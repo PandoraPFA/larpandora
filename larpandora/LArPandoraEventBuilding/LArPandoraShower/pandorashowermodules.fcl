@@ -1,0 +1,62 @@
+#include "pandorashowertools.fcl"
+
+BEGIN_PROLOG
+
+standard_pandoraModularShowerCreation: {
+
+    module_type: "LArPandoraModularShowerCreation"
+
+    ShowerFinderTools: [
+         @local::showerpfpvertexstartposition,
+         @local::showerpcadirection,
+         @local::showerpcapropergationstartposition,
+         @local::showerlengthpercentile,
+         @local::showerlinearenergy,
+         @local::shower3Dtrackhitfinder,
+         @local::showerpandoraslidingfittrackfinder,
+         @local::showerstandardcalodedx
+    ]
+
+    PFParticleModuleLabel:      "pandora"
+    SecondInteration:           false
+    AllowPartialShowers:        true
+    Verbose:                    false
+
+    ShowerStartPositionLabel: "ShowerStartPosition"
+    ShowerDirectionLabel:     "ShowerDirection"
+    ShowerEnergyLabel:        "ShowerEnergy"
+    ShowerLengthLabel:        "ShowerLength"
+    ShowerOpeningAngleLabel:  "ShowerOpeningAngle"
+    ShowerdEdxLabel:          "ShowerdEdx"
+    ShowerBestPlaneLabel:     "ShowerBestPlane"
+}
+
+test_pandoraModularShowerCreation: {
+
+    module_type: "LArPandoraModularShowerCreation"
+
+    ShowerFinderTools: [
+         @local::showerpfpvertexstartposition,
+         @local::showerpcadirection,
+         @local::showerlengthpercentile,
+         @local::showerlinearenergy,
+         @local::shower3Dtrackhitfinder,
+         @local::showerpandoraslidingfittrackfinder,
+         @local::showerstandardcalodedx
+    ]
+
+    PFParticleModuleLabel:      "pandora"
+    SecondInteration:           false
+    AllowPartialShowers:        true
+    Verbose:                    false
+
+    ShowerStartPositionLabel: "ShowerStartPosition"
+    ShowerDirectionLabel:     "ShowerDirection"
+    ShowerEnergyLabel:        "ShowerEnergy"
+    ShowerLengthLabel:        "ShowerLength"
+    ShowerOpeningAngleLabel:  "ShowerOpeningAngle"
+    ShowerdEdxLabel:          "ShowerdEdx"
+    ShowerBestPlaneLabel:     "ShowerBestPlane"
+}
+
+END_PROLOG
