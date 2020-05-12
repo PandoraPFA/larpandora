@@ -1,0 +1,27 @@
+art_make(LIB_LIBRARIES
+  larcorealg_Geometry
+  ${ROOT_BASIC_LIB_LIST}
+  ${ROOT_CORE}
+  ${ROOT_PHYSICS}
+  ${ROOT_MATRIX}
+  ${ROOT_MINUIT}
+  canvas
+  ${FHICLCPP}
+  cetlib_except
+  ${MF_MESSAGELOGGER}
+  ${ART_FRAMEWORK_CORE}
+  ${ART_FRAMEWORK_PRINCIPAL}
+  ${ART_FRAMEWORK_SERVICES_REGISTRY}
+  ${ART_FRAMEWORK_SERVICES_BASIC}
+  ${ART_ROOT_IO_TFILE_SUPPORT}
+  ${ART_ROOT_IO_TFILESERVICE_SERVICE}
+  art_Persistency_Common
+  art_Persistency_Provenance
+  art_Utilities
+  larsim_MCCheater_BackTrackerService_service
+  larsim_MCCheater_ParticleInventoryService_service
+  lardataobj_RecoBase
+  )
+
+install_headers()
+install_source()

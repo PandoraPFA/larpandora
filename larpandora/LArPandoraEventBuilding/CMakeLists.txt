@@ -1,6 +1,8 @@
 include_directories( $ENV{PANDORA_INC} )
 include_directories( $ENV{LARPANDORACONTENT_INC} )
 
+add_subdirectory(LArPandoraShower)
+
 art_make(
           LIB_LIBRARIES larcorealg_Geometry
                         larcore_Geometry_Geometry_service
