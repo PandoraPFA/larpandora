@@ -1,0 +1,23 @@
+BEGIN_PROLOG
+standard_pandorashoweralg:
+{
+UseCollectionOnly: false #Only use the collection charge infromation.
+HitModuleLabel:        "linecluster"
+PFParticleModuleLabel: "pandora"
+InitialTrackInputLabel: "InitialTrack"
+ShowerStartPositionInputLabel: "ShowerStartPosition"
+ShowerDirectionInputLabel: "ShowerDirection"
+InitialTrackSpacePointsInputLabel: "InitialTrackSpacePoints"
+}
+
+standard_pandorashowercheatingalg:
+{
+PandoraShowerAlg:      @local::standard_pandorashoweralg
+HitModuleLabel:        "linecluster"
+PFParticleModuleLabel: "pandora"
+ShowerStartPositionInputLabel: "ShowerStartPosition"
+ShowerDirectionInputLabel: "ShowerDirection"
+InitialTrackSpacePointsInputLabel: "InitialTrackSpacePoints"
+}
+END_PROLOG
+

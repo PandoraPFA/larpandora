@@ -1,6 +1,6 @@
 //############################################################################
 //### Name:        ShowerRecoEnergyfromNumElectrons                        ###
-//### Author:      Tom Ham                                 ###
+//### Author:      Tom Ham                                                 ###
 //### Date:        01/04/2020                                              ###
 //### Description: Tool for finding the Energy of the shower by going      ###
 //###              from number of hits -> number of electrons -> energy.   ###
