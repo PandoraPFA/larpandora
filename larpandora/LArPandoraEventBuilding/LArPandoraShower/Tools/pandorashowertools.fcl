@@ -7,7 +7,7 @@
 BEGIN_PROLOG
 
 showerbasetools:{
-    PandoraShowerAlg:         @local::standard_pandorashoweralg
+    LArPandoraShowerAlg:         @local::standard_larpandorashoweralg
     EnableEventDisplay: false
     }
 
@@ -235,7 +235,7 @@ showertrackpcadirection:{
 showerstartpositioncheater:{
     tool_type:               ShowerStartPositionCheater
     BaseTools:           @local::showerbasetools
-    PandoraShowerCheatingAlg:    @local::standard_pandorashowercheatingalg
+    LArPandoraShowerCheatingAlg:    @local::standard_larpandorashowercheatingalg
     PFParticleModuleLabel:  "pandora"
     HitModuleLabel:         "linecluster"
     ShowerStartPositionOutputLabel: "ShowerStartPosition"
@@ -245,7 +245,7 @@ showerstartpositioncheater:{
 showerdirectioncheater:{
     tool_type:              ShowerDirectionCheater
     BaseTools:          @local::showerbasetools
-    PandoraShowerCheatingAlg:   @local::standard_pandorashowercheatingalg
+    LArPandoraShowerCheatingAlg:   @local::standard_larpandorashowercheatingalg
     PFParticleModuleLabel:  "pandora"
     NSegments:              6     #Number of segements the shower should be split into
     #for the RMS analysis
@@ -260,7 +260,7 @@ showerdirectioncheater:{
 showertrackfindercheater:{
     tool_type:               ShowerTrackFinderCheater
     BaseTools:           @local::showerbasetools
-    PandoraShowerCheatingAlg:    @local::standard_pandorashowercheatingalg
+    LArPandoraShowerCheatingAlg:    @local::standard_larpandorashowercheatingalg
     PFParticleModuleLabel:  "pandora"
     HitModuleLabel:         "linecluster"
     MaxProjectionDist:      10

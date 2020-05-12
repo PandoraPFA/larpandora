@@ -592,30 +592,6 @@ class reco::shower::ShowerElementHolder{
         return abi::__cxa_demangle(typeid(object).name(),NULL,NULL,&status);
       }
 
-    template <class T>
-      art::Handle<std::vector<T> > GetHandle(art::Event &evt, art::InputTag &moduleTag){
-
-        T test();
-        std::string typeName = getType(test);
-        std::string name = moduleTag.label() + typeName;
-
-        if (CheckEventElement(name)){
-          art::Handle<std::vector<T> > handle = GetEventElement<art::Handle<std::vector<T> > >(name);
-          if (handle.isValid()){
-            return handle;
-          } else {
-            throw cet::exception("ShowerElementHolder") << "Handle is not valid" << std::endl;
-          }
-        } else {
-          art::Handle<std::vector<T> > handle;
-          if (evt.getByLabel(moduleTag, handle)){
-            SetEventElement(handle, name);
-            return handle;
-          } else {
-            throw cet::exception("ShowerElementHolder") << "handle is not valid" << std::endl;
-          }
-        }
-      }
 
     template <class T1, class T2>
       art::FindManyP<T1>& GetFindManyP(art::Handle<std::vector<T2> > &handle,
@@ -625,18 +601,16 @@ class reco::shower::ShowerElementHolder{
         if (!handle->size())
           throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
 
-        T1 test1();
-        T2 test2();
+        T1 type1();
+        T2 type2();
 
-        std::string typeName1 = getType(test1);
-        std::string typeName2 = getType(test2);
+        std::string typeName1 = getType(type1);
+        std::string typeName2 = getType(type2);
 
         std::string name = "FMP" + moduleTag.label() + typeName2 + typeName1;
 
-        // std::cout<<"Test: Name: "<<name<<std::endl;
 
         if (CheckEventElement(name)){
-          // std::cout<<"Test: Found!"<<std::endl;
           art::FindManyP<T1>& findManyP = GetEventElement<art::FindManyP<T1> >(name);
           if (findManyP.isValid()){
             return findManyP;
@@ -644,8 +618,6 @@ class reco::shower::ShowerElementHolder{
             throw cet::exception("ShowerElementHolder") << "FindManyP is not valid" << std::endl;
           }
         } else {
-          // std::cout<<"Test: Not Found"<<std::endl;
-          std::cout<<"Test: Creating: "<<name<<std::endl;
           art::FindManyP<T1> findManyP(handle, evt, moduleTag);
           if (findManyP.isValid()){
             SetEventElement(findManyP, name);
@@ -664,11 +636,11 @@ class reco::shower::ShowerElementHolder{
         if (!handle->size())
           throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
 
-        T1 test1();
-        T2 test2();
+        T1 type1();
+        T2 type2();
 
-        std::string typeName1 = getType(test1);
-        std::string typeName2 = getType(test2);
+        std::string typeName1 = getType(type1);
+        std::string typeName2 = getType(type2);
 
         std::string name = "FOP" + moduleTag.label() + typeName2 + typeName1;
 
