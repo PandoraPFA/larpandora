@@ -58,8 +58,8 @@ namespace ShowerRecoTools {
   ShowerTrackTrajToSpacepoint::ShowerTrackTrajToSpacepoint(const fhicl::ParameterSet& pset)
     : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fMaxDist(pset.get<float>("MaxDist")),
-    fVerbose(pset.get<int>("Verbose")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fInitialTrackSpacePointsOutputLabel(pset.get<std::string>("InitialTrackSpacePointsOutputLabel")),
     fInitialTrackHitsOutputLabel(pset.get<std::string>("InitialTrackHitsOutputLabel")),
     fInitialTrackInputTag(pset.get<std::string>("InitialTrackInputTag")),

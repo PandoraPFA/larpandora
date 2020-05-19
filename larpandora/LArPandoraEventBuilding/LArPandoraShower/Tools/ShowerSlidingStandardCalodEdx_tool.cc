@@ -171,8 +171,6 @@ namespace ShowerRecoTools{
       return 1;
     }
 
-
-
     //Only consider hits in the same tpcs as the vertex.
     TVector3 ShowerStartPosition = {-999,-999,-999};
     ShowerEleHolder.GetElement(fShowerStartPositionInputLabel,ShowerStartPosition);
@@ -370,11 +368,12 @@ namespace ShowerRecoTools{
       }
     }
 
-    std::cout << "#### dEdx vector ###" << std::endl;
-    for(auto const& plane: dEdx_vec_cut){
-      std::cout << "#Plane: " << plane.first << " #" << std::endl;
-      for(auto const& dEdx: plane.second){
-        std::cout << "dEdx: " << dEdx << std::endl;
+    if (fVerbose>1){
+      for(auto const& plane: dEdx_vec_cut){
+        std::cout << "#Plane: " << plane.first << " #" << std::endl;
+        for(auto const& dEdx: plane.second){
+          std::cout << "dEdx: " << dEdx << std::endl;
+        }
       }
     }
 
@@ -393,9 +392,6 @@ namespace ShowerRecoTools{
       dEdx_val = dEdx_vec;
       return;
     }
-
-
-    std::cout << "why am I running" << std::endl;
 
     //Can only do this with 4 hits.
     if(dEdx_vec.size() < 4){
@@ -429,21 +425,24 @@ namespace ShowerRecoTools{
       if(upperbound){
         if(dEdx > fdEdxCut){
           dEdx_val.push_back(dEdx);
-          std::cout << "Adding dEdx: "<< dEdx<< std::endl;
+          if (fVerbose>1)
+            std::cout << "Adding dEdx: "<< dEdx<< std::endl;
           continue;
         }
         else{
           //Maybe its a landau fluctation lets try again.
           if(dEdx_iter < dEdx_vec.size()-1){
             if(dEdx_vec[dEdx_iter+1] > fdEdxCut){
-              std::cout << "Next dEdx hit is good removing hit"<< dEdx<< std::endl;
+              if (fVerbose>1)
+                std::cout << "Next dEdx hit is good removing hit"<< dEdx<< std::endl;
               continue;
             }
           }
           //I'll let one more value
           if(dEdx_iter<dEdx_vec.size()-2){
             if(dEdx_vec[dEdx_iter+2] > fdEdxCut){
-              std::cout << "Next Next dEdx hit is good removing hit"<< dEdx<< std::endl;
+              if (fVerbose>1)
+                std::cout << "Next Next dEdx hit is good removing hit"<< dEdx<< std::endl;
               continue;
             }
           }
@@ -454,21 +453,24 @@ namespace ShowerRecoTools{
       else{
         if(dEdx < fdEdxCut){
           dEdx_val.push_back(dEdx);
-          std::cout << "Adding dEdx: "<< dEdx<< std::endl;
+          if (fVerbose>1)
+            std::cout << "Adding dEdx: "<< dEdx<< std::endl;
           continue;
         }
         else{
           //Maybe its a landau fluctation lets try again.
           if(dEdx_iter < dEdx_vec.size()-1){
             if(dEdx_vec[dEdx_iter+1] > fdEdxCut){
-              std::cout << "Next dEdx hit is good removing hit "<< dEdx<< std::endl;
+              if (fVerbose>1)
+                std::cout << "Next dEdx hit is good removing hit "<< dEdx<< std::endl;
               continue;
             }
           }
           //I'll let one more value
           if(dEdx_iter < dEdx_vec.size()-2){
             if(dEdx_vec[dEdx_iter+2] > fdEdxCut){
-              std::cout << "Next Next dEdx hit is good removing hit "<< dEdx<< std::endl;
+              if (fVerbose>1)
+                std::cout << "Next Next dEdx hit is good removing hit "<< dEdx<< std::endl;
               continue;
             }
           }

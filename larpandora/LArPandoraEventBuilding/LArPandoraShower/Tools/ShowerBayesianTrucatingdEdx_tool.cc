@@ -161,8 +161,8 @@ namespace ShowerRecoTools {
 
     //Get the vectors of the dEdx Elements
     if(!ShowerEleHolder.CheckElement(fdEdxInputLabel)){
-      fVerbose(pset.get<int>("Verbose")),
-      mf::LogError("ShowerSlidingStandardCalodEdx") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSlidingStandardCalodEdx") << "Start position not set, returning "<< std::endl;
       return 1;
     }
 
