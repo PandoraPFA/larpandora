@@ -67,7 +67,7 @@ class reco::shower::LArPandoraModularShowerCreation: public art::EDProducer {
 
 
     //fcl object names
-    art::InputTag fPFParticleModuleLabel;
+    art::InputTag fPFParticleLabel;
     bool          fAllowPartialShowers;
     int           fVerbose;
     bool          fUseAllParticles;
@@ -127,7 +127,7 @@ art::Ptr<T> reco::shower::LArPandoraModularShowerCreation::GetProducedElementPtr
 
 reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(fhicl::ParameterSet const& pset) :
   EDProducer{pset},
-  fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+  fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
   fAllowPartialShowers(pset.get<bool>("AllowPartialShowers")),
   fVerbose(pset.get<int>("Verbose", 0)),
   fUseAllParticles(pset.get<bool>("UseAllParticles", false)),
@@ -144,23 +144,23 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(f
   for (auto& tool_pset : tool_psets) {
 
     std::string tool_name = tool_pset.get<std::string>("tool_type");
-    if (!tool_pset.has_key("PFParticleModuleLabel")){
+    if (!tool_pset.has_key("PFParticleLabel")){
 
       // I cannot pass an art::InputTag as it is mangled, so lets make a string instead
-      std::string PFParticleModuleLabelString(fPFParticleModuleLabel.label()+":"+fPFParticleModuleLabel.instance()
-          +":"+fPFParticleModuleLabel.process());
+      std::string PFParticleLabelString(fPFParticleLabel.label()+":"+fPFParticleLabel.instance()
+          +":"+fPFParticleLabel.process());
 
-      tool_pset.put<std::string>("PFParticleModuleLabel", PFParticleModuleLabelString);
+      tool_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
       tool_pset.put<int>("Verbose", fVerbose);
       fhicl::ParameterSet base_pset = tool_pset.get<fhicl::ParameterSet>("BaseTools");
       fhicl::ParameterSet alg_pset = base_pset.get<fhicl::ParameterSet>("LArPandoraShowerAlg");
-      alg_pset.put<std::string>("PFParticleModuleLabel", PFParticleModuleLabelString);
+      alg_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
       base_pset.put_or_replace<fhicl::ParameterSet>("LArPandoraShowerAlg", alg_pset);
       tool_pset.put_or_replace<fhicl::ParameterSet>("BaseTools", base_pset);
 
-      // std::cout << fPFParticleModuleLabel << std::endl;
-      // tool_pset.put<art::InputTag>("PFParticleModuleLabel", fPFParticleModuleLabel);
-      // std::cout << tool_pset.get<art::InputTag>("PFParticleModuleLabel") << std::endl;
+      // std::cout << fPFParticleLabel << std::endl;
+      // tool_pset.put<art::InputTag>("PFParticleLabel", fPFParticleLabel);
+      // std::cout << tool_pset.get<art::InputTag>("PFParticleLabel") << std::endl;
     }
 
     fShowerTools.push_back(art::make_tool<ShowerRecoTools::IShowerTool>(tool_pset));
@@ -203,7 +203,7 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt) {
   //Get the PFParticles
   art::Handle<std::vector<recob::PFParticle> > pfpHandle;
   std::vector<art::Ptr<recob::PFParticle> > pfps;
-  if (evt.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+  if (evt.getByLabel(fPFParticleLabel, pfpHandle)){
     art::fill_ptr_vector(pfps, pfpHandle);
   }
   else {
@@ -213,21 +213,21 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt) {
 
   //Handle to access the pandora hits assans
   art::Handle<std::vector<recob::Cluster> > clusterHandle;
-  if (!evt.getByLabel(fPFParticleModuleLabel,clusterHandle)){
+  if (!evt.getByLabel(fPFParticleLabel,clusterHandle)){
     throw cet::exception("LArPandoraModularShowerCreation")
       << "pfp clusters are not loaded." << std::endl;
   }
 
   //Get the assoications to hits, clusters and spacespoints
   art::FindManyP<recob::Hit> fmh = showerEleHolder.GetFindManyP<recob::Hit>(
-      clusterHandle, evt, fPFParticleModuleLabel);
+      clusterHandle, evt, fPFParticleLabel);
   art::FindManyP<recob::Cluster> fmcp = showerEleHolder.GetFindManyP<recob::Cluster>(
-      pfpHandle, evt, fPFParticleModuleLabel);
+      pfpHandle, evt, fPFParticleLabel);
   art::FindManyP<recob::SpacePoint> fmspp = showerEleHolder.GetFindManyP<recob::SpacePoint>(
-      pfpHandle, evt, fPFParticleModuleLabel);
-  // art::FindManyP<recob::Hit> fmh(clusterHandle, evt, fPFParticleModuleLabel);
-  // art::FindManyP<recob::Cluster> fmcp(pfpHandle, evt, fPFParticleModuleLabel);
-  // art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, evt, fPFParticleModuleLabel);
+      pfpHandle, evt, fPFParticleLabel);
+  // art::FindManyP<recob::Hit> fmh(clusterHandle, evt, fPFParticleLabel);
+  // art::FindManyP<recob::Cluster> fmcp(pfpHandle, evt, fPFParticleLabel);
+  // art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, evt, fPFParticleLabel);
 
   if(!fmcp.isValid()){
     throw cet::exception("LArPandoraModularShowerCreation")

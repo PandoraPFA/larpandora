@@ -113,7 +113,8 @@ namespace ShowerRecoTools {
       //Services
       detinfo::DetectorProperties const* fDetProp;
 
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
       bool          fUseShowerDirection;
       bool          fChargeWeighted;
       bool          fForwardHitsOnly;
@@ -139,7 +140,8 @@ namespace ShowerRecoTools {
   ShowerResidualTrackHitFinder::ShowerResidualTrackHitFinder(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fUseShowerDirection(pset.get<bool>("UseShowerDirection")),
     fChargeWeighted(pset.get<bool>("ChargeWeighted")),
     fForwardHitsOnly(pset.get<bool>("ForwardHitsOnly")),
@@ -187,20 +189,21 @@ namespace ShowerRecoTools {
 
     //This is all based on the shower vertex being known. If it is not lets not do the track
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("ShowerResidualTrackHitFinder") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerResidualTrackHitFinder") << "Start position not set, returning "<< std::endl;
       return 1;
     }
 
     // Get the assocated pfParicle Handle
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
       throw cet::exception("ShowerResidualTrackHitFinder") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
     // Get the spacepoint - PFParticle assn
     art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
-        pfpHandle, Event, fPFParticleModuleLabel);
+        pfpHandle, Event, fPFParticleLabel);
     if (!fmspp.isValid()){
       throw cet::exception("ShowerResidualTrackHitFinder") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
       return 1;
@@ -208,14 +211,14 @@ namespace ShowerRecoTools {
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, spHandle)){
       throw cet::exception("ShowerResidualTrackHitFinder") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
     // Get the hits associated with the space points
     art::FindManyP<recob::Hit>& fmh = ShowerEleHolder.GetFindManyP<recob::Hit>(
-        spHandle, Event, fPFParticleModuleLabel);
+        spHandle, Event, fPFParticleLabel);
     if(!fmh.isValid()){
       throw cet::exception("ShowerResidualTrackHitFinder") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
@@ -226,7 +229,8 @@ namespace ShowerRecoTools {
 
     //We cannot progress with no spacepoints.
     if(spacePoints.size() == 0){
-      mf::LogError("ShowerResidualTrackHitFinder") << "No space points, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerResidualTrackHitFinder") << "No space points, returning "<< std::endl;
       return 1;
     }
 
@@ -238,7 +242,8 @@ namespace ShowerRecoTools {
     if(fUseShowerDirection){
 
       if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
-        mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
+        if (fVerbose)
+          mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
         return 1;
       }
 
@@ -272,7 +277,8 @@ namespace ShowerRecoTools {
       if (fForwardHitsOnly){
 
         if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
-          mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
+          if (fVerbose)
+            mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
           return 1;
         }
 
@@ -313,7 +319,8 @@ namespace ShowerRecoTools {
     spacePoints.erase(spacePoints.begin()+sp_iter, spacePoints.end());
 
     if(spacePoints.size() < 3){
-      mf::LogError("ShowerResidualTrackHitFinder") << "Not enough spacepoints bailing"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerResidualTrackHitFinder") << "Not enough spacepoints bailing"<< std::endl;
       return 1;
     }
 

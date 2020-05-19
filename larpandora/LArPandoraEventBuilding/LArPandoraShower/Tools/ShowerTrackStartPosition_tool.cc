@@ -39,6 +39,7 @@ namespace ShowerRecoTools {
 
     private:
 
+      int         fVerbose;
       std::string fInitialTrackInputLabel;
       std::string fShowerStartPositionOutputLabel;
 
@@ -47,6 +48,7 @@ namespace ShowerRecoTools {
 
   ShowerTrackStartPosition::ShowerTrackStartPosition(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fVerbose(pset.get<int>("Verbose")),
     fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
     fShowerStartPositionOutputLabel(pset.get<std::string>("ShowerStartPositionOutputLabel"))
   {
@@ -61,8 +63,9 @@ namespace ShowerRecoTools {
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement("InitialTrack")){
-      mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
-        << "Initial track not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+          << "Initial track not set"<< std::endl;
       return 1;
     }
     recob::Track InitialTrack;

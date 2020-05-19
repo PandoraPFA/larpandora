@@ -43,7 +43,8 @@ namespace ShowerRecoTools {
 
       float fMaxDist; //Max distance that a spacepoint can be from a trajectory
       //point to be matched
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int fVerbose;
 
       std::string fInitialTrackSpacePointsOutputLabel;
       std::string fInitialTrackHitsOutputLabel;
@@ -57,7 +58,8 @@ namespace ShowerRecoTools {
   ShowerTrackTrajToSpacepoint::ShowerTrackTrajToSpacepoint(const fhicl::ParameterSet& pset)
     : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fMaxDist(pset.get<float>("MaxDist")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fInitialTrackSpacePointsOutputLabel(pset.get<std::string>("InitialTrackSpacePointsOutputLabel")),
     fInitialTrackHitsOutputLabel(pset.get<std::string>("InitialTrackHitsOutputLabel")),
     fInitialTrackInputTag(pset.get<std::string>("InitialTrackInputTag")),
@@ -76,20 +78,23 @@ namespace ShowerRecoTools {
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputTag)){
-      mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track not set"<< std::endl;
       return 0;
     }
 
     //Check the start position is set.
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputTag)){
-      mf::LogError("ShowerTrackTrajToSpacepoint") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajToSpacepoint") << "Start position not set, returning "<< std::endl;
       return 0;
     }
 
 
     //Check the Track Hits has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackSpacePointsInputTag)){
-      mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track spacepoints not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track spacepoints not set"<< std::endl;
       return 0;
     }
 
@@ -149,13 +154,13 @@ namespace ShowerRecoTools {
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, spHandle)){
       throw cet::exception("ShowerTrackTrajToSpacepoint") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
     // Get the hits associated with the space points
-    art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleModuleLabel);
+    art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleLabel);
     if(!fohsp.isValid()){
       throw cet::exception("ShowerTrackTrajToSpacepoint") << "Spacepoint and hit association not valid. Stopping.";
       return 1;

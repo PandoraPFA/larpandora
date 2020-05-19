@@ -36,6 +36,7 @@ namespace ShowerRecoTools {
 
     private:
 
+      int         fVerbose;
       std::string fInitialTrackBestPlaneInputLabel;
       std::string fOverallBestPlaneInputLabel;
       std::string fBestPlaneOutputLabel;
@@ -44,6 +45,7 @@ namespace ShowerRecoTools {
 
   ShowerBestPlaneDesicion::ShowerBestPlaneDesicion(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fVerbose(pset.get<int>("Verbose")),
     fInitialTrackBestPlaneInputLabel(pset.get<std::string>("InitialTrackBestPlaneInputLabel")),
     fOverallBestPlaneInputLabel(pset.get<std::string>("OverallBestPlaneInputLabel")),
     fBestPlaneOutputLabel(pset.get<std::string>("BestPlaneOutputLabel"))
@@ -69,7 +71,8 @@ namespace ShowerRecoTools {
 
     // If neither are set, do not fill the element holder and return an error.
     // The LArPandoraModularShower module will take care of it.
-    mf::LogError("ShowerBestPlaneDesicion") << "Shower best plane not set"<< std::endl;
+    if (fVerbose)
+      mf::LogError("ShowerBestPlaneDesicion") << "Shower best plane not set"<< std::endl;
     return 1;
   }
 }

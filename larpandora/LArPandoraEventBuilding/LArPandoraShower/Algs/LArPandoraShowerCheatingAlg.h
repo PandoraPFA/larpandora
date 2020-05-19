@@ -60,7 +60,7 @@ class shower::LArPandoraShowerCheatingAlg {
     shower::LArPandoraShowerAlg fLArPandoraShowerAlg;
 
     art::InputTag                                       fHitModuleLabel;
-    art::InputTag                                       fPFParticleModuleLabel;
+    art::InputTag                                       fPFParticleLabel;
     art::ServiceHandle<cheat::ParticleInventoryService> particleInventory;
     art::ServiceHandle<art::TFileService>   tfs;
 

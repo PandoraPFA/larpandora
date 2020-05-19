@@ -51,6 +51,7 @@ namespace ShowerRecoTools{
       calo::CalorimetryAlg              fCalorimetryAlg;
 
       //fcl parameters.
+      int    fVerbose;
       double fdEdxTrackLength,dEdxTrackLength; //Max length from a hit can be to the start point in cm.
       bool   fMaxHitPlane;     //Set the best planes as the one with the most hits
       bool   fMissFirstPoint;  //Do not use any hits from the first wire.
@@ -67,6 +68,7 @@ namespace ShowerRecoTools{
   ShowerStandardCalodEdx::ShowerStandardCalodEdx(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg")),
+    fVerbose(pset.get<int>("Verbose")),
     fdEdxTrackLength(pset.get<float>("dEdxTrackLength")),
     fMaxHitPlane(pset.get<bool>("MaxHitPlane")),
     fMissFirstPoint(pset.get<bool>("MissFirstPoint")),
@@ -93,15 +95,18 @@ namespace ShowerRecoTools{
 
     // Shower dEdx calculation
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("ShowerStandardCalodEdx") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerStandardCalodEdx") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackHitsInputLabel)){
-      mf::LogError("ShowerStandardCalodEdx") << "Initial Track Hits not set returning"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerStandardCalodEdx") << "Initial Track Hits not set returning"<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
-      mf::LogError("ShowerStandardCalodEdx") << "Shower Direction not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerStandardCalodEdx") << "Shower Direction not set"<< std::endl;
       return 1;
     }
 
@@ -110,7 +115,8 @@ namespace ShowerRecoTools{
     ShowerEleHolder.GetElement(fInitialTrackHitsInputLabel,trackhits);
 
     if(trackhits.size() == 0){
-      mf::LogWarning("ShowerStandardCalodEdx") << "Not Hits in the initial track" << std::endl;
+      if (fVerbose)
+        mf::LogWarning("ShowerStandardCalodEdx") << "Not Hits in the initial track" << std::endl;
       return 0;
     }
 

@@ -54,6 +54,7 @@ namespace ShowerRecoTools{
       art::ServiceHandle<geo::Geometry> fGeom;
 
       //fcl paramaters
+      int   fVerbose;
       float fSlidingFitHalfWindow; //To Describe
       float fMinTrajectoryPoints;  //Minimum number of trajectory point to say the track is good.
       std::string fInitialTrackOutputLabel;
@@ -67,6 +68,7 @@ namespace ShowerRecoTools{
 
   ShowerPandoraSlidingFitTrackFinder::ShowerPandoraSlidingFitTrackFinder(const fhicl::ParameterSet& pset):
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fVerbose(pset.get<int>("Verbose")),
     fSlidingFitHalfWindow(pset.get<float> ("SlidingFitHalfWindow")),
     fMinTrajectoryPoints(pset.get<float> ("MinTrajectoryPoints")),
     fInitialTrackOutputLabel(pset.get<std::string>("InitialTrackOutputLabel")),
@@ -98,15 +100,18 @@ namespace ShowerRecoTools{
       ){
     //This is all based on the shower vertex being known. If it is not lets not do the track
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
-      mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Direction not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Direction not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackSpacePointsInputLabel)){
-      mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Initial Spacepoints not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPandoraSlidingFitTrackFinder") << "Initial Spacepoints not set, returning "<< std::endl;
       return 1;
     }
 
@@ -169,11 +174,13 @@ namespace ShowerRecoTools{
           fSlidingFitHalfWindow, wirePitchW, trackStateVector, &indexVector);
     }
     catch (const pandora::StatusCodeException &){
-      mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Unable to extract sliding fit trajectory" << std::endl;
+      if (fVerbose)
+        mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Unable to extract sliding fit trajectory" << std::endl;
       return 1;
     }
     if (trackStateVector.size() < fMinTrajectoryPoints){
-      mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Insufficient input trajectory points to build track: " << trackStateVector.size();
+      if (fVerbose)
+        mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Insufficient input trajectory points to build track: " << trackStateVector.size();
       return 1;
     }
 
@@ -226,7 +233,8 @@ namespace ShowerRecoTools{
 
     //Check the track has been set
     if(!ShowerEleHolder.CheckElement(fInitialTrackOutputLabel)){
-      mf::LogError("ShowerPandoraSlidingFitTrackFinderAddAssn") << "Track not set so the assocation can not be made  "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPandoraSlidingFitTrackFinderAddAssn") << "Track not set so the assocation can not be made  "<< std::endl;
       return 1;
     }
 

@@ -57,13 +57,9 @@ namespace ShowerRecoTools{
       float MaxPerpendicularDist;
       bool  fForwardHitsOnly;      //Only take hits downstream of shower vertex
       //(projection>0)
-      bool  fDebugEVD;             //Make Debug Event Display
-      bool  fAllowDyanmicLength;   //Use the initial track length instead of the
-      //fMaxProjectionDist
-      float fEnergyResidualConst;
-      float fEnergyLengthConst;
 
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
 
       std::string fInitialTrackLengthInputLabel;
       std::string fShowerEnergyInputLabel;
@@ -79,11 +75,8 @@ namespace ShowerRecoTools{
     fMaxProjectionDist(pset.get<float>("MaxProjectionDist")),
     fMaxPerpendicularDist(pset.get<float>("MaxPerpendicularDist")),
     fForwardHitsOnly(pset.get<bool>("ForwardHitsOnly")),
-    fDebugEVD(pset.get<bool>("DebugEVD")),
-    fAllowDyanmicLength(pset.get<bool>("AllowDyanmicLength")),
-    fEnergyResidualConst(pset.get<float>("EnergyResidualConst")),
-    fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fInitialTrackLengthInputLabel(pset.get<std::string>("InitialTrackLengthInputLabel")),
     fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
@@ -104,21 +97,15 @@ namespace ShowerRecoTools{
     MaxProjectionDist    = fMaxProjectionDist;
     MaxPerpendicularDist = fMaxPerpendicularDist;
 
-    //If we want to use a dynamic length value on a second iteraction get theta value now
-    if(fAllowDyanmicLength){
-      if(ShowerEleHolder.CheckElement(fInitialTrackLengthInputLabel)){
-        ShowerEleHolder.GetElement(fInitialTrackLengthInputLabel,fMaxProjectionDist);
-      }
-    }
-
-
     //This is all based on the shower vertex being known. If it is not lets not do the track
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("Shower3DTrackHitFinder") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("Shower3DTrackHitFinder") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement("ShowerDirection")){
-      mf::LogError("Shower3DTrackHitFinder") << "Direction not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("Shower3DTrackHitFinder") << "Direction not set, returning "<< std::endl;
       return 1;
     }
 
@@ -130,14 +117,14 @@ namespace ShowerRecoTools{
 
     // Get the assocated pfParicle Handle
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
       throw cet::exception("Shower3DTrackHitFinder") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
     // Get the spacepoint - PFParticle assn
     art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
-        pfpHandle, Event, fPFParticleModuleLabel);
+        pfpHandle, Event, fPFParticleLabel);
     if (!fmspp.isValid()){
       throw cet::exception("Shower3DTrackHitFinder") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
       return 1;
@@ -145,16 +132,16 @@ namespace ShowerRecoTools{
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, spHandle)){
       throw cet::exception("Shower3DTrackHitFinder") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
     // Get the hits associated with the space points
     art::FindManyP<recob::Hit>& fmhsp = ShowerEleHolder.GetFindManyP<recob::Hit>(
-        spHandle, Event, fPFParticleModuleLabel);
+        spHandle, Event, fPFParticleLabel);
 
-    // art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleModuleLabel);
+    // art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleLabel);
     if(!fmhsp.isValid()){
       throw cet::exception("Shower3DTrackHitFinder") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
@@ -165,7 +152,8 @@ namespace ShowerRecoTools{
 
     //We cannot progress with no spacepoints.
     if(spacePoints.size() == 0){
-      mf::LogError("Shower3DTrackHitFinder") << "No space points, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("Shower3DTrackHitFinder") << "No space points, returning "<< std::endl;
       return 1;
     }
 
@@ -186,10 +174,6 @@ namespace ShowerRecoTools{
 
     ShowerEleHolder.SetElement(trackHits, fInitialTrackHitsOutputLabel);
     ShowerEleHolder.SetElement(trackSpacePoints,fInitialTrackSpacePointsOutputLabel);
-
-    if (fDebugEVD){
-      IShowerTool::GetLArPandoraShowerAlg().DebugEVD(pfparticle,Event,ShowerEleHolder);
-    }
 
     return 0;
   }

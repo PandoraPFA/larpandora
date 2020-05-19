@@ -49,6 +49,7 @@ namespace ShowerRecoTools {
     private:
 
       //fcl
+      int  fVerbose;
       bool fUsePandoraVertex; //Direction from point defined as
       //(Position of traj point - Vertex) rather than
       //(Position of traj point - Track Start Point).
@@ -65,6 +66,7 @@ namespace ShowerRecoTools {
 
   ShowerTrackTrajectoryPointDirection::ShowerTrackTrajectoryPointDirection(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fVerbose(pset.get<int>("Verbose")),
     fUsePandoraVertex(pset.get<bool>("UsePandoraVertex")),
     fUsePositonInfo(pset.get<bool>("UsePositonInfo")),
     fTrajPoint(pset.get<int>("TrajPoint")),
@@ -85,14 +87,16 @@ namespace ShowerRecoTools {
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputLabel)){
-      mf::LogError("ShowerTrackTrajectoryPointDirection") << "Initial track not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajectoryPointDirection") << "Initial track not set"<< std::endl;
       return 1;
     }
     recob::Track InitialTrack;
     ShowerEleHolder.GetElement(fInitialTrackInputLabel,InitialTrack);
 
     if((int)InitialTrack.NumberTrajectoryPoints()-1 < fTrajPoint){
-      mf::LogError("ShowerTrackTrajectoryPointDirection") << "Less that fTrajPoint trajectory points, bailing."<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajectoryPointDirection") << "Less that fTrajPoint trajectory points, bailing."<< std::endl;
       fTrajPoint = InitialTrack.NumberTrajectoryPoints()-1;
     }
 
@@ -100,7 +104,8 @@ namespace ShowerRecoTools {
     auto flags = InitialTrack.FlagsAtPoint(fTrajPoint);
     if(flags.isSet(recob::TrajectoryPointFlagTraits::NoPoint))
     {
-      mf::LogError("ShowerTrackTrajectoryPointDirection") << "Bogus trajectory point bailing."<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerTrackTrajectoryPointDirection") << "Bogus trajectory point bailing."<< std::endl;
       return 1;
     }
 
@@ -113,7 +118,8 @@ namespace ShowerRecoTools {
       if(fUsePandoraVertex){
         //Check the Track has been defined
         if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-          mf::LogError("ShowerTrackTrajectoryPointDirection") << "Shower start position not set"<< std::endl;
+          if (fVerbose)
+            mf::LogError("ShowerTrackTrajectoryPointDirection") << "Shower start position not set"<< std::endl;
           return 1;
         }
         TVector3 StartPosition_vec = {-999,-999,-999};

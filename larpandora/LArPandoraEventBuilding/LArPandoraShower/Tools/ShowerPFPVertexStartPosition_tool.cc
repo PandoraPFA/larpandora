@@ -53,7 +53,8 @@ namespace ShowerRecoTools{
     private:
 
       //fcl parameters
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
       std::string   fShowerStartPositionOutputLabel;
       std::string   fShowerDirectionInputLabel;
   };
@@ -61,7 +62,8 @@ namespace ShowerRecoTools{
 
   ShowerPFPVertexStartPosition::ShowerPFPVertexStartPosition(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fShowerStartPositionOutputLabel(pset.get<std::string>("ShowerStartPositionOutputLabel")),
     fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel"))
   {
@@ -77,15 +79,15 @@ namespace ShowerRecoTools{
 
     // Get the assocated pfParicle vertex PFParticles
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
-      std::cout<<"fPFParticleModuleLabel: "<<fPFParticleModuleLabel<<std::endl;
+    if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
+      std::cout<<"fPFParticleLabel: "<<fPFParticleLabel<<std::endl;
       throw cet::exception("ShowerPFPVertexStartPosition") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
     art::FindManyP<recob::Vertex>& fmv = ShowerEleHolder.GetFindManyP<recob::Vertex>(
-        pfpHandle, Event, fPFParticleModuleLabel);
-    // art::FindManyP<recob::Vertex> fmv(pfpHandle, Event, fPFParticleModuleLabel);
+        pfpHandle, Event, fPFParticleLabel);
+    // art::FindManyP<recob::Vertex> fmv(pfpHandle, Event, fPFParticleLabel);
     if(!fmv.isValid()){
       throw cet::exception("ShowerPFPVertexStartPosition") << "Vertex and PF particle association is somehow not valid. Stopping";
       return 1;
@@ -95,12 +97,14 @@ namespace ShowerRecoTools{
     try{
       vtx_cand = fmv.at(pfparticle.key());
     } catch(...){
-      mf::LogError("ShowerPFPVertexStartPosition") << "PFP-Vertex assan not set, returning";
+      if (fVerbose)
+        mf::LogError("ShowerPFPVertexStartPosition") << "PFP-Vertex assan not set, returning";
       return 1;
     }
     //If there is more than one then fail becuase I don't think that this can be the case
     if(vtx_cand.size() != 1){
-      mf::LogError("ShowerPFPVertexStartPosition") << "Wrong number of vertices: "<<vtx_cand.size()<<", returning";
+      if (fVerbose)
+        mf::LogError("ShowerPFPVertexStartPosition") << "Wrong number of vertices: "<<vtx_cand.size()<<", returning";
       return 1;
     }
 
@@ -122,7 +126,7 @@ namespace ShowerRecoTools{
       ShowerEleHolder.GetElement(fShowerDirectionInputLabel,ShowerDirection);
 
       art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
-          pfpHandle, Event, fPFParticleModuleLabel);
+          pfpHandle, Event, fPFParticleLabel);
 
       if (!fmspp.isValid()){
         throw cet::exception("ShowerPFPVertexStartPosition") << "Trying to get the spacepoints and failed. Something is not configured correctly. Stopping ";
@@ -131,13 +135,13 @@ namespace ShowerRecoTools{
 
       //Get the spacepoints handle and the hit assoication
       art::Handle<std::vector<recob::SpacePoint> > spHandle;
-      if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+      if (!Event.getByLabel(fPFParticleLabel, spHandle)){
         throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
         return 1;
       }
       art::FindManyP<recob::Hit>& fmh = ShowerEleHolder.GetFindManyP<recob::Hit>(
-          spHandle, Event, fPFParticleModuleLabel);
-      // art::FindManyP<recob::Hit> fmh(spHandle, Event, fPFParticleModuleLabel);
+          spHandle, Event, fPFParticleLabel);
+      // art::FindManyP<recob::Hit> fmh(spHandle, Event, fPFParticleLabel);
       if(!fmh.isValid()){
         throw cet::exception("ShowerPFPVertexStartPosition") << "Spacepoint and hit association not valid. Stopping.";
         return 1;
@@ -164,7 +168,8 @@ namespace ShowerRecoTools{
       return 0;
     }
 
-    mf::LogWarning("ShowerPFPVertexStartPosition") << "Start Position has not been set yet. If you are not calculating the start position again then maybe you should stop";
+    if (fVerbose)
+      mf::LogWarning("ShowerPFPVertexStartPosition") << "Start Position has not been set yet. If you are not calculating the start position again then maybe you should stop";
     return 0;
   }
 
