@@ -57,12 +57,12 @@ namespace ShowerRecoTools {
     //Check the relevent products
     if(!ShowerEleHolder.CheckElement(fFirstDirectionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerDirectionEnergyDecision") << "fFirstDirectionInputLabel is is not set. Stopping.";
+        mf::LogError("ShowerDirectionTopologyDecision") << "fFirstDirectionInputLabel is is not set. Stopping.";
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fSecondDirectionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerDirectionEnergyDecision") << "fSecondDirectionInputLabel is is not set. Stopping.";
+        mf::LogError("ShowerDirectionTopologyDecision") << "fSecondDirectionInputLabel is is not set. Stopping.";
       return 1;
     }
 

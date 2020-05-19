@@ -75,7 +75,7 @@ namespace ShowerRecoTools {
     // Get the assocated pfParicle Handle
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
     if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
-      throw cet::exception("ShowerResidualTrackHitFinder") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
+      throw cet::exception("ShowerLengthPercentile") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
@@ -83,14 +83,14 @@ namespace ShowerRecoTools {
     art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
         pfpHandle, Event, fPFParticleLabel);
     if (!fmspp.isValid()){
-      throw cet::exception("ShowerResidualTrackHitFinder") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
+      throw cet::exception("ShowerLengthPercentile") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
       return 1;
     }
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
     if (!Event.getByLabel(fPFParticleLabel, spHandle)){
-      throw cet::exception("ShowerResidualTrackHitFinder") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
+      throw cet::exception("ShowerLengthPercentile") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
@@ -105,7 +105,7 @@ namespace ShowerRecoTools {
 
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
+        mf::LogError("ShowerLengthPercentile") << "Direction not set, returning "<< std::endl;
       return 1;
     }
 
