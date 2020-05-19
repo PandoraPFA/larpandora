@@ -186,7 +186,7 @@ namespace ShowerRecoTools {
       try{
         Energy = view_energies.at(plane);
         if (Energy<0){
-          mf::LogWarning("ShowerLinearEnergy") << "Negative shower energy: "<<Energy;
+          mf::LogWarning("ShowerRecoEnergyfromNumElectrons") << "Negative shower energy: "<<Energy;
           Energy=-999;
         }
         if(plane == 2){
@@ -195,7 +195,7 @@ namespace ShowerRecoTools {
       }
 
       catch(...){
-        mf::LogWarning("ShowerLinearEnergy") <<"No energy calculation for plane "<<plane<<std::endl;
+        mf::LogWarning("ShowerRecoEnergyfromNumElectrons") <<"No energy calculation for plane "<<plane<<std::endl;
         // if there's no calculation, set the energy to -999.
         Energy = -999;
         if(plane == 2){
@@ -206,7 +206,7 @@ namespace ShowerRecoTools {
     }
 
     if(ShowerRecoEnergyfromNumElectrons.size() == 0){
-      throw cet::exception("ShowerLinearEnergy") << "Energy Vector is empty";
+      throw cet::exception("ShowerRecoEnergyfromNumElectrons") << "Energy Vector is empty";
       return 1;
     }
 

@@ -88,27 +88,27 @@ namespace ShowerRecoTools {
       // Get the assocated pfParicle vertex PFParticles
       art::Handle<std::vector<recob::PFParticle> > pfpHandle;
       if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
-        throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
+        throw cet::exception("ShowerPCAPropergationStartPosition") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
         return 1;
       }
       art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
           pfpHandle, Event, fPFParticleLabel);
 
       if (!fmspp.isValid()){
-        throw cet::exception("ShowerPCADirection") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
+        throw cet::exception("ShowerPCAPropergationStartPosition") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
         return 1;
       }
 
       //Get the spacepoints handle and the hit assoication
       art::Handle<std::vector<recob::SpacePoint> > spHandle;
       if (!Event.getByLabel(fPFParticleLabel, spHandle)){
-        throw cet::exception("ShowerPCADirection") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
+        throw cet::exception("ShowerPCAPropergationStartPosition") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
         return 1;
       }
       art::FindManyP<recob::Hit>& fmh = ShowerEleHolder.GetFindManyP<recob::Hit>(
           spHandle, Event, fPFParticleLabel);
       if(!fmh.isValid()){
-        throw cet::exception("ShowerPCADirection") << "Spacepoint and hit association not valid. Stopping.";
+        throw cet::exception("ShowerPCAPropergationStartPosition") << "Spacepoint and hit association not valid. Stopping.";
         return 1;
       }
 
