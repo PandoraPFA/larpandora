@@ -1,6 +1,6 @@
 //############################################################################
 //### Name:        ShowerPCADirection                                      ###
-//### Author:      Dominic Barker (dominic.barker@sheffield.ac.uk          ###
+//### Author:      Dominic Barker and Ed Tyley                             ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the shower direction using PCA         ###
 //###              methods. Derived from LArPandoraModularShowers Method.  ###
@@ -67,8 +67,7 @@ namespace ShowerRecoTools {
       TVector3 GetPCAxisVector(recob::PCAxis& PCAxis);
 
       double  RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps,
-          TVector3& ShowerCentre,
-          TVector3& Direction);
+          TVector3& ShowerCentre, TVector3& Direction);
 
       // Function to calculate the RMS spread of perpendicular distances from PCA
       double CalculateRMS(const std::vector<double>& perpVec);

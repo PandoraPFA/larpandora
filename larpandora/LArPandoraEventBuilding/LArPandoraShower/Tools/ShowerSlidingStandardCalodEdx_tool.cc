@@ -76,8 +76,6 @@ namespace ShowerRecoTools{
       float fdEdxCut;
       bool fUseMedian;        //Use the median value as the dEdx rather than the mean.
       bool fCutStartPosition; //Remove hits using MinDistCutOff from the vertex as well.
-      float fEnergyResidualConst;
-      float fEnergyLengthConst;
 
       art::InputTag fPFParticleLabel;
       int           fVerbose;
@@ -104,8 +102,6 @@ namespace ShowerRecoTools{
     fdEdxCut(pset.get<float>("dEdxCut")),
     fUseMedian(pset.get<bool>("UseMedian")),
     fCutStartPosition(pset.get<bool>("CutStartPosition")),
-    fEnergyResidualConst(pset.get<float>("EnergyResidualConst")),
-    fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
     fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
@@ -183,7 +179,6 @@ namespace ShowerRecoTools{
     //Don't care that I could use a vector.
     std::map<int,std::vector<double > > dEdx_vec;
     std::map<int,std::vector<double> >  dEdx_vecErr;
-    std::map<int,std::vector<double> > dE_vec;
     std::map<int,int> num_hits;
 
     for(geo::PlaneID plane_id: fGeom->IteratePlaneIDs()){
@@ -301,10 +296,6 @@ namespace ShowerRecoTools{
 
       //Add the value to the dEdx
       dEdx_vec[planeid.Plane].push_back(dEdx);
-
-      //Save the energy.
-      dE_vec[planeid.Plane].push_back(dEdx*trackpitch);
-
     }
 
     //Search for blow ups and gradient changes.

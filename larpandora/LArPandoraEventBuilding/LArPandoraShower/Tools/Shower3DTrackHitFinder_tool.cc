@@ -91,8 +91,7 @@ namespace ShowerRecoTools{
   }
 
   int Shower3DTrackHitFinder::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-      art::Event& Event,
-      reco::shower::ShowerElementHolder& ShowerEleHolder){
+      art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     MaxProjectionDist    = fMaxProjectionDist;
     MaxPerpendicularDist = fMaxPerpendicularDist;
@@ -178,8 +177,8 @@ namespace ShowerRecoTools{
     return 0;
   }
 
-  std::vector<art::Ptr<recob::SpacePoint> > Shower3DTrackHitFinder::FindTrackSpacePoints(std::vector<art::Ptr<recob::SpacePoint> >& spacePoints,
-      TVector3& showerStartPosition,
+  std::vector<art::Ptr<recob::SpacePoint> > Shower3DTrackHitFinder::FindTrackSpacePoints(
+      std::vector<art::Ptr<recob::SpacePoint> >& spacePoints, TVector3& showerStartPosition,
       TVector3& showerDirection){
 
     // Make a vector to hold the output space points
@@ -187,21 +186,17 @@ namespace ShowerRecoTools{
 
     for (const auto& spacePoint : spacePoints){
       // Calculate the projection along direction and perpendicular distance
-      // from "axis" of shower
+      // from "axis" of shower TODO: change alg to return a pair for efficiency
       double proj = IShowerTool::GetLArPandoraShowerAlg().SpacePointProjection(spacePoint,
           showerStartPosition, showerDirection);
       double perp = IShowerTool::GetLArPandoraShowerAlg().SpacePointPerpendicular(spacePoint,
           showerStartPosition, showerDirection, proj);
 
-      if (fForwardHitsOnly){
-        if (proj>0 && proj<MaxProjectionDist && TMath::Abs(perp)<MaxPerpendicularDist){
-          trackSpacePoints.push_back(spacePoint);
-        }
-      } else {
-        if (TMath::Abs(proj)<MaxProjectionDist && TMath::Abs(perp)<MaxPerpendicularDist){
-          trackSpacePoints.push_back(spacePoint);
-        }
-      }
+      if (fForwardHitsOnly && proj<0)
+        continue;
+
+      if (TMath::Abs(proj)<MaxProjectionDist && TMath::Abs(perp)<MaxPerpendicularDist)
+        trackSpacePoints.push_back(spacePoint);
     }
     return trackSpacePoints;
   }

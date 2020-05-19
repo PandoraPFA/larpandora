@@ -94,8 +94,6 @@ shower3Dtrackhitfinder:{
     DebugEVD:              false
     AllowDyanmicLength:    false  #If the Track legth is saved use that instead of
     #MaxProjectionDist
-    EnergyResidualConst:  -0.1   #Linear dimensionless value to vary the energy with
-    EnergyLengthConst:    0.1   #Linear dimensionless value to vary the energy w
     InitialTrackLengthInputLabel: "InitialTrackLength"
     ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
@@ -300,8 +298,6 @@ showerslidingstandardcalodedx:{
     dEdxCut:               999.
     CutStartPosition:     false #Remove hits using MinDistCutOff from the vertex as well
     UseMedian:            true  #Use the median dEdx rather the mean.
-    EnergyResidualConst:  -0.1   #Linear dimensionless value to vary the energy with
-    EnergyLengthConst:    0.1   #Linear dimensionless value to vary the energy with
     # PFParticleLabel: "pandora"
     ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
@@ -324,8 +320,6 @@ showerresidualtrackhitfinder:{
     StartFitSize:          12
     NMissPoints:           10
     ChargeWeighted:        false
-    EnergyResidualConst:   -0.1
-    EnergyLengthConst:     0.1
     MakeTrackSeed:         true
     StartDistanceCut:      0
     DistanceCut:           999
