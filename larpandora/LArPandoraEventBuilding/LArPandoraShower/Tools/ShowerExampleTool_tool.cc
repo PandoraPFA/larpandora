@@ -48,7 +48,8 @@ namespace ShowerRecoTools {
           reco::shower::ShowerElementHolder& ShowerEleHolder) override;
 
       //prehaps you want a fcl parameter.
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
 
   };
 
@@ -56,7 +57,8 @@ namespace ShowerRecoTools {
   ShowerExampleTool::ShowerExampleTool(const fhicl::ParameterSet& pset) :
     //Setup the algs and others here
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel"))
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel"))
+    fVerbose(pset.get<int>("Verbose")),
   {
   }
 
@@ -79,7 +81,7 @@ namespace ShowerRecoTools {
     //Now we are calculating the property of the shower like pfparticle. You have access to everything in the event. Maybe you want the vertex.
     art::Handle<std::vector<recob::Vertex> > vtxHandle;
     std::vector<art::Ptr<recob::Vertex> > vertices;
-    if (Event.getByLabel(fPFParticleModuleLabel, vtxHandle))
+    if (Event.getByLabel(fPFParticleLabel, vtxHandle))
       art::fill_ptr_vector(vertices, vtxHandle);
     else {
       throw cet::exception("ShowerExampleTool") << "Could not get the pandora vertices. Something is not configured correctly. Please give the correct pandora module label. Stopping";
@@ -140,7 +142,8 @@ namespace ShowerRecoTools {
 
     //You can also get the shower number that you are current one (the first shower number is 0).
     int showernum = ShowerEleHolder.GetShowerNumber();
-    std::cout << "You on are shower: " << showernum << std::endl;
+    if (fVerbose>1)
+      std::cout << "You on are shower: " << showernum << std::endl;
 
     //You can also read out what ptr are set and what elements are set:.
     PrintPtrs();
@@ -160,7 +163,8 @@ namespace ShowerRecoTools {
 
     //First check the element has been set
     if(!ShowerEleHolder.CheckElement("myvertex")){
-      mf::LogError("ShowerExampleTooAddAssn") << "vertex not set."<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerExampleTooAddAssn") << "vertex not set."<< std::endl;
       return 1;
     }
 

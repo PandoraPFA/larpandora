@@ -79,7 +79,8 @@ namespace ShowerRecoTools{
       float fEnergyResidualConst;
       float fEnergyLengthConst;
 
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
 
       std::string fShowerEnergyInputLabel;
       std::string fShowerStartPositionInputLabel;
@@ -105,7 +106,8 @@ namespace ShowerRecoTools{
     fCutStartPosition(pset.get<bool>("CutStartPosition")),
     fEnergyResidualConst(pset.get<float>("EnergyResidualConst")),
     fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel")),
@@ -129,15 +131,18 @@ namespace ShowerRecoTools{
 
     // Shower dEdx calculation
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("ShowerSlidingStandardCalodEdx") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSlidingStandardCalodEdx") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackSpacePointsInputLabel)){
-      mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track Spacepoints is not set returning"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track Spacepoints is not set returning"<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputLabel)){
-      mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track is not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track is not set"<< std::endl;
       return 1;
     }
 
@@ -146,20 +151,21 @@ namespace ShowerRecoTools{
     ShowerEleHolder.GetElement(fInitialTrackSpacePointsInputLabel,tracksps);
 
     if(tracksps.size() == 0){
-      mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no spacepointsin the initial track" << std::endl;
+      if (fVerbose)
+        mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no spacepointsin the initial track" << std::endl;
       return 0;
     }
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
-    if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+    if (!Event.getByLabel(fPFParticleLabel, spHandle)){
       throw cet::exception("ShowerSlidingStandardCalodEdx") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
     // Get the hits associated with the space points
     art::FindManyP<recob::Hit>& fmsp = ShowerEleHolder.GetFindManyP<recob::Hit>(
-        spHandle, Event, fPFParticleModuleLabel);
+        spHandle, Event, fPFParticleLabel);
     if(!fmsp.isValid()){
       throw cet::exception("ShowerSlidingStandardCalodEdx") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
@@ -194,7 +200,8 @@ namespace ShowerRecoTools{
       //Get the associated hit
       std::vector<art::Ptr<recob::Hit> > hits = fmsp.at(sp.key());
       if(hits.size() == 0){
-        mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no hit for the spacepoint. This suggest the find many is wrong."<< std::endl;
+        if (fVerbose)
+          mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no hit for the spacepoint. This suggest the find many is wrong."<< std::endl;
         continue;
       }
       const art::Ptr<recob::Hit> hit = hits[0];
@@ -260,8 +267,9 @@ namespace ShowerRecoTools{
       TVector3 PlaneDirection = fGeom->Plane(planeid).GetIncreasingWireDirection();
 
       if(TMath::Abs((TMath::Pi()/2 - TrajDirection.Angle(PlaneDirection))) < fMinAngleToWire){
-        mf::LogWarning("ShowerSlidingStandardCalodEdx")
-          << "remove from angle cut" << std::endl;
+        if (fVerbose)
+          mf::LogWarning("ShowerSlidingStandardCalodEdx")
+            << "remove from angle cut" << std::endl;
         continue;
       }
 
@@ -272,8 +280,9 @@ namespace ShowerRecoTools{
 
       //Shaping time doesn't seem to exist in a global place so add it as a fcl.
       if(fShapingTime < time_taken){
-        mf::LogWarning("ShowerSlidingStandardCalodEdx")
-          << "move for shaping time" << std::endl;
+        if (fVerbose)
+          mf::LogWarning("ShowerSlidingStandardCalodEdx")
+            << "move for shaping time" << std::endl;
         continue;
       }
 

@@ -37,7 +37,8 @@ namespace ShowerRecoTools {
 
     private:
 
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
       std::string fShowerPCAInputLabel;
       std::string fShowerLengthOutputLabel;
       std::string fShowerOpeningAngleOutputLabel;
@@ -47,7 +48,8 @@ namespace ShowerRecoTools {
 
   ShowerPCAEigenvalueLength::ShowerPCAEigenvalueLength(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fShowerPCAInputLabel(pset.get<std::string>("ShowerPCAInputLabel")),
     fShowerLengthOutputLabel(pset.get<std::string>("ShowerLengthOutputLabel")),
     fShowerOpeningAngleOutputLabel(pset.get<std::string>("ShowerOpeningAngleOutputLabel")),
@@ -60,7 +62,8 @@ namespace ShowerRecoTools {
 
 
     if(!ShowerEleHolder.CheckElement(fShowerPCAInputLabel)){
-      mf::LogError("ShowerPCAEigenvalueLength") << "PCA not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPCAEigenvalueLength") << "PCA not set, returning "<< std::endl;
       return 1;
     }
 

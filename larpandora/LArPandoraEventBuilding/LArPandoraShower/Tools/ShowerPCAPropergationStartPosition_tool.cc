@@ -43,7 +43,8 @@ namespace ShowerRecoTools {
     private:
 
       //fcl parameters
-      art::InputTag fPFParticleModuleLabel;
+      art::InputTag fPFParticleLabel;
+      int           fVerbose;
       std::string   fShowerStartPositionOutputLabel;
       std::string   fShowerCentreInputLabel;
       std::string   fShowerDirectionInputLabel;
@@ -53,7 +54,8 @@ namespace ShowerRecoTools {
 
   ShowerPCAPropergationStartPosition::ShowerPCAPropergationStartPosition(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     fShowerStartPositionOutputLabel(pset.get<std::string>("ShowerStartPositionOutputLabel")),
     fShowerCentreInputLabel(pset.get<std::string>("ShowerCentreInputLabel")),
     fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
@@ -72,23 +74,25 @@ namespace ShowerRecoTools {
 
     //Get the start position and direction and center
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-      mf::LogError("ShowerPCAPropergationStartPosition") << "Start position not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPCAPropergationStartPosition") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
-      mf::LogError("ShowerPCAPropergationStartPosition") << "Direction not set, returning "<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerPCAPropergationStartPosition") << "Direction not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fShowerCentreInputLabel)){
 
       // Get the assocated pfParicle vertex PFParticles
       art::Handle<std::vector<recob::PFParticle> > pfpHandle;
-      if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+      if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
         throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
         return 1;
       }
       art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
-          pfpHandle, Event, fPFParticleModuleLabel);
+          pfpHandle, Event, fPFParticleLabel);
 
       if (!fmspp.isValid()){
         throw cet::exception("ShowerPCADirection") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
@@ -97,12 +101,12 @@ namespace ShowerRecoTools {
 
       //Get the spacepoints handle and the hit assoication
       art::Handle<std::vector<recob::SpacePoint> > spHandle;
-      if (!Event.getByLabel(fPFParticleModuleLabel, spHandle)){
+      if (!Event.getByLabel(fPFParticleLabel, spHandle)){
         throw cet::exception("ShowerPCADirection") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
         return 1;
       }
       art::FindManyP<recob::Hit>& fmh = ShowerEleHolder.GetFindManyP<recob::Hit>(
-          spHandle, Event, fPFParticleModuleLabel);
+          spHandle, Event, fPFParticleLabel);
       if(!fmh.isValid()){
         throw cet::exception("ShowerPCADirection") << "Spacepoint and hit association not valid. Stopping.";
         return 1;

@@ -46,6 +46,7 @@ namespace ShowerRecoTools {
     private:
 
       //fcl
+      int   fVerbose;
       bool  fUsePandoraVertex;    //Direction from point defined as
       //(Position of traj point - Vertex) rather than
       //(Position of traj point - Track Start Point).
@@ -67,6 +68,7 @@ namespace ShowerRecoTools {
 
   ShowerSmartTrackTrajectoryPointDirection::ShowerSmartTrackTrajectoryPointDirection(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fVerbose(pset.get<int>("Verbose")),
     fUsePandoraVertex(pset.get<bool>("UsePandoraVertex")),
     fAllowDynamicSliding(pset.get<bool>("AllowDynamicSliding")),
     fUsePositionInfo(pset.get<bool>("UsePositionInfo")),
@@ -87,8 +89,9 @@ namespace ShowerRecoTools {
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputLabel)){
-      mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
-        << "Initial track not set"<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+          << "Initial track not set"<< std::endl;
       return 1;
     }
     recob::Track InitialTrack;
@@ -96,8 +99,9 @@ namespace ShowerRecoTools {
 
     //Smartly choose the which trajectory point to look at by ignoring the smush of hits at the vertex.
     if(InitialTrack.NumberTrajectoryPoints() == 1){
-      mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
-        << "Not Enough trajectory points."<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+          << "Not Enough trajectory points."<< std::endl;
       return 1;
     }
 
@@ -112,8 +116,9 @@ namespace ShowerRecoTools {
       if(fUsePandoraVertex){
         //Check the Track has been defined
         if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
-          mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
-            << "Shower start position not set"<< std::endl;
+          if (fVerbose)
+            mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+              << "Shower start position not set"<< std::endl;
           return 1;
         }
         TVector3 StartPosition_vec = {-999,-999,-999};
@@ -160,7 +165,8 @@ namespace ShowerRecoTools {
         }
 
         if(bail){
-          mf::LogError("ShowerSmartTrackTrajectoryPointDirection") << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
+          if (fVerbose)
+            mf::LogError("ShowerSmartTrackTrajectoryPointDirection") << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
           break;
         }
 
@@ -263,8 +269,9 @@ namespace ShowerRecoTools {
         }
 
         if(bail){
-          mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
-            << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
+          if (fVerbose)
+            mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+              << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
           break;
         }
 
@@ -290,8 +297,9 @@ namespace ShowerRecoTools {
     }
 
     if(trajpoint == (int) InitialTrack.NumberTrajectoryPoints() -3){
-      mf::LogError("ShowerSmartTrackTrajectoryPointDirectio") <<
-        "Trajectory point not set."<< std::endl;
+      if (fVerbose)
+        mf::LogError("ShowerSmartTrackTrajectoryPointDirectio") <<
+          "Trajectory point not set."<< std::endl;
       return 1;
     }
 

@@ -3,7 +3,7 @@
 shower::LArPandoraShowerCheatingAlg::LArPandoraShowerCheatingAlg(const fhicl::ParameterSet& pset):
   fLArPandoraShowerAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerAlg")),
   fHitModuleLabel(pset.get<art::InputTag> ("HitModuleLabel")),
-  fPFParticleModuleLabel(pset.get<art::InputTag> ("PFParticleModuleLabel")),
+  fPFParticleLabel(pset.get<art::InputTag> ("PFParticleLabel")),
   fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
   fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
   fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel"))
@@ -89,7 +89,7 @@ void shower::LArPandoraShowerCheatingAlg::CheatDebugEVD(const simb::MCParticle* 
 
 
   // Get the hits associated with the space points
-  art::FindManyP<recob::SpacePoint> fmsph(hitHandle, Event, fPFParticleModuleLabel);
+  art::FindManyP<recob::SpacePoint> fmsph(hitHandle, Event, fPFParticleLabel);
   if(!fmsph.isValid()){
     throw cet::exception("ShowerTrackFinderCheater") << "Spacepoint and hit association not valid. Stopping.";
     return;

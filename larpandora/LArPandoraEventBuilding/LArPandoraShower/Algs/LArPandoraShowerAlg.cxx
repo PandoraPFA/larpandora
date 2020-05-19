@@ -3,7 +3,7 @@
 shower::LArPandoraShowerAlg::LArPandoraShowerAlg(const fhicl::ParameterSet& pset):
   fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
   fUseCollectionOnly(pset.get<bool>("UseCollectionOnly")),
-  fPFParticleModuleLabel(pset.get<art::InputTag> ("PFParticleModuleLabel")),
+  fPFParticleLabel(pset.get<art::InputTag> ("PFParticleLabel")),
   fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
   fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
   fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
@@ -398,14 +398,14 @@ void shower::LArPandoraShowerAlg::DebugEVD(art::Ptr<recob::PFParticle> const& pf
   // going to be used to debug I don't care, I would rather have generality in this case
 
   art::Handle<std::vector<recob::PFParticle> > pfpHandle;
-  if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+  if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
     throw cet::exception("Shower3DTrackFinderEMShower") << "Could not get the pandora pf particles\
       . Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
     return;
   }
 
   // Get the spacepoint - PFParticle assn
-  art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, Event, fPFParticleModuleLabel);
+  art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, Event, fPFParticleLabel);
   if (!fmspp.isValid()){
     throw cet::exception("Shower3DTrackFinder") << "Trying to get the spacepoint and failed. Somet\
       hing is not configured correctly. Stopping ";
@@ -557,7 +557,7 @@ void shower::LArPandoraShowerAlg::DebugEVD(art::Ptr<recob::PFParticle> const& pf
   //  we want to draw all of the PFParticles in the event
   //Get the PFParticles
   std::vector<art::Ptr<recob::PFParticle> > pfps;
-  if (Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
+  if (Event.getByLabel(fPFParticleLabel, pfpHandle)){
     art::fill_ptr_vector(pfps, pfpHandle);
   }
   else {

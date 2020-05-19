@@ -38,11 +38,17 @@ namespace ShowerRecoTools {
       //Function to add the assoctions
       int AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr, art::Event& Event,
           reco::shower::ShowerElementHolder& ShowerEleHolder) override;
+
+      // Stuff you will probably need that inherits from the module
+      art::InputTag              fPFParticleLabel;
+      int                        fVerbose;
   };
 
 
   ShowerGenericTool::ShowerGenericTool(const fhicl::ParameterSet& pset) :
-    IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools"))
+    IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
+    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
+    fVerbose(pset.get<int>("Verbose"))
   {
   }
 
