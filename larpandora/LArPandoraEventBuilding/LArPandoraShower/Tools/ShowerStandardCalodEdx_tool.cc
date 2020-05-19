@@ -55,8 +55,6 @@ namespace ShowerRecoTools{
       double fdEdxTrackLength,dEdxTrackLength; //Max length from a hit can be to the start point in cm.
       bool   fMaxHitPlane;     //Set the best planes as the one with the most hits
       bool   fMissFirstPoint;  //Do not use any hits from the first wire.
-      float  fEnergyLengthConst;
-      std::string fShowerEnergyInputLabel;
       std::string fShowerStartPositionInputLabel;
       std::string fInitialTrackHitsInputLabel;
       std::string fShowerDirectionInputLabel;
@@ -72,8 +70,6 @@ namespace ShowerRecoTools{
     fdEdxTrackLength(pset.get<float>("dEdxTrackLength")),
     fMaxHitPlane(pset.get<bool>("MaxHitPlane")),
     fMissFirstPoint(pset.get<bool>("MissFirstPoint")),
-    fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
-    fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackHitsInputLabel(pset.get<std::string>("InitialTrackHitsInputLabel")),
     fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
@@ -87,9 +83,7 @@ namespace ShowerRecoTools{
   }
 
   int ShowerStandardCalodEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-      art::Event& Event,
-      reco::shower::ShowerElementHolder& ShowerEleHolder
-      ){
+      art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     dEdxTrackLength=fdEdxTrackLength;
 

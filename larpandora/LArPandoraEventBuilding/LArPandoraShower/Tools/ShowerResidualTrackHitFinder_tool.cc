@@ -123,8 +123,6 @@ namespace ShowerRecoTools {
       int           fStartFitSize,StartFitSize;
       int           fNMissPoints,NMissPoints;
       float         fTrackMaxAdjacentSPDistance,TrackMaxAdjacentSPDistance;
-      float         fEnergyResidualConst;
-      float         fEnergyLengthConst;
       bool          fRunTest;
       bool          fMakeTrackSeed;
       float         fStartDistanceCut;
@@ -150,8 +148,6 @@ namespace ShowerRecoTools {
     fStartFitSize(pset.get<int>("StartFitSize")),
     fNMissPoints(pset.get<int>("NMissPoints")),
     fTrackMaxAdjacentSPDistance(pset.get<float>("TrackMaxAdjacentSPDistance")),
-    fEnergyResidualConst(pset.get<float>("EnergyResidualConst")),
-    fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
     fRunTest(0),
     fMakeTrackSeed(pset.get<bool>("MakeTrackSeed")),
     fStartDistanceCut(pset.get<float>("StartDistanceCut")),
