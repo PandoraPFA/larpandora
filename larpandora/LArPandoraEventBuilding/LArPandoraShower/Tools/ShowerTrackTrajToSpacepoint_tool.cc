@@ -45,8 +45,8 @@ namespace ShowerRecoTools {
       //point to be matched
       art::InputTag fPFParticleModuleLabel;
 
-      std::string fInitialTrackSpacePointsOuputLabel;
-      std::string fInitialTrackHitsOuputLabel;
+      std::string fInitialTrackSpacePointsOutputLabel;
+      std::string fInitialTrackHitsOutputLabel;
       std::string fInitialTrackInputTag;
       std::string fShowerStartPositionInputTag;
       std::string fInitialTrackSpacePointsInputTag;
@@ -58,8 +58,8 @@ namespace ShowerRecoTools {
     : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fMaxDist(pset.get<float>("MaxDist")),
     fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
-    fInitialTrackSpacePointsOuputLabel(pset.get<std::string>("InitialTrackSpacePointsOuputLabel")),
-    fInitialTrackHitsOuputLabel(pset.get<std::string>("InitialTrackHitsOuputLabel")),
+    fInitialTrackSpacePointsOutputLabel(pset.get<std::string>("InitialTrackSpacePointsOutputLabel")),
+    fInitialTrackHitsOutputLabel(pset.get<std::string>("InitialTrackHitsOutputLabel")),
     fInitialTrackInputTag(pset.get<std::string>("InitialTrackInputTag")),
     fShowerStartPositionInputTag(pset.get<std::string>("ShowerStartPositionInputTag")),
     fInitialTrackSpacePointsInputTag(pset.get<std::string>("InitialTrackSpacePointsInputTag"))
@@ -170,8 +170,8 @@ namespace ShowerRecoTools {
     }
 
     //Save the spacepoints.
-    ShowerEleHolder.SetElement(new_intitaltrack_sp,fInitialTrackSpacePointsOuputLabel);
-    ShowerEleHolder.SetElement(trackHits,fInitialTrackHitsOuputLabel);
+    ShowerEleHolder.SetElement(new_intitaltrack_sp,fInitialTrackSpacePointsOutputLabel);
+    ShowerEleHolder.SetElement(trackHits,fInitialTrackHitsOutputLabel);
 
     return 0;
   }

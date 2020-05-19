@@ -74,7 +74,7 @@ namespace ShowerRecoTools {
   ShowerTrackPCADirection::ShowerTrackPCADirection(const fhicl::ParameterSet& pset)
     :     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fHitModuleLabel(pset.get<art::InputTag>("HitModuleLabel")),
     fChargeWeighted(pset.get<bool>         ("ChargeWeighted")),
     fMinPCAPoints (pset.get<unsigned int> ("MinPCAPoints")),

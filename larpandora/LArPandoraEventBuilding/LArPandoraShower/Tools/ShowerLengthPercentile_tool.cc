@@ -41,8 +41,8 @@ namespace ShowerRecoTools {
       art::InputTag fPFParticleModuleLabel;
       std::string fShowerStartPositionInputLabel;
       std::string fShowerDirectionInputLabel;
-      std::string fShowerLengthOuputLabel;
-      std::string fShowerOpeningAngleOuputLabel;
+      std::string fShowerLengthOutputLabel;
+      std::string fShowerOpeningAngleOutputLabel;
   };
 
 
@@ -52,8 +52,8 @@ namespace ShowerRecoTools {
     fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
-    fShowerLengthOuputLabel(pset.get<std::string>("ShowerLengthOuputLabel")),
-    fShowerOpeningAngleOuputLabel(pset.get<std::string>("ShowerOpeningAngleOuputLabel"))
+    fShowerLengthOutputLabel(pset.get<std::string>("ShowerLengthOutputLabel")),
+    fShowerOpeningAngleOutputLabel(pset.get<std::string>("ShowerOpeningAngleOutputLabel"))
   {
   }
 
@@ -93,6 +93,11 @@ namespace ShowerRecoTools {
 
     // Get the SpacePoints
     std::vector<art::Ptr<recob::SpacePoint> > spacePoints = fmspp.at(pfparticle.key());
+    if (!spacePoints.size()){
+      mf::LogError("ShowerLengthPercentile") << "No Spacepoints, returning" <<std::endl;
+      return 1;
+    }
+
 
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
       mf::LogError("ShowerResidualTrackHitFinder") << "Direction not set, returning "<< std::endl;
@@ -132,8 +137,8 @@ namespace ShowerRecoTools {
     double ShowerAngleError = -9999; //TODO: Do properly
 
     // Fill the shower element holder
-    ShowerEleHolder.SetElement(ShowerLength, ShowerLengthError, fShowerLengthOuputLabel);
-    ShowerEleHolder.SetElement(ShowerAngle, ShowerAngleError, fShowerOpeningAngleOuputLabel);
+    ShowerEleHolder.SetElement(ShowerLength, ShowerLengthError, fShowerLengthOutputLabel);
+    ShowerEleHolder.SetElement(ShowerAngle, ShowerAngleError, fShowerOpeningAngleOutputLabel);
 
     return 0;
   }

@@ -2,7 +2,7 @@
 
 BEGIN_PROLOG
 
-standard_pandoraModularShowerCreation: {
+legacy_pandoraModularShowerCreation: {
 
     module_type: "LArPandoraModularShowerCreation"
 
@@ -10,17 +10,17 @@ standard_pandoraModularShowerCreation: {
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
          @local::showerpcapropergationstartposition,
-         @local::showerlengthpercentile,
+         @local::showerpcaeigenvaluelength,
          @local::showerlinearenergy,
          @local::shower3Dtrackhitfinder,
          @local::showerpandoraslidingfittrackfinder,
          @local::showerstandardcalodedx
     ]
 
-    PFParticleModuleLabel:      "pandora"
-    SecondInteration:           false
-    AllowPartialShowers:        true
-    Verbose:                    false
+    PFParticleModuleLabel:    "pandora"
+    SecondInteration:          false
+    AllowPartialShowers:       true
+    Verbose:                   0
 
     ShowerStartPositionLabel: "ShowerStartPosition"
     ShowerDirectionLabel:     "ShowerDirection"
@@ -31,7 +31,7 @@ standard_pandoraModularShowerCreation: {
     ShowerBestPlaneLabel:     "ShowerBestPlane"
 }
 
-test_pandoraModularShowerCreation: {
+standard_pandoraModularShowerCreation: {
 
     module_type: "LArPandoraModularShowerCreation"
 
@@ -39,16 +39,18 @@ test_pandoraModularShowerCreation: {
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
          @local::showerlengthpercentile,
-         @local::showerlinearenergy,
-         @local::shower3Dtrackhitfinder,
+         @local::showerrecoenergyfromnumelectrons,
+         @local::showerresidualtrackhitfinder,
+         @local::showerslidingstandardcalodedx,
          @local::showerpandoraslidingfittrackfinder,
-         @local::showerstandardcalodedx
+         @local::showertracktrajectorypointdirection,
+         @local::showerdirectiontopologydecision
     ]
 
-    PFParticleModuleLabel:      "pandora"
-    SecondInteration:           false
-    AllowPartialShowers:        true
-    Verbose:                    false
+    PFParticleModuleLabel:    "pandora"
+    SecondInteration:          false
+    AllowPartialShowers:       true
+    Verbose:                   0
 
     ShowerStartPositionLabel: "ShowerStartPosition"
     ShowerDirectionLabel:     "ShowerDirection"

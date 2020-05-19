@@ -1,13 +1,13 @@
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerCheatingAlg.h"
 
 shower::LArPandoraShowerCheatingAlg::LArPandoraShowerCheatingAlg(const fhicl::ParameterSet& pset):
-  fLArPandoraShowerAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerAlg"))
+  fLArPandoraShowerAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerAlg")),
+  fHitModuleLabel(pset.get<art::InputTag> ("HitModuleLabel")),
+  fPFParticleModuleLabel(pset.get<art::InputTag> ("PFParticleModuleLabel")),
+  fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
+  fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
+  fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel"))
 {
-  fPFParticleModuleLabel = pset.get<art::InputTag> ("PFParticleModuleLabel");
-  fHitModuleLabel        = pset.get<art::InputTag> ("HitModuleLabel");
-  fShowerStartPositionInputLabel = pset.get<std::string>("ShowerStartPositionInputLabel");
-  fShowerDirectionInputLabel     = pset.get<std::string>("ShowerDirectionInputLabel");
-  fInitialTrackSpacePointsInputLabel = pset.get<std::string>("InitialTrackSpacePointsInputLabel");
 }
 
 std::map<int,const simb::MCParticle*>  shower::LArPandoraShowerCheatingAlg::GetTrueParticleMap() const {

@@ -76,7 +76,6 @@ namespace ShowerRecoTools{
       float fdEdxCut;
       bool fUseMedian;        //Use the median value as the dEdx rather than the mean.
       bool fCutStartPosition; //Remove hits using MinDistCutOff from the vertex as well.
-      bool fScaleWithEnergy;
       float fEnergyResidualConst;
       float fEnergyLengthConst;
 
@@ -86,9 +85,9 @@ namespace ShowerRecoTools{
       std::string fShowerStartPositionInputLabel;
       std::string fInitialTrackSpacePointsInputLabel;
       std::string fInitialTrackInputLabel;
-      std::string fShowerdEdxOuputLabel;
+      std::string fShowerdEdxOutputLabel;
       std::string fShowerBestPlaneOutputLabel;
-      std::string fShowerdEdxVecOuputLabel;
+      std::string fShowerdEdxVecOutputLabel;
   };
 
 
@@ -104,7 +103,6 @@ namespace ShowerRecoTools{
     fdEdxCut(pset.get<float>("dEdxCut")),
     fUseMedian(pset.get<bool>("UseMedian")),
     fCutStartPosition(pset.get<bool>("CutStartPosition")),
-    fScaleWithEnergy(pset.get<bool>("ScaleWithEnergy")),
     fEnergyResidualConst(pset.get<float>("EnergyResidualConst")),
     fEnergyLengthConst(pset.get<float>("EnergyLengthConst")),
     fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
@@ -112,9 +110,9 @@ namespace ShowerRecoTools{
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel")),
     fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
-    fShowerdEdxOuputLabel(pset.get<std::string>("ShowerdEdxOuputLabel")),
+    fShowerdEdxOutputLabel(pset.get<std::string>("ShowerdEdxOutputLabel")),
     fShowerBestPlaneOutputLabel(pset.get<std::string>("ShowerBestPlaneOutputLabel")),
-    fShowerdEdxVecOuputLabel(pset.get<std::string>("ShowerdEdxVecOuputLabel"))
+    fShowerdEdxVecOutputLabel(pset.get<std::string>("ShowerdEdxVecOutputLabel"))
   {
   }
 
@@ -128,24 +126,6 @@ namespace ShowerRecoTools{
 
     MaxDist         = fMaxDist;
     dEdxTrackLength = fdEdxTrackLength;
-
-    //Check if the user want to try sclaing the paramters with respect to energy.
-    if(fScaleWithEnergy){
-      if(!ShowerEleHolder.CheckElement(fShowerEnergyInputLabel)){
-        mf::LogError("ShowerResidualTrackHitFinder") << "ShowerEnergy not set, returning "<< std::endl;
-        return 1;
-      }
-      std::vector<double> Energy = {-999,-999,-999};
-      ShowerEleHolder.GetElement(fShowerEnergyInputLabel,Energy);
-
-      //We should change this
-      //Assume that the max energy is the correct energy as our clustering is currently poo.
-      double max_energy =  *max_element(std::begin(Energy), std::end(Energy))/1000;
-      MaxDist          += max_energy*fEnergyResidualConst*fMaxDist;
-      dEdxTrackLength  += max_energy*fEnergyLengthConst*fdEdxTrackLength;
-
-    }
-
 
     // Shower dEdx calculation
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
@@ -279,7 +259,7 @@ namespace ShowerRecoTools{
       //If the direction is in the same direction as the wires within some tolerance the hit finding struggles. Let remove these.
       TVector3 PlaneDirection = fGeom->Plane(planeid).GetIncreasingWireDirection();
 
-      if(TrajDirection.Angle(PlaneDirection) < fMinAngleToWire){
+      if(TMath::Abs((TMath::Pi()/2 - TrajDirection.Angle(PlaneDirection))) < fMinAngleToWire){
         mf::LogWarning("ShowerSlidingStandardCalodEdx")
           << "remove from angle cut" << std::endl;
         continue;
@@ -390,9 +370,9 @@ namespace ShowerRecoTools{
     }
 
     //Need to sort out errors sensibly.
-    ShowerEleHolder.SetElement(dEdx_val,dEdx_valErr,fShowerdEdxOuputLabel);
+    ShowerEleHolder.SetElement(dEdx_val,dEdx_valErr,fShowerdEdxOutputLabel);
     ShowerEleHolder.SetElement(best_plane,fShowerBestPlaneOutputLabel);
-    ShowerEleHolder.SetElement(dEdx_vec_cut,fShowerdEdxVecOuputLabel);
+    ShowerEleHolder.SetElement(dEdx_vec_cut,fShowerdEdxVecOutputLabel);
     return 0;
   }
 

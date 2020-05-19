@@ -117,7 +117,6 @@ namespace ShowerRecoTools {
       bool          fUseShowerDirection;
       bool          fChargeWeighted;
       bool          fForwardHitsOnly;
-      bool          fScaleWithEnergy;
       float         fMaxResidualDiff,MaxResidualDiff;
       float         fMaxAverageResidual,MaxAverageResidual;
       int           fStartFitSize,StartFitSize;
@@ -140,11 +139,10 @@ namespace ShowerRecoTools {
   ShowerResidualTrackHitFinder::ShowerResidualTrackHitFinder(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fUseShowerDirection(pset.get<bool>("UseShowerDirection")),
     fChargeWeighted(pset.get<bool>("ChargeWeighted")),
     fForwardHitsOnly(pset.get<bool>("ForwardHitsOnly")),
-    fScaleWithEnergy(pset.get<bool>("ScaleWithEnergy")),
     fMaxResidualDiff(pset.get<float>("MaxResidualDiff")),
     fMaxAverageResidual(pset.get<float>("MaxAverageResidual")),
     fStartFitSize(pset.get<int>("StartFitSize")),
@@ -179,28 +177,6 @@ namespace ShowerRecoTools {
     NMissPoints                = fNMissPoints;
     TrackMaxAdjacentSPDistance = fTrackMaxAdjacentSPDistance;
 
-    //Check if the user want to try sclaing the paramters with respect to energy.
-    if(fScaleWithEnergy){
-      if(!ShowerEleHolder.CheckElement(fShowerEnergyInputLabel)){
-        mf::LogError("ShowerResidualTrackHitFinder") << "ShowerEnergy not set, returning "<< std::endl;
-        return 1;
-      }
-      std::vector<double> Energy = {-999,-999,-999};
-      ShowerEleHolder.GetElement(fShowerEnergyInputLabel,Energy);
-
-      //We should change this
-      //Assume that the max energy is the correct energy as our clustering is currently poo.
-      double max_energy =  *max_element(std::begin(Energy), std::end(Energy))/1000;
-      MaxResidualDiff             += max_energy*fEnergyResidualConst*fMaxResidualDiff;
-      MaxAverageResidual          += max_energy*fEnergyResidualConst*fMaxAverageResidual;
-      StartFitSize                += max_energy*fEnergyLengthConst*(float)fStartFitSize;
-      NMissPoints                 += max_energy*fEnergyResidualConst*(float)fNMissPoints;
-      TrackMaxAdjacentSPDistance  += max_energy*fEnergyResidualConst*fTrackMaxAdjacentSPDistance;
-      if(StartFitSize == 0){StartFitSize = 3;}
-
-    }
-
-    //    std::cout << "MaxResidualDiff: " << MaxResidualDiff << " MaxAverageResidual: " << MaxAverageResidual << " StartFitSize: " << StartFitSize << " NMissPoints: " << NMissPoints << " TrackMaxAdjacentSPDistance: " << TrackMaxAdjacentSPDistance << std::endl;
 
     if(StartFitSize == 0){
       throw cet::exception("ShowerResidualTrackHitFinder") << "We cannot make a track if you don't gives us at leats one hit. Change fStartFitSize please to something sensible";

@@ -93,7 +93,7 @@ namespace ShowerRecoTools {
   ShowerPCADirection::ShowerPCADirection(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fNSegments(pset.get<float>("NSegments")),
     fUseStartPosition(pset.get<bool>("UseStartPosition")),
     fChargeWeighted(pset.get<bool>("ChargeWeighted")),
@@ -122,7 +122,8 @@ namespace ShowerRecoTools {
     // Get the assocated pfParicle vertex PFParticles
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
     if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
-      throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
+      throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. \
+        Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 

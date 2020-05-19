@@ -598,8 +598,8 @@ class reco::shower::ShowerElementHolder{
           art::Event &evt, art::InputTag &moduleTag){
 
         //TODO: tidy up
-        if (!handle->size())
-          throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
+        // if (!handle->size())
+        //   throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
 
         T1 type1();
         T2 type2();
@@ -633,8 +633,8 @@ class reco::shower::ShowerElementHolder{
           art::Event &evt, art::InputTag &moduleTag){
 
         //TODO: tidy up
-        if (!handle->size())
-          throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
+        // if (!handle->size())
+        //   throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
 
         T1 type1();
         T2 type2();

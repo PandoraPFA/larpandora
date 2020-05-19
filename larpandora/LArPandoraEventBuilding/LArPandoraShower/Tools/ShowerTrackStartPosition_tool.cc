@@ -58,7 +58,6 @@ namespace ShowerRecoTools {
 
   int ShowerTrackStartPosition::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
-    return 0;
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement("InitialTrack")){
@@ -77,9 +76,8 @@ namespace ShowerRecoTools {
     TVector3 TrajPosition = {TrajPosition_vec.X(), TrajPosition_vec.Y(),TrajPosition_vec.Z()};
     ShowerEleHolder.SetElement(TrajPosition,StartPositionErr,fShowerStartPositionOutputLabel);
 
+    return 0;
   }
-
-
 }
 
 DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerTrackStartPosition)

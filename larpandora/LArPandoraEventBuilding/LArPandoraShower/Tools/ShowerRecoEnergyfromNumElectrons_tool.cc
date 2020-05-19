@@ -55,6 +55,7 @@ namespace ShowerRecoTools {
       double CalculateEnergy(std::vector<art::Ptr<recob::Hit> >& hits, geo::View_t& view);
 
       art::InputTag fPFParticleModuleLabel;
+      int fVerbose;
 
       //Services
       detinfo::DetectorProperties const* detprop = nullptr;
@@ -73,10 +74,10 @@ namespace ShowerRecoTools {
 
   ShowerRecoEnergyfromNumElectrons::ShowerRecoEnergyfromNumElectrons(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
+    fVerbose(pset.get<int>("Verbose")),
     detprop(lar::providerFrom<detinfo::DetectorPropertiesService>()),
     fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg"))
-
   {
   }
 
@@ -89,8 +90,8 @@ namespace ShowerRecoTools {
       reco::shower::ShowerElementHolder& ShowerEleHolder
       ){
 
-
-    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shower Reco Energy Tool ~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    if (fVerbose)
+      std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Shower Reco Energy Tool ~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 
     // get shower number per event
     showernum = ShowerEleHolder.GetShowerNumber();
@@ -144,7 +145,8 @@ namespace ShowerRecoTools {
       //Get the hits
       std::vector<art::Ptr<recob::Hit> > hits = fmhc.at(cluster.key());
       if(hits.size() == 0){
-        mf::LogWarning("ShowerRecoEnergyfromNumElectrons") << "No hit for the cluster. This suggest the find many is wrong."<< std::endl;
+        if (fVerbose)
+          mf::LogWarning("ShowerRecoEnergyfromNumElectrons") << "No hit for the cluster. This suggest the find many is wrong."<< std::endl;
         continue;
       }
 
@@ -170,7 +172,8 @@ namespace ShowerRecoTools {
       //std::cout << "hits = " << hits.size() << std::endl;
 
       // Print out the energy for each plane
-      std::cout<<"View: "<< view <<  " and energy: "<<Energy<<std::endl;;
+      if (fVerbose)
+        std::cout<<"View: "<< view <<  " and energy: "<<Energy<<std::endl;;
 
       unsigned int viewNum = view;
       view_energies[viewNum] = Energy;
@@ -238,17 +241,17 @@ namespace ShowerRecoTools {
     double Recombination_factor = 0.64; //constant factor for every shower (study done by Ed)
 
     for (art::PtrVector<recob::Hit>::const_iterator hit = hits.begin(); hit != hits.end(); ++hit){
-      totalCharge += (*hit)->Integral() * fCalorimetryAlg.LifetimeCorrection((*hit)->PeakTime()); // obtain charge and correct for lifetime }
+      totalCharge += (*hit)->Integral() * fCalorimetryAlg.LifetimeCorrection((*hit)->PeakTime()); // obtain charge and correct for lifetime
+    }
+
+    // correct charge due to recombination
+    correctedtotalCharge = totalCharge / Recombination_factor;
+    // calculate # of electrons and the corresponding energy
+    nElectrons = fCalorimetryAlg.ElectronsFromADCArea(correctedtotalCharge, view);
+    totalEnergy = (nElectrons / util::kGeVToElectrons) * 1000; // energy in MeV
+    return totalEnergy;
+
   }
-
-  // correct charge due to recombination
-  correctedtotalCharge = totalCharge / Recombination_factor;
-  // calculate # of electrons and the corresponding energy
-  nElectrons = fCalorimetryAlg.ElectronsFromADCArea(correctedtotalCharge, view);
-  totalEnergy = (nElectrons / util::kGeVToElectrons) * 1000; // energy in MeV
-  return totalEnergy;
-
-}
 
 
 }
