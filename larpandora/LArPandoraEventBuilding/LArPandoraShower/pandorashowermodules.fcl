@@ -17,7 +17,7 @@ legacy_pandoraModularShowerCreation: {
          @local::showerstandardcalodedx
     ]
 
-    PFParticleModuleLabel:    "pandora"
+    PFParticleLabel:    "pandora"
     SecondInteration:          false
     AllowPartialShowers:       true
     Verbose:                   0
@@ -47,7 +47,7 @@ standard_pandoraModularShowerCreation: {
          @local::showerdirectiontopologydecision
     ]
 
-    PFParticleModuleLabel:    "pandora"
+    PFParticleLabel:    "pandora"
     SecondInteration:          false
     AllowPartialShowers:       true
     Verbose:                   0
