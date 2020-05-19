@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerDecisionBestPlane_tool.cc                         ###
+//### Name:        ShowerBestPlaneDesicion_tool.cc                         ###
 //### Author:      Ed Tyley                                                ###
 //### Date:        13.05.19                                                ###
 //### Description: Decision tool to choose best plane. Choose plane with   ###
@@ -23,11 +23,11 @@
 namespace ShowerRecoTools {
 
 
-  class ShowerDecisionBestPlane: public IShowerTool {
+  class ShowerBestPlaneDesicion: public IShowerTool {
 
     public:
 
-      ShowerDecisionBestPlane(const fhicl::ParameterSet& pset);
+      ShowerBestPlaneDesicion(const fhicl::ParameterSet& pset);
 
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
           art::Event& Event,
@@ -42,7 +42,7 @@ namespace ShowerRecoTools {
   };
 
 
-  ShowerDecisionBestPlane::ShowerDecisionBestPlane(const fhicl::ParameterSet& pset) :
+  ShowerBestPlaneDesicion::ShowerBestPlaneDesicion(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fInitialTrackBestPlaneInputLabel(pset.get<std::string>("InitialTrackBestPlaneInputLabel")),
     fOverallBestPlaneInputLabel(pset.get<std::string>("OverallBestPlaneInputLabel")),
@@ -50,7 +50,7 @@ namespace ShowerRecoTools {
   {
   }
 
-  int ShowerDecisionBestPlane::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerBestPlaneDesicion::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     int  bestPlane = -999;
@@ -69,9 +69,9 @@ namespace ShowerRecoTools {
 
     // If neither are set, do not fill the element holder and return an error.
     // The LArPandoraModularShower module will take care of it.
-    mf::LogError("ShowerDecisionBestPlane") << "Shower best plane not set"<< std::endl;
+    mf::LogError("ShowerBestPlaneDesicion") << "Shower best plane not set"<< std::endl;
     return 1;
   }
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerDecisionBestPlane)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerBestPlaneDesicion)

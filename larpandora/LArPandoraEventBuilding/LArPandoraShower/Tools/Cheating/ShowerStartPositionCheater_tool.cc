@@ -62,7 +62,7 @@ namespace ShowerRecoTools {
   ShowerStartPositionCheater::ShowerStartPositionCheater(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fLArPandoraShowerCheatingAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fHitModuleLabel(pset.get<art::InputTag>("HitModuleLabel")),
     fShowerStartPositionOutputLabel(pset.get<std::string>("ShowerStartPositionOutputLabel")),
     fTrueParticleOutputLabel(pset.get<std::string>("TrueParticleOutputLabel"))

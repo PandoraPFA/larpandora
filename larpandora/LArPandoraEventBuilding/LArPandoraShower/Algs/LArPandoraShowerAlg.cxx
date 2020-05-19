@@ -1,25 +1,21 @@
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
 
 shower::LArPandoraShowerAlg::LArPandoraShowerAlg(const fhicl::ParameterSet& pset):
-  fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>())
+  fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
+  fUseCollectionOnly(pset.get<bool>("UseCollectionOnly")),
+  fPFParticleModuleLabel(pset.get<art::InputTag> ("PFParticleModuleLabel")),
+  fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
+  fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
+  fShowerDirectionInputLabel(pset.get<std::string>("ShowerDirectionInputLabel")),
+  fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel"))
 {
-  fUseCollectionOnly      = pset.get<bool>("UseCollectionOnly");
-  fPFParticleModuleLabel  = pset.get<art::InputTag> ("PFParticleModuleLabel");
-  fHitModuleLabel         = pset.get<art::InputTag> ("HitModuleLabel");
-  fInitialTrackInputLabel = pset.get<std::string>("InitialTrackInputLabel");
-  fShowerStartPositionInputLabel = pset.get<std::string>("ShowerStartPositionInputLabel");
-  fShowerDirectionInputLabel = pset.get<std::string>("ShowerDirectionInputLabel");
-  fInitialTrackSpacePointsInputLabel = pset.get<std::string>("InitialTrackSpacePointsInputLabel");
 }
-
 
 //Order the shower hits with regards to their projected length onto
 //the shower direction from the shower start position. This is done
 //in the 2D coordinate system (wire direction, x)
 void shower::LArPandoraShowerAlg::OrderShowerHits(std::vector<art::Ptr<recob::Hit> >& hits,
-    TVector3 const& ShowerStartPosition,
-    TVector3 const& ShowerDirection
-    ) const {
+    TVector3 const& ShowerStartPosition, TVector3 const& ShowerDirection) const {
 
   std::map<double, art::Ptr<recob::Hit> > OrderedHits;
   art::Ptr<recob::Hit> startHit = hits.front();
@@ -285,8 +281,6 @@ double shower::LArPandoraShowerAlg::DistanceBetweenSpacePoints(art::Ptr<recob::S
   return distance;
 }
 
-
-
 //Return the charge of the spacepoint in ADC.
 double shower::LArPandoraShowerAlg::SpacePointCharge(art::Ptr<recob::SpacePoint> const& sp,
     art::FindManyP<recob::Hit> const& fmh) const {
@@ -354,8 +348,7 @@ double shower::LArPandoraShowerAlg::SpacePointPerpendicular(art::Ptr<recob::Spac
 }
 
 double shower::LArPandoraShowerAlg::SpacePointPerpendicular(art::Ptr<recob::SpacePoint> const &sp,
-    TVector3 const& vertex, TVector3 const& direction,
-    double proj) const {
+    TVector3 const& vertex, TVector3 const& direction, double proj) const {
 
   // Get the position of the spacepoint
   TVector3 pos = shower::LArPandoraShowerAlg::SpacePointPosition(sp) - vertex;

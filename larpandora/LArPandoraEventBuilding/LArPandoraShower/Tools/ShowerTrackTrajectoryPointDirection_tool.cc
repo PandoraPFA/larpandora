@@ -69,8 +69,8 @@ namespace ShowerRecoTools {
     fUsePositonInfo(pset.get<bool>("UsePositonInfo")),
     fTrajPoint(pset.get<int>("TrajPoint")),
     fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
-    fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPosition")),
-    fShowerDirectionOutputLabel(pset.get<std::string>("ShowerDirection"))
+    fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
+    fShowerDirectionOutputLabel(pset.get<std::string>("ShowerDirectionOutputLabel"))
   {
   }
 

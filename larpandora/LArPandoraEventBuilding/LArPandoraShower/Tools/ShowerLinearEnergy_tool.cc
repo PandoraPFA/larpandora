@@ -69,7 +69,7 @@ namespace ShowerRecoTools {
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fGradients(pset.get<std::vector<double> >("Gradients")),
     fIntercepts(pset.get<std::vector<double> >("Intercepts")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fShowerEnergyOutputLabel(pset.get<std::string>("ShowerEnergyOutputLabel")),
     fShowerBestPlaneOutputLabel(pset.get<std::string>("ShowerBestPlaneOutputLabel")),
     detprop(lar::providerFrom<detinfo::DetectorPropertiesService>())

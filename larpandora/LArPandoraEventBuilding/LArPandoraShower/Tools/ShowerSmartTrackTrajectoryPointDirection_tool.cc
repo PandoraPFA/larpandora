@@ -61,7 +61,7 @@ namespace ShowerRecoTools {
 
       std::string fInitialTrackInputLabel;
       std::string fShowerStartPositionInputLabel;
-      std::string fShowerDirectionOuputLabel;
+      std::string fShowerDirectionOutputLabel;
   };
 
 
@@ -74,7 +74,7 @@ namespace ShowerRecoTools {
     fAngleCut(pset.get<float>("AngleCut")),
     fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
-    fShowerDirectionOuputLabel(pset.get<std::string>("ShowerDirectionOuputLabel"))
+    fShowerDirectionOutputLabel(pset.get<std::string>("ShowerDirectionOutputLabel"))
 
   {
   }
@@ -298,7 +298,7 @@ namespace ShowerRecoTools {
     //Set the direction.
     TVector3 Direction = {Direction_vec.X(), Direction_vec.Y(),Direction_vec.Z()};
     TVector3 DirectionErr = {-999,-999,-999};
-    ShowerEleHolder.SetElement(Direction,DirectionErr,fShowerDirectionOuputLabel);
+    ShowerEleHolder.SetElement(Direction,DirectionErr,fShowerDirectionOutputLabel);
     return 0;
   }
 }

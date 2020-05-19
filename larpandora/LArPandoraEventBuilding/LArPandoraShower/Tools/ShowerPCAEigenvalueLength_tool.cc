@@ -39,8 +39,8 @@ namespace ShowerRecoTools {
 
       art::InputTag fPFParticleModuleLabel;
       std::string fShowerPCAInputLabel;
-      std::string fShowerLengthOuputLabel;
-      std::string fShowerOpeningAngleOuputLabel;
+      std::string fShowerLengthOutputLabel;
+      std::string fShowerOpeningAngleOutputLabel;
       float fNSigma;
   };
 
@@ -49,8 +49,8 @@ namespace ShowerRecoTools {
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fShowerPCAInputLabel(pset.get<std::string>("ShowerPCAInputLabel")),
-    fShowerLengthOuputLabel(pset.get<std::string>("ShowerLengthOuputLabel")),
-    fShowerOpeningAngleOuputLabel(pset.get<std::string>("ShowerOpeningAngleOuputLabel")),
+    fShowerLengthOutputLabel(pset.get<std::string>("ShowerLengthOutputLabel")),
+    fShowerOpeningAngleOutputLabel(pset.get<std::string>("ShowerOpeningAngleOutputLabel")),
     fNSigma(pset.get<float>("NSigma"))
   {
   }
@@ -89,8 +89,8 @@ namespace ShowerRecoTools {
     double ShowerAngleError = -9999;
 
     // Fill the shower element holder
-    ShowerEleHolder.SetElement(ShowerLength, ShowerLengthError, fShowerLengthOuputLabel);
-    ShowerEleHolder.SetElement(ShowerAngle, ShowerAngleError, fShowerOpeningAngleOuputLabel);
+    ShowerEleHolder.SetElement(ShowerLength, ShowerLengthError, fShowerLengthOutputLabel);
+    ShowerEleHolder.SetElement(ShowerAngle, ShowerAngleError, fShowerOpeningAngleOutputLabel);
 
     return 0;
   }

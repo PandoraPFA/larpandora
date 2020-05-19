@@ -72,7 +72,7 @@ namespace ShowerRecoTools {
 
       std::string fShowerStartPositionInputLabel;
       std::string fTrueParticleInputLabel;
-      std::string fShowerDirectionOuputLabel;
+      std::string fShowerDirectionOutputLabel;
 
   };
 
@@ -80,13 +80,13 @@ namespace ShowerRecoTools {
   ShowerDirectionCheater::ShowerDirectionCheater(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fLArPandoraShowerCheatingAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg")),
-    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel","")),
+    fPFParticleModuleLabel(pset.get<art::InputTag>("PFParticleModuleLabel")),
     fNSegments(pset.get<float>("NSegments")),
     fRMSFlip(pset.get<bool>("RMSFlip")),
     fVertexFlip(pset.get<bool>("VertexFlip")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fTrueParticleInputLabel(pset.get<std::string>("TrueParticleInputLabel")),
-    fShowerDirectionOuputLabel(pset.get<std::string>("ShowerDirectionOuputLabel"))
+    fShowerDirectionOutputLabel(pset.get<std::string>("ShowerDirectionOutputLabel"))
   {
     if (vertexDotProduct||rmsGradient){
       Tree = tfs->make<TTree>("DebugTreeDirCheater", "DebugTree from shower direction cheater");
@@ -156,7 +156,7 @@ namespace ShowerRecoTools {
     trueDir = trueDir.Unit(); // TODO: Can probably remove?
 
     TVector3 trueDirErr = {-999,-999,-999};
-    ShowerEleHolder.SetElement(trueDir,trueDirErr,fShowerDirectionOuputLabel);
+    ShowerEleHolder.SetElement(trueDir,trueDirErr,fShowerDirectionOutputLabel);
 
     if (fRMSFlip || fVertexFlip){
       //Get the SpacePoints and hits

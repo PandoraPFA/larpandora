@@ -95,10 +95,9 @@ class shower::LArPandoraShowerAlg {
 
   private:
 
-    bool fUseCollectionOnly;
-    art::InputTag                           fHitModuleLabel;
-    art::InputTag                           fPFParticleModuleLabel;
     detinfo::DetectorProperties const*      fDetProp = nullptr;
+    bool fUseCollectionOnly;
+    art::InputTag                           fPFParticleModuleLabel;
     art::ServiceHandle<geo::Geometry const> fGeom;
     art::ServiceHandle<art::TFileService>   tfs;
 

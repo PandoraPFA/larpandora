@@ -78,7 +78,8 @@ namespace ShowerRecoTools{
     // Get the assocated pfParicle vertex PFParticles
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
     if (!Event.getByLabel(fPFParticleModuleLabel, pfpHandle)){
-      throw cet::exception("ShowerPCADirection") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
+      std::cout<<"fPFParticleModuleLabel: "<<fPFParticleModuleLabel<<std::endl;
+      throw cet::exception("ShowerPFPVertexStartPosition") << "Could not get the pandora pf particles. Something is not cofingured coreectly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
