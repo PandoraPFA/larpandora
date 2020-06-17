@@ -257,9 +257,12 @@ namespace ShowerRecoTools{
       TVector3 TrajDirection = {TrajDirection_vec.X(),TrajDirection_vec.Y(),TrajDirection_vec.Z()};
 
       //If the direction is in the same direction as the wires within some tolerance the hit finding struggles. Let remove these.
+      // Note that we project in the YZ plane to make sure we are not cutting on
+      // the angle into the wire planes, that should be done by the shaping time cut
+      TVector3 TrajDirectionYZ = {0,TrajDirection_vec.Y(),TrajDirection_vec.Z()};
       TVector3 PlaneDirection = fGeom->Plane(planeid).GetIncreasingWireDirection();
 
-      if(TMath::Abs((TMath::Pi()/2 - TrajDirection.Angle(PlaneDirection))) < fMinAngleToWire){
+      if(TMath::Abs((TMath::Pi()/2 - TrajDirectionYZ.Angle(PlaneDirection))) < fMinAngleToWire){
         if (fVerbose)
           mf::LogWarning("ShowerSlidingStandardCalodEdx")
             << "remove from angle cut" << std::endl;
