@@ -287,7 +287,11 @@ namespace ShowerRecoTools {
     float yz = 0;
 
     //Get the Shower Centre
-    ShowerCentre = IShowerTool::GetLArPandoraShowerAlg().ShowerCentre(sps, fmh, TotalCharge);
+    if (fChargeWeighted){
+      ShowerCentre = IShowerTool::GetLArPandoraShowerAlg().ShowerCentre(sps, fmh, TotalCharge);
+    } else {
+      ShowerCentre = IShowerTool::GetLArPandoraShowerAlg().ShowerCentre(sps);
+    }
 
     //Normalise the spacepoints, charge weight and add to the PCA.
     for(auto& sp: sps){
