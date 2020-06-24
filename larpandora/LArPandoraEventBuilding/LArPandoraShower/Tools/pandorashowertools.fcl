@@ -19,7 +19,7 @@ showerpcadirection:{
     #this is the number of segements to split the shower into.
     UseStartPosition: true #The direction of the PCA is in the direction of
     #(Shower Center - Start Position)
-    ChargeWeighted:   true #Apply a charge weighting in the PCA.
+    ChargeWeighted:   false #Apply a charge weighting in the PCA.
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     ShowerDirectionOutputLabel: "ShowerDirection"
     ShowerCentreOutputLabel: "ShowerCentre"
