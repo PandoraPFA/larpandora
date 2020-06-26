@@ -65,7 +65,7 @@ namespace ShowerRecoTools {
     //Get the start position
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerTrajPointdEdx") << "Start position not set, returning "<< std::endl;
+        mf::LogError("ShowerLengthPercentile") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     //Only consider hits in the same tpcs as the vertex.
