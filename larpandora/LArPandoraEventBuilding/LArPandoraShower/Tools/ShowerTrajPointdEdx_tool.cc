@@ -329,7 +329,7 @@ namespace ShowerRecoTools{
       }
     }
 
-    if (max_hits = -999){
+    if (max_hits == -999){
       if (fVerbose)
         mf::LogError("ShowerTrajPointdEdx") << "No hits in any plane, returning "<< std::endl;
       return 1;

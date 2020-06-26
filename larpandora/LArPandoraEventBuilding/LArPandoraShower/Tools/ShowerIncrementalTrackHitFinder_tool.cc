@@ -159,7 +159,6 @@ namespace ShowerRecoTools {
     {
       if(fStartFitSize == 0){
         throw cet::exception("ShowerIncrementalTrackHitFinder") << "We cannot make a track if you don't gives us at leats one hit. Change fStartFitSize please to something sensible";
-        return 1;
       }
     }
 
