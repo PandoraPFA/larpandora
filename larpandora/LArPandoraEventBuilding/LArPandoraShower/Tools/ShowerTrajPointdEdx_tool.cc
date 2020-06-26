@@ -329,6 +329,12 @@ namespace ShowerRecoTools{
       }
     }
 
+    if (max_hits = -999){
+      if (fVerbose)
+        mf::LogError("ShowerTrajPointdEdx") << "No hits in any plane, returning "<< std::endl;
+      return 1;
+    }
+
 
     for(auto& dEdx_plane: dEdx_vec){
       FinddEdxLength(dEdx_plane.second, dEdx_vec_cut[dEdx_plane.first]);
