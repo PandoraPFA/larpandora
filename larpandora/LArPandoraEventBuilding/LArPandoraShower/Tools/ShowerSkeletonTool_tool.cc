@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerGenericTool                                       ###
+//### Name:        ShowerSkeletonTool                                       ###
 //### Author:      You                                                     ###
 //### Date:        13.05.19                                                ###
 //### Description: Generic form of the shower tools                        ###
@@ -21,11 +21,11 @@
 namespace ShowerRecoTools {
 
 
-  class ShowerGenericTool: public IShowerTool {
+  class ShowerSkeletonTool: public IShowerTool {
 
     public:
 
-      ShowerGenericTool(const fhicl::ParameterSet& pset);
+      ShowerSkeletonTool(const fhicl::ParameterSet& pset);
 
       //Generic Direction Finder
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -45,23 +45,23 @@ namespace ShowerRecoTools {
   };
 
 
-  ShowerGenericTool::ShowerGenericTool(const fhicl::ParameterSet& pset) :
+  ShowerSkeletonTool::ShowerSkeletonTool(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose"))
   {
   }
 
-  int ShowerGenericTool::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerSkeletonTool::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
     return 0;
   }
 
-  int ShowerGenericTool::AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr, art::Event& Event,
+  int ShowerSkeletonTool::AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr, art::Event& Event,
       reco::shower::ShowerElementHolder& ShowerEleHolder
       ){
     return 0;
   }
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerGenericTool)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerSkeletonTool)

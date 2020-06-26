@@ -35,13 +35,14 @@ showerlinearenergy:{
     #energy, in the Plane0 plane. in MeV/ADC.
     Intercepts:  []     #Intercept of the linear graph of the total charge to total
     ShowerEnergyOutputLabel: "ShowerEnergy"
-    ShowerBestPlaneOutputLabel: "ShowerOverallBestPlane"
+    ShowerBestPlaneOutputLabel: "ShowerBestPlane"
 }
 
- showerrecoenergyfromnumelectrons:{
-     tool_type:  ShowerRecoEnergyfromNumElectrons
+showernumelectronsenergy:{
+     tool_type:  ShowerNumElectronsEnergy
      BaseTools: @local::showerbasetools
      CalorimetryAlg: @nil
+     RecombinationFactor: 0.64
      # PFParticleLabel: "pandora"
  }
 
@@ -81,8 +82,8 @@ showerpandoraslidingfittrackfinder:{
 }
 
 
-shower3Dtrackhitfinder:{
-    tool_type: Shower3DTrackHitFinder
+shower3Dcylindertrackhitfinder:{
+    tool_type: Shower3DCylinderTrackHitFinder
     BaseTools: @local::showerbasetools
 
     # PFParticleLabel: "pandora"
@@ -92,10 +93,7 @@ shower3Dtrackhitfinder:{
     #direction of the shower in cm
     ForwardHitsOnly:       true   #Don't use hits behind the vertex.
     DebugEVD:              false
-    AllowDyanmicLength:    false  #If the Track legth is saved use that instead of
     #MaxProjectionDist
-    InitialTrackLengthInputLabel: "InitialTrackLength"
-    ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     ShowerDirectionInputLabel: "ShowerDirection"
     InitialTrackHitsOutputLabel: "InitialTrackHits"
@@ -110,33 +108,19 @@ showerpfpvertexstartposition:{
     ShowerDirectionInputLabel: "ShowerDirection"
 }
 
-showerstandardcalodedx:{
-    tool_type: ShowerStandardCalodEdx
+showerunidirectiondedx:{
+    tool_type: ShowerUnidirectiondEdx
     BaseTools: @local::showerbasetools
 
     CalorimetryAlg:  @nil
     MaxHitPlane:     true #Set the best planes as the one with the most hits
     MissFirstPoint:  true #Do not use any hits from the first wire
     dEdxTrackLength: 3    #Max length from a hit can be to the start point in cm.
-    EnergyLengthConst:    0.1   #Linear dimensionless value to vary the energy
-    ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     InitialTrackHitsInputLabel: "InitialTrackHits"
     ShowerDirectionInputLabel: "ShowerDirection"
     ShowerdEdxOutputLabel: "ShowerdEdx"
     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
-
-    }
-
-showerlmastandardcalodedx:{
-    tool_type: ShowerLMAStandardCalodEdx
-    BaseTools: @local::showerbasetools
-
-    CalorimetryAlg:      @nil
-    MaxHitPlane:         true #Set the best planes as the one with the most hits
-    MissFirstPoint:      true #Do not use any hits from the first wire
-    dEdxTrackLength:     3    #Max length from a hit can be to the start point in cm.
-    MovingAveragePoints: 3
 }
 
 showertrackhitdirection:{
@@ -176,8 +160,8 @@ showertrackdirection:{
     DebugEVD:         false
 }
 
-showertracktrajectorypointdirection: {
-    tool_type: ShowerTrackTrajectoryPointDirection
+showertracktrajpointdirection: {
+    tool_type: ShowerTrackTrajPointDirection
     BaseTools: @local::showerbasetools
 
     TrajPoint:         1   #Trajectory point to get the direction from.
@@ -191,8 +175,8 @@ showertracktrajectorypointdirection: {
     ShowerDirectionOutputLabel: "ShowerDirection"
     }
 
-showersmarttracktrajectorypointdirection: {
-    tool_type: ShowerSmartTrackTrajectoryPointDirection
+showertrackcolineartrajpointdirection: {
+    tool_type: ShowerTrackColinearTrajPointDirection
     BaseTools: @local::showerbasetools
     UsePandoraVertex:    false  #Direction from point defined as
     #(Position of traj point - Vertex) rather than
@@ -225,7 +209,6 @@ showertrackpcadirection:{
     InitialTrackSpacePointsInputLabel: "InitialTrackSpacePoints"
     ShowerDirectionOutputLabel: "ShowerDirection"
 }
-
 
 showerstartpositioncheater:{
     tool_type:               ShowerStartPositionCheater
@@ -269,7 +252,7 @@ showertrackfindercheater:{
 }
 
 showertracktrajtospacepoint:{
-    tool_type: ShowerTrackTrajToSpacepoint
+    tool_type: ShowerTrackTrajToSpacePoint
     BaseTools: @local::showerbasetools
     # PFParticleLabel: "pandora"
     MaxDist:               1  #Max Distance a trajectory point can be away
@@ -281,8 +264,8 @@ showertracktrajtospacepoint:{
     InitialTrackSpacePointsInputTag: "InitialTrackSpacePoints"
 }
 
-showerslidingstandardcalodedx:{
-    tool_type: ShowerSlidingStandardCalodEdx
+showertrajpointdedx:{
+    tool_type: ShowerTrajPointdEdx
     BaseTools: @local::showerbasetools
     CalorimetryAlg: @nil
     MinDistCutOff:         2    #Distance in wires a hit has to be from the start
@@ -299,7 +282,6 @@ showerslidingstandardcalodedx:{
     CutStartPosition:     false #Remove hits using MinDistCutOff from the vertex as well
     UseMedian:            true  #Use the median dEdx rather the mean.
     # PFParticleLabel: "pandora"
-    ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     InitialTrackSpacePointsInputLabel: "InitialTrackSpacePoints"
     InitialTrackInputLabel: "InitialTrack"
@@ -308,8 +290,8 @@ showerslidingstandardcalodedx:{
     ShowerdEdxVecOutputLabel: "ShowerdEdxVec"
 }
 
-showerresidualtrackhitfinder:{
-    tool_type: ShowerResidualTrackHitFinder
+showerincrementaltrackhitfinder:{
+    tool_type: ShowerIncrementalTrackHitFinder
     BaseTools: @local::showerbasetools
     # PFParticleLabel: "pandora"
     UseShowerDirection:    true
@@ -323,7 +305,6 @@ showerresidualtrackhitfinder:{
     MakeTrackSeed:         true
     StartDistanceCut:      0
     DistanceCut:           999
-    ShowerEnergyInputLabel: "ShowerEnergy"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     InitialTrackHitsOutputLabel: "InitialTrackHits"
     InitialTrackSpacePointsOutputLabel: "InitialTrackSpacePoints"
@@ -379,13 +360,6 @@ showerpcaeigenvaluelength:{
     NSigma: 3
 }
 
-showerbestplanedecision:{
-    tool_type: ShowerBestPlaneDesicion
-    BaseTools: @local::showerbasetools
-    InitialTrackBestPlaneInputLabel: "ShowerInitialTrackBestPlane"
-    OverallBestPlaneInputLabel:      "ShowerOverallBestPlane"
-    BestPlaneOutputLabel:            "ShowerBestPlane"
-}
 
 showerdirectiontopologydecision:{
     tool_type: ShowerDirectionTopologyDecision

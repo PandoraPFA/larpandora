@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        Shower3DTrackHitFinder                                  ###
+//### Name:        Shower3DCylinderTrackHitFinder                                  ###
 //### Author:      Ed Tyley                                                ###
 //### Date:        14.06.19                                                ###
 //### Description: Tool for finding the initial shower track using 3D      ###
@@ -31,12 +31,12 @@
 
 namespace ShowerRecoTools{
 
-  class Shower3DTrackHitFinder:IShowerTool {
+  class Shower3DCylinderTrackHitFinder:IShowerTool {
     public:
 
-      Shower3DTrackHitFinder(const fhicl::ParameterSet& pset);
+      Shower3DCylinderTrackHitFinder(const fhicl::ParameterSet& pset);
 
-      ~Shower3DTrackHitFinder();
+      ~Shower3DCylinderTrackHitFinder();
 
       //Generic Track Finder
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -52,9 +52,7 @@ namespace ShowerRecoTools{
 
       //Fcl paramters
       float fMaxProjectionDist;    //Maximum projection along shower direction.
-      float MaxProjectionDist;     //length of cylinder
       float fMaxPerpendicularDist; //Maximum perpendicular distance, radius of cylinder
-      float MaxPerpendicularDist;
       bool  fForwardHitsOnly;      //Only take hits downstream of shower vertex
       //(projection>0)
 
@@ -62,7 +60,6 @@ namespace ShowerRecoTools{
       int           fVerbose;
 
       std::string fInitialTrackLengthInputLabel;
-      std::string fShowerEnergyInputLabel;
       std::string fShowerStartPositionInputLabel;
       std::string fInitialTrackHitsOutputLabel;
       std::string fInitialTrackSpacePointsOutputLabel;
@@ -70,7 +67,7 @@ namespace ShowerRecoTools{
   };
 
 
-  Shower3DTrackHitFinder::Shower3DTrackHitFinder(const fhicl::ParameterSet& pset) :
+  Shower3DCylinderTrackHitFinder::Shower3DCylinderTrackHitFinder(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fMaxProjectionDist(pset.get<float>("MaxProjectionDist")),
     fMaxPerpendicularDist(pset.get<float>("MaxPerpendicularDist")),
@@ -78,7 +75,6 @@ namespace ShowerRecoTools{
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
     fInitialTrackLengthInputLabel(pset.get<std::string>("InitialTrackLengthInputLabel")),
-    fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackHitsOutputLabel(pset.get<std::string>("InitialTrackHitsOutputLabel")),
     fInitialTrackSpacePointsOutputLabel(pset.get<std::string>("InitialTrackSpacePointsOutputLabel")),
@@ -86,25 +82,22 @@ namespace ShowerRecoTools{
   {
   }
 
-  Shower3DTrackHitFinder::~Shower3DTrackHitFinder()
+  Shower3DCylinderTrackHitFinder::~Shower3DCylinderTrackHitFinder()
   {
   }
 
-  int Shower3DTrackHitFinder::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int Shower3DCylinderTrackHitFinder::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
-
-    MaxProjectionDist    = fMaxProjectionDist;
-    MaxPerpendicularDist = fMaxPerpendicularDist;
 
     //This is all based on the shower vertex being known. If it is not lets not do the track
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
       if (fVerbose)
-        mf::LogError("Shower3DTrackHitFinder") << "Start position not set, returning "<< std::endl;
+        mf::LogError("Shower3DCylinderTrackHitFinder") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement("ShowerDirection")){
       if (fVerbose)
-        mf::LogError("Shower3DTrackHitFinder") << "Direction not set, returning "<< std::endl;
+        mf::LogError("Shower3DCylinderTrackHitFinder") << "Direction not set, returning "<< std::endl;
       return 1;
     }
 
@@ -117,7 +110,7 @@ namespace ShowerRecoTools{
     // Get the assocated pfParicle Handle
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
     if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
-      throw cet::exception("Shower3DTrackHitFinder") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
+      throw cet::exception("Shower3DCylinderTrackHitFinder") << "Could not get the pandora pf particles. Something is not cofingured correctly Please give the correct pandoa module label. Stopping";
       return 1;
     }
 
@@ -125,14 +118,14 @@ namespace ShowerRecoTools{
     art::FindManyP<recob::SpacePoint>& fmspp = ShowerEleHolder.GetFindManyP<recob::SpacePoint>(
         pfpHandle, Event, fPFParticleLabel);
     if (!fmspp.isValid()){
-      throw cet::exception("Shower3DTrackHitFinder") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
+      throw cet::exception("Shower3DCylinderTrackHitFinder") << "Trying to get the spacepoint and failed. Something is not configured correctly. Stopping ";
       return 1;
     }
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
     if (!Event.getByLabel(fPFParticleLabel, spHandle)){
-      throw cet::exception("Shower3DTrackHitFinder") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
+      throw cet::exception("Shower3DCylinderTrackHitFinder") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
@@ -142,7 +135,7 @@ namespace ShowerRecoTools{
 
     // art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleLabel);
     if(!fmhsp.isValid()){
-      throw cet::exception("Shower3DTrackHitFinder") << "Spacepoint and hit association not valid. Stopping.";
+      throw cet::exception("Shower3DCylinderTrackHitFinder") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
     }
 
@@ -152,7 +145,7 @@ namespace ShowerRecoTools{
     //We cannot progress with no spacepoints.
     if(spacePoints.size() == 0){
       if (fVerbose)
-        mf::LogError("Shower3DTrackHitFinder") << "No space points, returning "<< std::endl;
+        mf::LogError("Shower3DCylinderTrackHitFinder") << "No space points, returning "<< std::endl;
       return 1;
     }
 
@@ -177,7 +170,7 @@ namespace ShowerRecoTools{
     return 0;
   }
 
-  std::vector<art::Ptr<recob::SpacePoint> > Shower3DTrackHitFinder::FindTrackSpacePoints(
+  std::vector<art::Ptr<recob::SpacePoint> > Shower3DCylinderTrackHitFinder::FindTrackSpacePoints(
       std::vector<art::Ptr<recob::SpacePoint> >& spacePoints, TVector3& showerStartPosition,
       TVector3& showerDirection){
 
@@ -195,7 +188,7 @@ namespace ShowerRecoTools{
       if (fForwardHitsOnly && proj<0)
         continue;
 
-      if (TMath::Abs(proj)<MaxProjectionDist && TMath::Abs(perp)<MaxPerpendicularDist)
+      if (TMath::Abs(proj)<fMaxProjectionDist && TMath::Abs(perp)<fMaxPerpendicularDist)
         trackSpacePoints.push_back(spacePoint);
     }
     return trackSpacePoints;
@@ -204,4 +197,4 @@ namespace ShowerRecoTools{
 }
 
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::Shower3DTrackHitFinder)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::Shower3DCylinderTrackHitFinder)

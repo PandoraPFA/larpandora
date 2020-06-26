@@ -64,7 +64,7 @@ namespace ShowerRecoTools {
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement("InitialTrack")){
       if (fVerbose)
-        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+        mf::LogError("SShowerTrackColinearTrajPointDirection")
           << "Initial track not set"<< std::endl;
       return 1;
     }
