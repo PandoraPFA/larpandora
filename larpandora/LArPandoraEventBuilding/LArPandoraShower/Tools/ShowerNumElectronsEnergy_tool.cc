@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerRecoEnergyfromNumElectrons                        ###
+//### Name:        ShowerNumElectronsEnergy                        ###
 //### Author:      Tom Ham                                                 ###
 //### Date:        01/04/2020                                              ###
 //### Description: Tool for finding the Energy of the shower by going      ###
@@ -36,13 +36,13 @@
 
 namespace ShowerRecoTools {
 
-  class ShowerRecoEnergyfromNumElectrons:IShowerTool {
+  class ShowerNumElectronsEnergy:IShowerTool {
 
     public:
 
-      ShowerRecoEnergyfromNumElectrons(const fhicl::ParameterSet& pset);
+      ShowerNumElectronsEnergy(const fhicl::ParameterSet& pset);
 
-      ~ShowerRecoEnergyfromNumElectrons();
+      ~ShowerNumElectronsEnergy();
 
       //Physics Function. Calculate the shower Energy.
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -64,6 +64,7 @@ namespace ShowerRecoTools {
 
       // Declare stuff
       double Energy = 0;
+      double fRecombinationFactor;
 
       // vec to store subrun #, event #, shower #, # of hits and energy
       std::vector<std::tuple<int, int, int, int, double>> n_hit_energy; // more useful when making plots
@@ -72,20 +73,21 @@ namespace ShowerRecoTools {
 
   };
 
-  ShowerRecoEnergyfromNumElectrons::ShowerRecoEnergyfromNumElectrons(const fhicl::ParameterSet& pset) :
+  ShowerNumElectronsEnergy::ShowerNumElectronsEnergy(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
     detprop(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-    fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg"))
+    fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg")),
+    fRecombinationFactor(pset.get<double>("RecombinationFactor"))
   {
   }
 
-  ShowerRecoEnergyfromNumElectrons::~ShowerRecoEnergyfromNumElectrons()
+  ShowerNumElectronsEnergy::~ShowerNumElectronsEnergy()
   {
   }
 
-  int ShowerRecoEnergyfromNumElectrons::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerNumElectronsEnergy::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event,
       reco::shower::ShowerElementHolder& ShowerEleHolder
       ){
@@ -105,7 +107,7 @@ namespace ShowerRecoTools {
     //ShowerEleHolder.PrintElements();
 
     //Holder for the final product
-    std::vector<double> ShowerRecoEnergyfromNumElectrons;
+    std::vector<double> ShowerNumElectronsEnergy;
 
     // Get the number of planes
     unsigned int numPlanes = fGeom->Nplanes();
@@ -113,7 +115,7 @@ namespace ShowerRecoTools {
     // Get the assocated pfParicle vertex PFParticles
     art::Handle<std::vector<recob::PFParticle> > pfpHandle;
     if (!Event.getByLabel(fPFParticleLabel, pfpHandle)){
-      throw cet::exception("ShowerRecoEnergyfromNumElectrons") << "Could not get the pandora pf particles. Something is not configured correctly Please give the correct pandora module label. Stopping";
+      throw cet::exception("ShowerNumElectronsEnergy") << "Could not get the pandora pf particles. Something is not configured correctly Please give the correct pandora module label. Stopping";
       return 1;
     }
 
@@ -122,7 +124,7 @@ namespace ShowerRecoTools {
     //Get the clusters
     art::Handle<std::vector<recob::Cluster> > clusHandle;
     if (!Event.getByLabel(fPFParticleLabel, clusHandle)){
-      throw cet::exception("ShowerRecoEnergyfromNumElectrons") << "Could not get the pandora clusters. Something is not configured correctly Please give the correct pandora module label. Stopping";
+      throw cet::exception("ShowerNumElectronsEnergy") << "Could not get the pandora clusters. Something is not configured correctly Please give the correct pandora module label. Stopping";
       return 1;
     }
     art::FindManyP<recob::Cluster>& fmc = ShowerEleHolder.GetFindManyP<recob::Cluster>(
@@ -146,7 +148,7 @@ namespace ShowerRecoTools {
       std::vector<art::Ptr<recob::Hit> > hits = fmhc.at(cluster.key());
       if(hits.size() == 0){
         if (fVerbose)
-          mf::LogWarning("ShowerRecoEnergyfromNumElectrons") << "No hit for the cluster. This suggest the find many is wrong."<< std::endl;
+          mf::LogWarning("ShowerNumElectronsEnergy") << "No hit for the cluster. This suggest the find many is wrong."<< std::endl;
         continue;
       }
 
@@ -186,7 +188,7 @@ namespace ShowerRecoTools {
       try{
         Energy = view_energies.at(plane);
         if (Energy<0){
-          mf::LogWarning("ShowerRecoEnergyfromNumElectrons") << "Negative shower energy: "<<Energy;
+          mf::LogWarning("ShowerNumElectronsEnergy") << "Negative shower energy: "<<Energy;
           Energy=-999;
         }
         if(plane == 2){
@@ -195,24 +197,24 @@ namespace ShowerRecoTools {
       }
 
       catch(...){
-        mf::LogWarning("ShowerRecoEnergyfromNumElectrons") <<"No energy calculation for plane "<<plane<<std::endl;
+        mf::LogWarning("ShowerNumElectronsEnergy") <<"No energy calculation for plane "<<plane<<std::endl;
         // if there's no calculation, set the energy to -999.
         Energy = -999;
         if(plane == 2){
           n_hit_energy.push_back(std::make_tuple(subRunN, EventN, showernum, hits.size(), Energy)); //save info for collection plane
         }
       }
-      ShowerRecoEnergyfromNumElectrons.push_back(Energy);
+      ShowerNumElectronsEnergy.push_back(Energy);
     }
 
-    if(ShowerRecoEnergyfromNumElectrons.size() == 0){
-      throw cet::exception("ShowerRecoEnergyfromNumElectrons") << "Energy Vector is empty";
+    if(ShowerNumElectronsEnergy.size() == 0){
+      throw cet::exception("ShowerNumElectronsEnergy") << "Energy Vector is empty";
       return 1;
     }
 
     std::vector<double> EnergyError = {-999,-999,-999};
 
-    ShowerEleHolder.SetElement(ShowerRecoEnergyfromNumElectrons,EnergyError,"ShowerEnergy");
+    ShowerEleHolder.SetElement(ShowerNumElectronsEnergy,EnergyError,"ShowerEnergy");
 
 
     bool write_to_file = false;
@@ -232,20 +234,19 @@ namespace ShowerRecoTools {
 
 
   // function to calculate the reco energy
-  double ShowerRecoEnergyfromNumElectrons::CalculateEnergy(std::vector<art::Ptr<recob::Hit> >& hits, geo::View_t& view){
+  double ShowerNumElectronsEnergy::CalculateEnergy(std::vector<art::Ptr<recob::Hit> >& hits, geo::View_t& view){
 
     double totalCharge = 0;
     double totalEnergy = 0;
     double correctedtotalCharge = 0;
     double nElectrons = 0;
-    double Recombination_factor = 0.64; //constant factor for every shower (study done by Ed)
 
     for (art::PtrVector<recob::Hit>::const_iterator hit = hits.begin(); hit != hits.end(); ++hit){
       totalCharge += (*hit)->Integral() * fCalorimetryAlg.LifetimeCorrection((*hit)->PeakTime()); // obtain charge and correct for lifetime
     }
 
     // correct charge due to recombination
-    correctedtotalCharge = totalCharge / Recombination_factor;
+    correctedtotalCharge = totalCharge / fRecombinationFactor;
     // calculate # of electrons and the corresponding energy
     nElectrons = fCalorimetryAlg.ElectronsFromADCArea(correctedtotalCharge, view);
     totalEnergy = (nElectrons / util::kGeVToElectrons) * 1000; // energy in MeV
@@ -256,6 +257,6 @@ namespace ShowerRecoTools {
 
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerRecoEnergyfromNumElectrons)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerNumElectronsEnergy)
 
 

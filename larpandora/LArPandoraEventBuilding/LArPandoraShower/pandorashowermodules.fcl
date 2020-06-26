@@ -6,15 +6,17 @@ legacy_pandoraModularShowerCreation: {
 
     module_type: "LArPandoraModularShowerCreation"
 
+    # Commented tools are the recommended default tools but they must be
+    # configured to use experiment specific calorimetry
     ShowerFinderTools: [
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
          @local::showerpcapropergationstartposition,
          @local::showerpcaeigenvaluelength,
-         @local::showerlinearenergy,
-         @local::shower3Dtrackhitfinder,
-         @local::showerpandoraslidingfittrackfinder,
-         @local::showerstandardcalodedx
+         # @local::showernumelectronsenergy,
+         @local::shower3Dcylindertrackhitfinder,
+         @local::showerpandoraslidingfittrackfinder
+         # @local::showerunidirectiondedx
     ]
 
     PFParticleLabel:    "pandora"
@@ -35,16 +37,19 @@ standard_pandoraModularShowerCreation: {
 
     module_type: "LArPandoraModularShowerCreation"
 
+    # Commented tools are the recommended default tools but they must be
+    # configured to use experiment specific calorimetry
     ShowerFinderTools: [
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
          @local::showerlengthpercentile,
-         @local::showerrecoenergyfromnumelectrons,
-         @local::showerresidualtrackhitfinder,
-         @local::showerslidingstandardcalodedx,
+         # @local::showernumelectronsenergy,
+         @local::showerincrementaltrackhitfinder,
+         # @local::showerunidirectiondedx
          @local::showerpandoraslidingfittrackfinder,
-         @local::showertracktrajectorypointdirection,
+         @local::showertracktrajpointdirection,
          @local::showerdirectiontopologydecision
+         # @local::showertrajpointdedx,
     ]
 
     PFParticleLabel:    "pandora"

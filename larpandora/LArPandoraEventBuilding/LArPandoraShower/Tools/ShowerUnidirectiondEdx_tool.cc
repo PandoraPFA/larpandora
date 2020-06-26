@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerStandardCalodEdx                                  ###
+//### Name:        ShowerUnidirectiondEdx                                  ###
 //### Author:      Ed Tyley                                                ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the dEdx of the start track of the     ###
@@ -30,13 +30,13 @@
 
 namespace ShowerRecoTools{
 
-  class ShowerStandardCalodEdx:IShowerTool {
+  class ShowerUnidirectiondEdx:IShowerTool {
 
     public:
 
-      ShowerStandardCalodEdx(const fhicl::ParameterSet& pset);
+      ShowerUnidirectiondEdx(const fhicl::ParameterSet& pset);
 
-      ~ShowerStandardCalodEdx();
+      ~ShowerUnidirectiondEdx();
 
       //Generic Direction Finder
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -63,7 +63,7 @@ namespace ShowerRecoTools{
   };
 
 
-  ShowerStandardCalodEdx::ShowerStandardCalodEdx(const fhicl::ParameterSet& pset) :
+  ShowerUnidirectiondEdx::ShowerUnidirectiondEdx(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg")),
     fVerbose(pset.get<int>("Verbose")),
@@ -78,11 +78,11 @@ namespace ShowerRecoTools{
   {
   }
 
-  ShowerStandardCalodEdx::~ShowerStandardCalodEdx()
+  ShowerUnidirectiondEdx::~ShowerUnidirectiondEdx()
   {
   }
 
-  int ShowerStandardCalodEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerUnidirectiondEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     dEdxTrackLength=fdEdxTrackLength;
@@ -90,17 +90,17 @@ namespace ShowerRecoTools{
     // Shower dEdx calculation
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerStandardCalodEdx") << "Start position not set, returning "<< std::endl;
+        mf::LogError("ShowerUnidirectiondEdx") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackHitsInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerStandardCalodEdx") << "Initial Track Hits not set returning"<< std::endl;
+        mf::LogError("ShowerUnidirectiondEdx") << "Initial Track Hits not set returning"<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fShowerDirectionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerStandardCalodEdx") << "Shower Direction not set"<< std::endl;
+        mf::LogError("ShowerUnidirectiondEdx") << "Shower Direction not set"<< std::endl;
       return 1;
     }
 
@@ -110,7 +110,7 @@ namespace ShowerRecoTools{
 
     if(trackhits.size() == 0){
       if (fVerbose)
-        mf::LogWarning("ShowerStandardCalodEdx") << "Not Hits in the initial track" << std::endl;
+        mf::LogWarning("ShowerUnidirectiondEdx") << "Not Hits in the initial track" << std::endl;
       return 0;
     }
 
@@ -211,7 +211,7 @@ namespace ShowerRecoTools{
           dEdxVec.push_back(dEdx);
         }
         else{
-          throw cet::exception("ShowerStandardCalodEdx") << "pitch is 0. I can't think how it is 0? Stopping so I can tell you" << std::endl;
+          throw cet::exception("ShowerUnidirectiondEdx") << "pitch is 0. I can't think how it is 0? Stopping so I can tell you" << std::endl;
         }
       }else { // if not (trackPlaneHits.size())
         dEdxVec.push_back(-999);
@@ -230,7 +230,7 @@ namespace ShowerRecoTools{
     }
 
     if (bestPlane==-999){
-      throw cet::exception("ShowerStandardCalodEdx") << "No best plane set";
+      throw cet::exception("ShowerUnidirectiondEdx") << "No best plane set";
       return 1;
     } else {
       ShowerEleHolder.SetElement(bestPlane,fShowerBestPlaneOutputLabel);
@@ -241,5 +241,5 @@ namespace ShowerRecoTools{
   }
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerStandardCalodEdx)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerUnidirectiondEdx)
 

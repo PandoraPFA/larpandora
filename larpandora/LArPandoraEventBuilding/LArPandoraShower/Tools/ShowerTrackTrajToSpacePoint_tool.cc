@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerTrackTrajToSpacepoint                             ###
+//### Name:        ShowerTrackTrajToSpacePoint                             ###
 //### Author:      Dominic Barker                                          ###
 //### Date:        01.10.19                                                ###
 //### Description: Tool to associate the initial track trajectory points   ###
@@ -25,13 +25,13 @@
 namespace ShowerRecoTools {
 
 
-  class ShowerTrackTrajToSpacepoint: public IShowerTool {
+  class ShowerTrackTrajToSpacePoint: public IShowerTool {
 
     public:
 
-      ShowerTrackTrajToSpacepoint(const fhicl::ParameterSet& pset);
+      ShowerTrackTrajToSpacePoint(const fhicl::ParameterSet& pset);
 
-      ~ShowerTrackTrajToSpacepoint();
+      ~ShowerTrackTrajToSpacePoint();
 
       //Match trajectory points to the spacepoints
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -55,7 +55,7 @@ namespace ShowerRecoTools {
   };
 
 
-  ShowerTrackTrajToSpacepoint::ShowerTrackTrajToSpacepoint(const fhicl::ParameterSet& pset)
+  ShowerTrackTrajToSpacePoint::ShowerTrackTrajToSpacePoint(const fhicl::ParameterSet& pset)
     : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fMaxDist(pset.get<float>("MaxDist")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
@@ -68,25 +68,25 @@ namespace ShowerRecoTools {
   {
   }
 
-  ShowerTrackTrajToSpacepoint::~ShowerTrackTrajToSpacepoint()
+  ShowerTrackTrajToSpacePoint::~ShowerTrackTrajToSpacePoint()
   {
   }
 
-  int ShowerTrackTrajToSpacepoint::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerTrackTrajToSpacePoint::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event,
       reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputTag)){
       if (fVerbose)
-        mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track not set"<< std::endl;
+        mf::LogError("ShowerTrackTrajToSpacePoint") << "Initial track not set"<< std::endl;
       return 0;
     }
 
     //Check the start position is set.
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputTag)){
       if (fVerbose)
-        mf::LogError("ShowerTrackTrajToSpacepoint") << "Start position not set, returning "<< std::endl;
+        mf::LogError("ShowerTrackTrajToSpacePoint") << "Start position not set, returning "<< std::endl;
       return 0;
     }
 
@@ -94,7 +94,7 @@ namespace ShowerRecoTools {
     //Check the Track Hits has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackSpacePointsInputTag)){
       if (fVerbose)
-        mf::LogError("ShowerTrackTrajToSpacepoint") << "Initial track spacepoints not set"<< std::endl;
+        mf::LogError("ShowerTrackTrajToSpacePoint") << "Initial track spacepoints not set"<< std::endl;
       return 0;
     }
 
@@ -155,14 +155,14 @@ namespace ShowerRecoTools {
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
     if (!Event.getByLabel(fPFParticleLabel, spHandle)){
-      throw cet::exception("ShowerTrackTrajToSpacepoint") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
+      throw cet::exception("ShowerTrackTrajToSpacePoint") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
     // Get the hits associated with the space points
     art::FindOneP<recob::Hit> fohsp(spHandle, Event, fPFParticleLabel);
     if(!fohsp.isValid()){
-      throw cet::exception("ShowerTrackTrajToSpacepoint") << "Spacepoint and hit association not valid. Stopping.";
+      throw cet::exception("ShowerTrackTrajToSpacePoint") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
     }
 
@@ -183,5 +183,5 @@ namespace ShowerRecoTools {
 
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerTrackTrajToSpacepoint)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerTrackTrajToSpacePoint)
 

@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerSmartTrackTrajectoryPointDirection                ###
+//### Name:        ShowerTrackColinearTrajPointDirection                ###
 //### Author:      Dominic Barker                                          ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the shower direction using the         ###
@@ -29,13 +29,13 @@
 namespace ShowerRecoTools {
 
 
-  class ShowerSmartTrackTrajectoryPointDirection:IShowerTool {
+  class ShowerTrackColinearTrajPointDirection:IShowerTool {
 
     public:
 
-      ShowerSmartTrackTrajectoryPointDirection(const fhicl::ParameterSet& pset);
+      ShowerTrackColinearTrajPointDirection(const fhicl::ParameterSet& pset);
 
-      ~ShowerSmartTrackTrajectoryPointDirection();
+      ~ShowerTrackColinearTrajPointDirection();
 
       //Calculate the direction from the inital track.
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -66,7 +66,7 @@ namespace ShowerRecoTools {
   };
 
 
-  ShowerSmartTrackTrajectoryPointDirection::ShowerSmartTrackTrajectoryPointDirection(const fhicl::ParameterSet& pset) :
+  ShowerTrackColinearTrajPointDirection::ShowerTrackColinearTrajPointDirection(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fVerbose(pset.get<int>("Verbose")),
     fUsePandoraVertex(pset.get<bool>("UsePandoraVertex")),
@@ -81,16 +81,16 @@ namespace ShowerRecoTools {
   {
   }
 
-  ShowerSmartTrackTrajectoryPointDirection::~ShowerSmartTrackTrajectoryPointDirection()
+  ShowerTrackColinearTrajPointDirection::~ShowerTrackColinearTrajPointDirection()
   {
   }
 
-  int ShowerSmartTrackTrajectoryPointDirection::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle, art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
+  int ShowerTrackColinearTrajPointDirection::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle, art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
 
     //Check the Track has been defined
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+        mf::LogError("ShowerTrackColinearTrajPointDirection")
           << "Initial track not set"<< std::endl;
       return 1;
     }
@@ -100,7 +100,7 @@ namespace ShowerRecoTools {
     //Smartly choose the which trajectory point to look at by ignoring the smush of hits at the vertex.
     if(InitialTrack.NumberTrajectoryPoints() == 1){
       if (fVerbose)
-        mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+        mf::LogError("ShowerTrackColinearTrajPointDirection")
           << "Not Enough trajectory points."<< std::endl;
       return 1;
     }
@@ -117,7 +117,7 @@ namespace ShowerRecoTools {
         //Check the Track has been defined
         if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
           if (fVerbose)
-            mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+            mf::LogError("ShowerTrackColinearTrajPointDirection")
               << "Shower start position not set"<< std::endl;
           return 1;
         }
@@ -166,7 +166,7 @@ namespace ShowerRecoTools {
 
         if(bail){
           if (fVerbose)
-            mf::LogError("ShowerSmartTrackTrajectoryPointDirection") << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
+            mf::LogError("ShowerTrackColinearTrajPointDirection") << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
           break;
         }
 
@@ -270,7 +270,7 @@ namespace ShowerRecoTools {
 
         if(bail){
           if (fVerbose)
-            mf::LogError("ShowerSmartTrackTrajectoryPointDirection")
+            mf::LogError("ShowerTrackColinearTrajPointDirection")
               << "Trajectory point not set as rest of the traj points are bogus."<< std::endl;
           break;
         }
@@ -312,5 +312,5 @@ namespace ShowerRecoTools {
 }
 
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerSmartTrackTrajectoryPointDirection)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerTrackColinearTrajPointDirection)
 

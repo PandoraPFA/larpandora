@@ -1,12 +1,12 @@
 //############################################################################
-//### Name:        ShowerSlidingStandardCalodEdx                           ###
+//### Name:        ShowerTrajPointdEdx                           ###
 //### Author:      Dominic Barker (dominic.barker@sheffield.ac.uk)         ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the dEdx of the start track of the     ###
 //###              shower using the standard calomitry module. This        ###
 //###              takes the sliding fit trajectory to make a 3D dEdx.     ###
 //###              This module is best used with the sliding linear fit    ###
-//###              and ShowerTrackTrajToSpacepoint                         ###
+//###              and ShowerTrackTrajToSpacePoint                         ###
 //############################################################################
 
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
@@ -38,13 +38,13 @@
 
 namespace ShowerRecoTools{
 
-  class ShowerSlidingStandardCalodEdx:IShowerTool {
+  class ShowerTrajPointdEdx:IShowerTool {
 
     public:
 
-      ShowerSlidingStandardCalodEdx(const fhicl::ParameterSet& pset);
+      ShowerTrajPointdEdx(const fhicl::ParameterSet& pset);
 
-      ~ShowerSlidingStandardCalodEdx();
+      ~ShowerTrajPointdEdx();
 
       //Physics Function. Calculate the dEdx.
       int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
@@ -80,7 +80,6 @@ namespace ShowerRecoTools{
       art::InputTag fPFParticleLabel;
       int           fVerbose;
 
-      std::string fShowerEnergyInputLabel;
       std::string fShowerStartPositionInputLabel;
       std::string fInitialTrackSpacePointsInputLabel;
       std::string fInitialTrackInputLabel;
@@ -90,7 +89,7 @@ namespace ShowerRecoTools{
   };
 
 
-  ShowerSlidingStandardCalodEdx::ShowerSlidingStandardCalodEdx(const fhicl::ParameterSet& pset) :
+  ShowerTrajPointdEdx::ShowerTrajPointdEdx(const fhicl::ParameterSet& pset) :
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fCalorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg")),
     fDetProp(lar::providerFrom<detinfo::DetectorPropertiesService>()),
@@ -104,7 +103,6 @@ namespace ShowerRecoTools{
     fCutStartPosition(pset.get<bool>("CutStartPosition")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
-    fShowerEnergyInputLabel(pset.get<std::string>("ShowerEnergyInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackSpacePointsInputLabel(pset.get<std::string>("InitialTrackSpacePointsInputLabel")),
     fInitialTrackInputLabel(pset.get<std::string>("InitialTrackInputLabel")),
@@ -114,11 +112,11 @@ namespace ShowerRecoTools{
   {
   }
 
-  ShowerSlidingStandardCalodEdx::~ShowerSlidingStandardCalodEdx()
+  ShowerTrajPointdEdx::~ShowerTrajPointdEdx()
   {
   }
 
-  int ShowerSlidingStandardCalodEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+  int ShowerTrajPointdEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
       art::Event& Event,
       reco::shower::ShowerElementHolder& ShowerEleHolder){
 
@@ -128,17 +126,17 @@ namespace ShowerRecoTools{
     // Shower dEdx calculation
     if(!ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerSlidingStandardCalodEdx") << "Start position not set, returning "<< std::endl;
+        mf::LogError("ShowerTrajPointdEdx") << "Start position not set, returning "<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackSpacePointsInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track Spacepoints is not set returning"<< std::endl;
+        mf::LogError("ShowerTrajPointdEdx") << "Initial Track Spacepoints is not set returning"<< std::endl;
       return 1;
     }
     if(!ShowerEleHolder.CheckElement(fInitialTrackInputLabel)){
       if (fVerbose)
-        mf::LogError("ShowerSlidingStandardCalodEdx") << "Initial Track is not set"<< std::endl;
+        mf::LogError("ShowerTrajPointdEdx") << "Initial Track is not set"<< std::endl;
       return 1;
     }
 
@@ -148,14 +146,14 @@ namespace ShowerRecoTools{
 
     if(tracksps.size() == 0){
       if (fVerbose)
-        mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no spacepointsin the initial track" << std::endl;
+        mf::LogWarning("ShowerTrajPointdEdx") << "no spacepointsin the initial track" << std::endl;
       return 0;
     }
 
     // Get the spacepoints
     art::Handle<std::vector<recob::SpacePoint> > spHandle;
     if (!Event.getByLabel(fPFParticleLabel, spHandle)){
-      throw cet::exception("ShowerSlidingStandardCalodEdx") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
+      throw cet::exception("ShowerTrajPointdEdx") << "Could not configure the spacepoint handle. Something is configured incorrectly. Stopping";
       return 1;
     }
 
@@ -163,7 +161,7 @@ namespace ShowerRecoTools{
     art::FindManyP<recob::Hit>& fmsp = ShowerEleHolder.GetFindManyP<recob::Hit>(
         spHandle, Event, fPFParticleLabel);
     if(!fmsp.isValid()){
-      throw cet::exception("ShowerSlidingStandardCalodEdx") << "Spacepoint and hit association not valid. Stopping.";
+      throw cet::exception("ShowerTrajPointdEdx") << "Spacepoint and hit association not valid. Stopping.";
       return 1;
     }
 
@@ -194,7 +192,7 @@ namespace ShowerRecoTools{
       std::vector<art::Ptr<recob::Hit> > hits = fmsp.at(sp.key());
       if(hits.size() == 0){
         if (fVerbose)
-          mf::LogWarning("ShowerSlidingStandardCalodEdx") << "no hit for the spacepoint. This suggest the find many is wrong."<< std::endl;
+          mf::LogWarning("ShowerTrajPointdEdx") << "no hit for the spacepoint. This suggest the find many is wrong."<< std::endl;
         continue;
       }
       const art::Ptr<recob::Hit> hit = hits[0];
@@ -214,7 +212,7 @@ namespace ShowerRecoTools{
         if(dist_from_start > dEdxTrackLength){continue;}
       }
 
-      //Find the closest trajectory point of the track. These should be in order if the user has used ShowerTrackTrajToSpacepoint_tool but the sake of gernicness I'll get the cloest sp.
+      //Find the closest trajectory point of the track. These should be in order if the user has used ShowerTrackTrajToSpacePoint_tool but the sake of gernicness I'll get the cloest sp.
       unsigned int index = 999;
       double MinDist = 999;
       for(unsigned int traj=0; traj< InitialTrack.NumberTrajectoryPoints(); ++traj){
@@ -264,7 +262,7 @@ namespace ShowerRecoTools{
 
       if(TMath::Abs((TMath::Pi()/2 - TrajDirectionYZ.Angle(PlaneDirection))) < fMinAngleToWire){
         if (fVerbose)
-          mf::LogWarning("ShowerSlidingStandardCalodEdx")
+          mf::LogWarning("ShowerTrajPointdEdx")
             << "remove from angle cut" << std::endl;
         continue;
       }
@@ -277,7 +275,7 @@ namespace ShowerRecoTools{
       //Shaping time doesn't seem to exist in a global place so add it as a fcl.
       if(fShapingTime < time_taken){
         if (fVerbose)
-          mf::LogWarning("ShowerSlidingStandardCalodEdx")
+          mf::LogWarning("ShowerTrajPointdEdx")
             << "move for shaping time" << std::endl;
         continue;
       }
@@ -379,7 +377,7 @@ namespace ShowerRecoTools{
   }
 
 
-  void ShowerSlidingStandardCalodEdx::FinddEdxLength(std::vector<double>& dEdx_vec, std::vector<double>& dEdx_val){
+  void ShowerTrajPointdEdx::FinddEdxLength(std::vector<double>& dEdx_vec, std::vector<double>& dEdx_val){
 
     //As default do not apply this cut.
     if(fdEdxCut > 10){
@@ -478,5 +476,5 @@ namespace ShowerRecoTools{
 
 }
 
-DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerSlidingStandardCalodEdx)
+DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerTrajPointdEdx)
 
