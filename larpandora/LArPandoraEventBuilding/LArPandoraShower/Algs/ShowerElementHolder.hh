@@ -597,10 +597,6 @@ class reco::shower::ShowerElementHolder{
       art::FindManyP<T1>& GetFindManyP(art::Handle<std::vector<T2> > &handle,
           art::Event &evt, art::InputTag &moduleTag){
 
-        //TODO: tidy up
-        // if (!handle->size())
-        //   throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
-
         T1 type1();
         T2 type2();
 
@@ -632,10 +628,6 @@ class reco::shower::ShowerElementHolder{
       art::FindOneP<T1> GetFindOneP(art::Handle<std::vector<T2> > &handle,
           art::Event &evt, art::InputTag &moduleTag){
 
-        //TODO: tidy up
-        // if (!handle->size())
-        //   throw cet::exception("ShowerElementHolder") << "Handle size is 0: " << std::endl;
-
         T1 type1();
         T2 type2();
 
@@ -644,10 +636,7 @@ class reco::shower::ShowerElementHolder{
 
         std::string name = "FOP" + moduleTag.label() + typeName2 + typeName1;
 
-        // std::cout<<"Test: Name: "<<name<<std::endl;
-
         if (CheckEventElement(name)){
-          // std::cout<<"Test: Found!"<<std::endl;
           art::FindOneP<T1> findOneP = GetEventElement<art::FindOneP<T1> >(name);
           if (findOneP.isValid()){
             return findOneP;
@@ -655,7 +644,6 @@ class reco::shower::ShowerElementHolder{
             throw cet::exception("ShowerElementHolder") << "FindOneP is not valid" << std::endl;
           }
         } else {
-          // std::cout<<"Test: Not Found"<<std::endl;
           art::FindOneP<T1> findOneP(handle, evt, moduleTag);
           if (findOneP.isValid()){
             SetEventElement(findOneP, name);
@@ -679,8 +667,6 @@ class reco::shower::ShowerElementHolder{
 
     //Shower ID number. Use this to set ptr makers.
     int showernumber;
-
 };
-
 
 #endif

@@ -144,6 +144,8 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(f
   for (auto& tool_pset : tool_psets) {
 
     std::string tool_name = tool_pset.get<std::string>("tool_type");
+    // If the PFPaticle label is not set for the tool, make it use the one for the module
+    // Note we also need to set the label in the Alg, via the base tool
     if (!tool_pset.has_key("PFParticleLabel")){
 
       // I cannot pass an art::InputTag as it is mangled, so lets make a string instead
@@ -151,16 +153,16 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(f
           +":"+fPFParticleLabel.process());
 
       tool_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
-      tool_pset.put<int>("Verbose", fVerbose);
       fhicl::ParameterSet base_pset = tool_pset.get<fhicl::ParameterSet>("BaseTools");
       fhicl::ParameterSet alg_pset = base_pset.get<fhicl::ParameterSet>("LArPandoraShowerAlg");
       alg_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
       base_pset.put_or_replace<fhicl::ParameterSet>("LArPandoraShowerAlg", alg_pset);
       tool_pset.put_or_replace<fhicl::ParameterSet>("BaseTools", base_pset);
+    }
 
-      // std::cout << fPFParticleLabel << std::endl;
-      // tool_pset.put<art::InputTag>("PFParticleLabel", fPFParticleLabel);
-      // std::cout << tool_pset.get<art::InputTag>("PFParticleLabel") << std::endl;
+    // If we have not explicitly set verboseness for a given tool, use global level
+    if (!tool_pset.has_key("Verbose")){
+      tool_pset.put<int>("Verbose", fVerbose);
     }
 
     fShowerTools.push_back(art::make_tool<ShowerRecoTools::IShowerTool>(tool_pset));
