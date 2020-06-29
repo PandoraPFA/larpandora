@@ -8,19 +8,20 @@ legacy_pandoraModularShowerCreation: {
 
     # Commented tools are the recommended default tools but they must be
     # configured to use experiment specific calorimetry
+    # Note, order or running will dictate best plane:
+    # set in energy tools but overridden by dEdx tools (if they succeed)`
     ShowerFinderTools: [
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
          @local::showerpcapropergationstartposition,
          @local::showerpcaeigenvaluelength,
          # @local::showernumelectronsenergy,
-         @local::shower3Dcylindertrackhitfinder,
+         @local::shower3dcylindertrackhitfinder,
          @local::showerpandoraslidingfittrackfinder
          # @local::showerunidirectiondedx
     ]
 
-    PFParticleLabel:    "pandora"
-    SecondInteration:          false
+    PFParticleLabel:          "pandora"
     AllowPartialShowers:       true
     Verbose:                   0
 
@@ -39,6 +40,8 @@ standard_pandoraModularShowerCreation: {
 
     # Commented tools are the recommended default tools but they must be
     # configured to use experiment specific calorimetry
+    # Note, order or running will dictate best plane:
+    # set in energy tools but overridden by dEdx tools (if they succeed)`
     ShowerFinderTools: [
          @local::showerpfpvertexstartposition,
          @local::showerpcadirection,
@@ -52,8 +55,7 @@ standard_pandoraModularShowerCreation: {
          # @local::showertrajpointdedx,
     ]
 
-    PFParticleLabel:    "pandora"
-    SecondInteration:          false
+    PFParticleLabel:          "pandora"
     AllowPartialShowers:       true
     Verbose:                   0
 
