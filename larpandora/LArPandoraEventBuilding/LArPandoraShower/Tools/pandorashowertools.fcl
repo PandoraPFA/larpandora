@@ -82,7 +82,7 @@ showerpandoraslidingfittrackfinder:{
 }
 
 
-shower3Dcylindertrackhitfinder:{
+shower3dcylindertrackhitfinder:{
     tool_type: Shower3DCylinderTrackHitFinder
     BaseTools: @local::showerbasetools
 

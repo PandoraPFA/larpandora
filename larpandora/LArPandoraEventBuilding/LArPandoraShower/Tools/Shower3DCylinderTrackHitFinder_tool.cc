@@ -59,7 +59,6 @@ namespace ShowerRecoTools{
       art::InputTag fPFParticleLabel;
       int           fVerbose;
 
-      std::string fInitialTrackLengthInputLabel;
       std::string fShowerStartPositionInputLabel;
       std::string fInitialTrackHitsOutputLabel;
       std::string fInitialTrackSpacePointsOutputLabel;
@@ -74,7 +73,6 @@ namespace ShowerRecoTools{
     fForwardHitsOnly(pset.get<bool>("ForwardHitsOnly")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
-    fInitialTrackLengthInputLabel(pset.get<std::string>("InitialTrackLengthInputLabel")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
     fInitialTrackHitsOutputLabel(pset.get<std::string>("InitialTrackHitsOutputLabel")),
     fInitialTrackSpacePointsOutputLabel(pset.get<std::string>("InitialTrackSpacePointsOutputLabel")),
