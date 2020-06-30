@@ -19,8 +19,8 @@ IF (NOT CETBUILDTOOLS_VERSION)
 ENDIF()
 
 set(CMAKE_MODULE_PATH $ENV{CANVAS_ROOT_IO_DIR}/Modules
-		      $ENV{CETBUILDTOOLS_DIR}/Modules
-		      ${CMAKE_MODULE_PATH})
+          $ENV{CETBUILDTOOLS_DIR}/Modules
+          ${CMAKE_MODULE_PATH})
 
 include(CetCMakeEnv)
 cet_cmake_env()
@@ -50,6 +50,7 @@ find_ups_product( pandora )
 find_ups_product( larpandoracontent )
 find_ups_product( cetbuildtools )
 find_ups_product( postgresql )
+find_ups_product( eigen )
 
 # macros for dictionary and simple_plugin
 include(ArtDictionary)
