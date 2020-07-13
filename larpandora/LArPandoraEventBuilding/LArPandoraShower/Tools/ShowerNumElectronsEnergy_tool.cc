@@ -188,7 +188,8 @@ namespace ShowerRecoTools {
       try{
         Energy = view_energies.at(plane);
         if (Energy<0){
-          mf::LogWarning("ShowerNumElectronsEnergy") << "Negative shower energy: "<<Energy;
+          if (fVerbose)
+            mf::LogWarning("ShowerNumElectronsEnergy") << "Negative shower energy: "<<Energy;
           Energy=-999;
         }
         if(plane == 2){
@@ -197,7 +198,8 @@ namespace ShowerRecoTools {
       }
 
       catch(...){
-        mf::LogWarning("ShowerNumElectronsEnergy") <<"No energy calculation for plane "<<plane<<std::endl;
+        if (fVerbose)
+          mf::LogWarning("ShowerNumElectronsEnergy") <<"No energy calculation for plane "<<plane<<std::endl;
         // if there's no calculation, set the energy to -999.
         Energy = -999;
         if(plane == 2){
