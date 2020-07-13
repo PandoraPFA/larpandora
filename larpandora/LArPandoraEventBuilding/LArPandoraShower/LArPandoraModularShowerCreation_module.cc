@@ -158,6 +158,13 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(f
       alg_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
       base_pset.put_or_replace<fhicl::ParameterSet>("LArPandoraShowerAlg", alg_pset);
       tool_pset.put_or_replace<fhicl::ParameterSet>("BaseTools", base_pset);
+
+      if (tool_pset.has_key("LArPandoraShowerCheatingAlg")){
+        fhicl::ParameterSet cheat_alg_pset = tool_pset.get<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg");
+        cheat_alg_pset.put<std::string>("PFParticleLabel", PFParticleLabelString);
+        cheat_alg_pset.put_or_replace<fhicl::ParameterSet>("LArPandoraShowerAlg", alg_pset);
+        tool_pset.put_or_replace<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg", cheat_alg_pset);
+      }
     }
 
     // If we have not explicitly set verboseness for a given tool, use global level
