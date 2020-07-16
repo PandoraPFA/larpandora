@@ -71,6 +71,7 @@ class reco::shower::LArPandoraModularShowerCreation: public art::EDProducer {
     bool          fAllowPartialShowers;
     int           fVerbose;
     bool          fUseAllParticles;
+    unsigned int  fNumPlanes;
 
     //tool tags which calculate the characteristics of the shower
     std::string fShowerStartPositionLabel;
@@ -87,6 +88,9 @@ class reco::shower::LArPandoraModularShowerCreation: public art::EDProducer {
 
     //map to the unique ptrs to
     reco::shower::ShowerProduedPtrsHolder uniqueproducerPtrs;
+
+    // Required services
+    art::ServiceHandle<geo::Geometry> fGeom;
 };
 
 //This function returns the art::Ptr to the data object InstanceName.
@@ -184,6 +188,8 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(f
     fShowerTools[i]->InitaliseProducerPtr(uniqueproducerPtrs);
     fShowerTools[i]->InitialiseProducers();
   }
+
+  fNumPlanes = fGeom->Nplanes();
 
   //Initialise the other paramters.
 
@@ -367,18 +373,18 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt) {
     }
 
     //Get the properties
-    TVector3            ShowerStartPosition     = {-999,-999,-999};
-    TVector3            ShowerDirection         = {-999,-999,-999};
-    std::vector<double> ShowerEnergy            = {-999,-999,-999};
-    std::vector<double> ShowerdEdx              = {-999,-999,-999};
-    int                 BestPlane               = -999;
-    double              ShowerLength            = -999;
-    double              ShowerOpeningAngle      = -999;
+    TVector3 ShowerStartPosition(-999,-999,-999);
+    TVector3 ShowerDirection(-999,-999,-999);
+    std::vector<double> ShowerEnergy(fNumPlanes, -999);
+    std::vector<double> ShowerdEdx(fNumPlanes, -999);
+    int BestPlane(-999);
+    double ShowerLength(-999);
+    double ShowerOpeningAngle(-999);
 
-    TVector3            ShowerStartPositionErr  = {-999,-999,-999};
-    TVector3            ShowerDirectionErr      = {-999,-999,-999};
-    std::vector<double> ShowerEnergyErr         = {-999,-999,-999};
-    std::vector<double> ShowerdEdxErr           = {-999,-999,-999};
+    TVector3 ShowerStartPositionErr(-999, -999, -999);
+    TVector3 ShowerDirectionErr(-999, -999,- 999);
+    std::vector<double> ShowerEnergyErr(fNumPlanes, -999);
+    std::vector<double> ShowerdEdxErr(fNumPlanes, -999);
 
     err = 0;
     if(showerEleHolder.CheckElement(fShowerStartPositionLabel))
@@ -407,16 +413,31 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt) {
         << ShowerStartPosition.Y() << " Z: " << ShowerStartPosition.Z() << std::endl;
       std::cout << "Shower Direction: X:" << ShowerDirection.X() << " Y: "
         << ShowerDirection.Y() << " Z: " << ShowerDirection.Z() << std::endl;
-      std::cout << "Shower dEdx: Plane 0: " << ShowerdEdx.at(0) << " Plane 1: "
-        << ShowerdEdx.at(1) << " Plane 2: " << ShowerdEdx.at(2) << std::endl;
-      std::cout << "Shower Energy: Plane 0: " << ShowerEnergy.at(0) << " Plane 1: "
-        << ShowerEnergy.at(1) << " Plane 2: " << ShowerEnergy.at(2) << std::endl;
+      std::cout << "Shower dEdx:";
+      for (unsigned int i=0; i<fNumPlanes; i++){
+        std::cout << " Plane " << i << ": " << ShowerdEdx.at(i);
+      }
+      std::cout << std::endl;
+      std::cout << "Shower Energy:";
+      for (unsigned int i=0; i<fNumPlanes; i++){
+        std::cout << " Plane " << i << ": " << ShowerEnergy.at(i);
+      }
+      std::cout << std::endl;
       std::cout << "Shower Best Plane: " << BestPlane << std::endl;
       std::cout << "Shower Length: " << ShowerLength << std::endl;
       std::cout << "Shower Opening Angle: " << ShowerOpeningAngle << std::endl;
 
       //Print what has been created in the shower
       showerEleHolder.PrintElements();
+    }
+
+    if (ShowerdEdx.size() != fNumPlanes){
+      throw cet::exception("LArPandoraModularShowerCreation")
+        << "dEdx vector is wrong size: " << ShowerdEdx.size() << " compared to Nplanes: " << fNumPlanes << std::endl;
+    }
+    if (ShowerEnergy.size() != fNumPlanes){
+      throw cet::exception("LArPandoraModularShowerCreation")
+        << "Energy vector is wrong size: " << ShowerEnergy.size() << " compared to Nplanes: " << fNumPlanes << std::endl;
     }
 
     //Make the shower
@@ -459,8 +480,7 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt) {
     if(!fAllowPartialShowers && assn_err > 0){
       if (fVerbose)
         mf::LogError("LArPandoraModularShowerCreation")
-          << "A association failed and not allowing partial showers. The shower will not be added to the event " << std::endl;
-      continue;
+          << "A association failed and not allowing partial showers. The association will not be added to the event " << std::endl;
     }
 
     //Reset the showerproperty holder.
