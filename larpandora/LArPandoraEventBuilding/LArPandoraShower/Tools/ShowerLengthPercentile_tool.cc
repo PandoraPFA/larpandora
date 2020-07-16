@@ -139,7 +139,7 @@ namespace ShowerRecoTools {
     //     spacePoints[spacePoints.size() -1], ShowerStartPosition, ShowerDirection);
 
     double ShowerAngle = atan(ShowerWidth/ShowerLength);
-    double ShowerAngleError = -9999; //TODO: Do properly
+    double ShowerAngleError = -999; //TODO: Do properly
 
     // Fill the shower element holder
     ShowerEleHolder.SetElement(ShowerLength, ShowerLengthError, fShowerLengthOutputLabel);

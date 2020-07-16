@@ -389,9 +389,9 @@ void shower::LArPandoraShowerAlg::DebugEVD(art::Ptr<recob::PFParticle> const& pf
   double y;
   double z;
 
-  double x_min=999999999., x_max=-999999999.;
-  double y_min=999999999., y_max=-999999999.;
-  double z_min=999999999., z_max=-999999999.;
+  double x_min=std::numeric_limits<double>::max(), x_max=-std::numeric_limits<double>::max();
+  double y_min=std::numeric_limits<double>::max(), y_max=-std::numeric_limits<double>::max();
+  double z_min=std::numeric_limits<double>::max(), z_max=-std::numeric_limits<double>::max();
 
   // Get a bunch of associations (again)
   // N.B. this is a horribly inefficient way of doing things but as this is only
@@ -469,8 +469,8 @@ void shower::LArPandoraShowerAlg::DebugEVD(art::Ptr<recob::PFParticle> const& pf
     ShowerEleHolder.GetElement(fShowerDirectionInputLabel, showerDirection);
 
     // the direction line
-    double minProj=9999999;
-    double maxProj=-99999999;
+    double minProj = std::numeric_limits<double>::max();
+    double maxProj = -std::numeric_limits<double>::max();
 
     //initialise counter point
     int point = 0;
