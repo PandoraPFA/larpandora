@@ -74,9 +74,9 @@ void shower::LArPandoraShowerCheatingAlg::CheatDebugEVD(const simb::MCParticle* 
   TCanvas* canvas = tfs->make<TCanvas>(canvasName, canvasName);
 
   // Initialise variables
-  float x;
-  float y;
-  float z;
+  float x = 0;
+  float y = 0;
+  float z = 0;
 
   std::vector<art::Ptr<recob::SpacePoint> > showerSpacePoints;
   std::vector<art::Ptr<recob::SpacePoint> > otherSpacePoints;

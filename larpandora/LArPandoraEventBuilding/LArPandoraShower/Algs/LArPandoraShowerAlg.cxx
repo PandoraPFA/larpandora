@@ -385,9 +385,9 @@ void shower::LArPandoraShowerAlg::DebugEVD(art::Ptr<recob::PFParticle> const& pf
   TCanvas* canvas = tfs->make<TCanvas>(canvasName, canvasName);
 
   // Initialise variables
-  double x;
-  double y;
-  double z;
+  double x = 0;
+  double y = 0;
+  double z = 0;
 
   double x_min=std::numeric_limits<double>::max(), x_max=-std::numeric_limits<double>::max();
   double y_min=std::numeric_limits<double>::max(), y_max=-std::numeric_limits<double>::max();
