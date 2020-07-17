@@ -1,33 +1,18 @@
 //############################################################################
-//### Name:        Shower3DCylinderTrackHitFinder                                  ###
+//### Name:        Shower3DCylinderTrackHitFinder                          ###
 //### Author:      Ed Tyley                                                ###
 //### Date:        14.06.19                                                ###
 //### Description: Tool for finding the initial shower track using 3D      ###
 //###              spacepoints within a cylinder along the shower          ###
 //###              direction. fcl parameters define cylinder dimensions    ###
 //############################################################################
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindOneP.h"
-#include "canvas/Persistency/Common/FindManyP.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "lardataobj/RecoBase/Hit.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <iostream>
-#include <math.h>
-
-//Root Includes
-#include "TVector3.h"
 
 namespace ShowerRecoTools{
 

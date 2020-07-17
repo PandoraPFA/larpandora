@@ -6,31 +6,12 @@
 //###              methods.                                                ###
 //############################################################################
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
-
 //Framework Includes
-#include "art/Framework/Principal/Handle.h"
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "lardataobj/RecoBase/Vertex.h"
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <iostream>
-#include <vector>
-
-//Root Includes
-#include "TVector3.h"
-#include "TMath.h"
 
 namespace ShowerRecoTools{
 

@@ -15,17 +15,11 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Core/ProducesCollector.h"
 #include "art/Persistency/Common/PtrMaker.h"
-#include "cetlib_except/exception.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/ShowerElementHolder.hh"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/ShowerProduedPtrsHolder.hh"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <string>
 
 namespace ShowerRecoTools{
   class IShowerTool{

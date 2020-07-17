@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerTrajPointdEdx                           ###
+//### Name:        ShowerTrajPointdEdx                                     ###
 //### Author:      Dominic Barker (dominic.barker@sheffield.ac.uk)         ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the dEdx of the start track of the     ###
@@ -9,32 +9,13 @@
 //###              and ShowerTrackTrajToSpacePoint                         ###
 //############################################################################
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
-
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "art_root_io/TFileService.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 //LArSoft Includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/Geometry/Geometry.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "larreco/Calorimetry/CalorimetryAlg.h"
-#include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Track.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <iostream>
-#include <vector>
-
-//Root Includes
-#include "TVector3.h"
 
 namespace ShowerRecoTools{
 

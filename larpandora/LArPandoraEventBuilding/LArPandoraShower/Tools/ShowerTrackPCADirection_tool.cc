@@ -6,31 +6,13 @@
 //###              methods using the initial track hits                    ###
 //############################################################################
 
-//Warning! Currently as pandora gives each hit a spacepoint, rather than
-//         matching up some energy depositions are double counted.
-//         This could lead to a bais in the PCA analysis.
-
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
-
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
 
 //LArSoft Includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/PFParticle.h"
-
-//C++ Includes
-#include <iostream>
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Root Includes
-#include "TVector3.h"
-#include "TMath.h"
 #include "TPrincipal.h"
 
 namespace ShowerRecoTools {

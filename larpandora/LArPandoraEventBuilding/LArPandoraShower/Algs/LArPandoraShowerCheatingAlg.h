@@ -11,7 +11,6 @@
 
 //LArSoft Includes
 #include "nusimdata/SimulationBase/MCParticle.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
 #include "larsim/MCCheater/BackTrackerService.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"

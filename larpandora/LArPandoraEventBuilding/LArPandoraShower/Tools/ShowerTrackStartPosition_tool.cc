@@ -1,24 +1,17 @@
 //############################################################################
 //### Name:        ShowerTrackStartPosition                                ###
-//### Author:      You                                                     ###
+//### Author:      Dom Barker                                              ###
 //### Date:        13.05.19                                                ###
-//### Description: Generic form of the shower tools                        ###
+//### Description: Tool for settung the shower start position to the       ###
+//                 start of the fitted track                               ###
 //############################################################################
-
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "lardataobj/RecoBase/Track.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
 
 namespace ShowerRecoTools {
 

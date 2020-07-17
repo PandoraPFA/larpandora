@@ -1,33 +1,16 @@
 //############################################################################
-//### Name:        ShowerTrackTrajPointDirection                     ###
+//### Name:        ShowerTrackTrajPointDirection                           ###
 //### Author:      Dominic Barker                                          ###
 //### Date:        13.05.19                                                ###
 //### Description: Tool for finding the shower direction using the         ###
 //###              first trajectory of the initial track                   ###
 //############################################################################
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
-
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "art_root_io/TFileService.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
 
 //LArSoft Includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <iostream>
-
-//Root Includes
-#include "TVector3.h"
-#include "TMath.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 namespace ShowerRecoTools {
 

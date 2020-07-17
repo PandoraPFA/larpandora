@@ -6,29 +6,13 @@
 //###              based method to define when the shower starts to        ###
 //###              shower. This methd is derived from the EMShower_module  ###
 //############################################################################
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "lardataobj/RecoBase/Track.h"
-#include "lardataobj/RecoBase/Hit.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "lardataobj/RecoBase/Cluster.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/LArPandoraShowerAlg.h"
-
-//C++ Includes
-#include <iostream>
-#include <math.h>
-
-//Root Includes
-#include "TVector3.h"
 
 namespace ShowerRecoTools{
 

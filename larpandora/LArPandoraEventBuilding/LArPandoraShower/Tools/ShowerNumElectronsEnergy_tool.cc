@@ -1,5 +1,5 @@
 //############################################################################
-//### Name:        ShowerNumElectronsEnergy                        ###
+//### Name:        ShowerNumElectronsEnergy                                ###
 //### Author:      Tom Ham                                                 ###
 //### Date:        01/04/2020                                              ###
 //### Description: Tool for finding the Energy of the shower by going      ###
@@ -8,31 +8,17 @@
 //###              the EMShower_module.cc                                  ###
 //############################################################################
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
-
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
-#include "art_root_io/TFileService.h"
 
 //LArSoft Includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RecoBase/PFParticle.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "lardataobj/RecoBase/Cluster.h"
-#include "lardataobj/RecoBase/Hit.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #include "larreco/Calorimetry/CalorimetryAlg.h"
 
 //C++ Includes
-#include <iostream>
-#include <vector>
 #include <tuple>
-
 
 namespace ShowerRecoTools {
 

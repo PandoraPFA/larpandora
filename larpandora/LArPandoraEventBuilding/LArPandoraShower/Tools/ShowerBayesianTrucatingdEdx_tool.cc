@@ -1,6 +1,6 @@
 //############################################################################
 //### Name:        ShowerBayesianTrucatingdEdx                             ###
-//### Author:      Dominic Batker                                          ###
+//### Author:      Dominic Barker                                          ###
 //### Date:        13.05.19                                                ###
 //### Description: Recursively adds values from the dEdx vectors and stops ###
 //###              when the probability of getting that dEdx value is too  ###
@@ -10,23 +10,16 @@
 //###              only be used with the sliding calo dEdx                 ###
 //############################################################################
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
+//ROOT Includes
 #include "TFile.h"
 
-#include <vector>
-#include <string>
 
 namespace ShowerRecoTools {
 

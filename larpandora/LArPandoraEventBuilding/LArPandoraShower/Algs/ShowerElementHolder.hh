@@ -667,6 +667,7 @@ class reco::shower::ShowerElementHolder{
 
     //Shower ID number. Use this to set ptr makers.
     int showernumber;
+
 };
 
 #endif

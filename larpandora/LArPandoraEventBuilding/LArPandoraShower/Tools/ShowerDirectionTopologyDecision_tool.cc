@@ -2,21 +2,15 @@
 //### Name:        ShowerDirectionTopologyDecisionTool                     ###
 //### Author:      Dom Barker                                              ###
 //### Date:        13.05.19                                                ###
-//### Description: Generic form of the shower tools                        ###
+//### Description: Decision tool to pick direction based on angular        ###
+//###              seperation of two candidate direction vectors           ###
 //############################################################################
-
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 namespace ShowerRecoTools {
 

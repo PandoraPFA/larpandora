@@ -12,17 +12,8 @@
 #define ShowerProduedPtrsHolder_HH
 
 //Framework includes
-#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Principal/Event.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/ShowerElementHolder.hh"
-
-//C++ Includes
-#include <iostream>
-#include <map>
-#include <string>
-#include <memory>
-#include <iomanip>
-#include <cxxabi.h>
 
 namespace reco {
   namespace shower {

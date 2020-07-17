@@ -1,34 +1,20 @@
 //############################################################################
-//### Name:        ShowerIncrementalTrackHitFinder                            ###
-//### Author:      you                                                     ###
+//### Name:        ShowerIncrementalTrackHitFinder                         ###
+//### Author:      Dom Barker                                              ###
 //### Date:        13.05.19                                                ###
-//### Description: Generic form of the shower tools                        ###
+//### Description: Tool to incrementally add space points to the initial   ###
+//###              track space points until the residuals blow up          ###
 //############################################################################
-
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
-#include "art/Utilities/make_tool.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib_except/exception.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/FindManyP.h"
-#include "art_root_io/TFileService.h"
 
 //LArSoft Includes
-#include "lardataobj/RecoBase/PFParticle.h"
-#include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/PFParticle.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 //Root Includes
-#include "TVector3.h"
-#include "TMath.h"
 #include "TPrincipal.h"
 #include "TGraph2D.h"
-#include "TCanvas.h"
-
 
 namespace ShowerRecoTools {
 
