@@ -1,29 +1,28 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent  larpandora  v08_12_11
-defaultqual e19
+parent	larpandora	v08_13_01
+defaultqual	e19
 #
 fcldir  product_dir job
 fwdir   product_dir scripts
 #
 product         version
-eigen           v3_3_5
-larreco         v08_32_03
-larpandoracontent v03_16_02
+larreco         v08_32_06
+larpandoracontent v03_18_00
 
-cetbuildtools v7_15_01  - only_for_build
+cetbuildtools	v7_15_01	-	only_for_build
 end_product_list
 
 
-qualifier     larreco       larpandoracontent eigen notes
-e19:py2:debug e19:py2:debug e19:py2:debug     -nq-
-e19:py2:prof  e19:py2:prof  e19:py2:prof      -nq-
-e19:debug     e19:debug     e19:debug         -nq-
-e19:prof      e19:prof      e19:prof          -nq-
-c7:debug      c7:debug      c7:debug          -nq-
-c7:prof       c7:prof       c7:prof           -nq-
-c7:py2:debug  c7:py2:debug  c7:py2:debug      -nq-
-c7:py2:prof   c7:py2:prof   c7:py2:prof       -nq-
+qualifier	larreco		larpandoracontent	notes
+e19:py2:debug	e19:py2:debug	e19:py2:debug
+e19:py2:prof	e19:py2:prof	e19:py2:prof
+e19:debug	e19:debug	e19:debug
+e19:prof	e19:prof	e19:prof
+c7:debug	c7:debug	c7:debug
+c7:prof		c7:prof		c7:prof
+c7:py2:debug	c7:py2:debug	c7:py2:debug
+c7:py2:prof	c7:py2:prof	c7:py2:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
