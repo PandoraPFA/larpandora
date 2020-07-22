@@ -14,6 +14,7 @@ art_make(LIB_LIBRARIES
   art_Persistency_Provenance
   art_Utilities
   nusimdata_SimulationBase
+  lardataobj_RecoBase
   larsim_MCCheater_BackTrackerService_service
   larsim_MCCheater_ParticleInventoryService_service
   )
