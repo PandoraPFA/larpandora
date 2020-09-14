@@ -19,6 +19,7 @@ art_make(
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         LArPandoraContent
+                        LArPandoraDLContent
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
