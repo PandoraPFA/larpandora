@@ -1,6 +1,7 @@
 add_subdirectory(Cheating)
 
 art_make(TOOL_LIBRARIES
+  larpandora_LArPandoraInterface
   larpandora_LArPandoraEventBuilding_LArPandoraShower_Algs
   larreco_Calorimetry
   LArPandoraContent

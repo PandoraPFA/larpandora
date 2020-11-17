@@ -16,6 +16,14 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
 
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
+
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+
+
 namespace ShowerRecoTools{
 
   class ShowerPandoraSlidingFitTrackFinder:IShowerTool {
@@ -119,7 +127,7 @@ namespace ShowerRecoTools{
 
     // ATTN: Expectations here are that the input geometry corresponds to either a single or dual phase LArTPC.  For single phase we expect
     // three views, U, V and either W or Y, for dual phase we expect two views, W and Y.
-    const bool isDualPhase(fGeom->MaxPlanes() == 2);
+    const bool isDualPhase(lar_pandora::LArPandoraHelper::IsDualPhase());
 
     if (nWirePlanes != planeSet.size())
       throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- geometry description for wire plane(s) missing ";

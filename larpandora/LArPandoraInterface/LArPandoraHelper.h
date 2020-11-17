@@ -8,7 +8,9 @@
 #define LAR_PANDORA_HELPER_H
 
 #include "art/Framework/Principal/Event.h"
-
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "lardataobj/Simulation/SimChannel.h"
 
 #include <map>
@@ -738,6 +740,17 @@ namespace lar_pandora {
      */
     static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(
       const pandora::ParticleFlowObject* const pPfo);
+
+    /**
+     *  @brief  Check if geometry has collection views only
+     *
+     *  @param  
+     *
+     *  @return true/false
+     */
+    static bool IsDualPhase();
+
+
   };
 
 } // namespace lar_pandora

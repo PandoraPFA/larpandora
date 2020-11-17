@@ -126,7 +126,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
     // ATTN: Expectations here are that the input geometry corresponds to either a single or dual phase LArTPC.  For single phase we expect
     // three views, U, V and either W or Y, for dual phase we expect two views, W and Y.
-    const bool isDualPhase(theGeometry->MaxPlanes() == 2);
+    const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     if (nWirePlanes != planeSet.size())
         throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- geometry description for wire plane(s) missing ";
@@ -134,7 +134,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     if (isDualPhase && (!planeSet.count(geo::kW) || !planeSet.count(geo::kY)))
         throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- dual phase scenario; expect to find w and y views ";
 
-    if (!isDualPhase && (!planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))))
+    if (isDualPhase && (!planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))))
         throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- single phase scenatio; expect to find u and v views; if there is one further view, it must be w or y ";
 
     const bool useYPlane((nWirePlanes > 2) && planeSet.count(geo::kY));

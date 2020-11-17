@@ -1500,6 +1500,20 @@ namespace lar_pandora {
     return larpandoraobj::PFParticleMetadata(pPfo->GetPropertiesMap());
   }
 
+  bool
+  LArPandoraHelper::IsDualPhase()
+  {
+    art::ServiceHandle<geo::Geometry const> theGeometry;
+    std::unordered_set<geo::_plane_sigtype> sigtypeSet;
+    for (readout::ROPID const& rID: theGeometry->IterateROPIDs()) {
+      //std::cout << "Signal type = " << theGeometry->SignalType(rID) << std::endl;
+      //(void)sigtypeSet.insert(theGeometry->SignalType(rID));
+      sigtypeSet.insert(theGeometry->SignalType(rID));
+    }
+    return !(sigtypeSet.count(geo::kInduction));
+  }
+
+
   //------------------------------------------------------------------------------------------------------------------------------------------
   //------------------------------------------------------------------------------------------------------------------------------------------
 
