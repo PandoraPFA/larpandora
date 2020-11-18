@@ -12,17 +12,10 @@
 
 //LArSoft Includes
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
-
-#include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/GeometryCore.h"
-#include "larcorealg/Geometry/PlaneGeo.h"
-#include "larcorealg/Geometry/TPCGeo.h"
-
-#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
-
 
 namespace ShowerRecoTools{
 

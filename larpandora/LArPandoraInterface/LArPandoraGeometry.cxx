@@ -7,7 +7,6 @@
 #include "cetlib_except/exception.h"
 
 #include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/GeometryCore.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcorealg/Geometry/WireGeo.h"
@@ -34,20 +33,6 @@ namespace lar_pandora {
 
     // ATTN: Expectations here are that the input geometry corresponds to either a single or dual phase LArTPC.
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    //std::cout << "debg sigtype = " << theGeometry->SignalTypeName(geo::_plane_sigtype) << std::endl;
-    //std::cout << "debg sigtype = " << theGeometry->SignalType() << std::endl;
-    //int nPlanes(theGeometry->Nplanes());
-    //for () {
-    //
-    //}
-    /*std::unordered_set<geo::_plane_sigtype> sigtypeSet;
-    for (readout::ROPID const& rID: theGeometry->IterateROPIDs()) {
-      std::cout << "Signal type = " << theGeometry->SignalType(rID) << std::endl;
-      (void)sigtypeSet.insert(theGeometry->SignalType(rID));
-    }*/
-    
-    //const bool isDualPhase(theGeometry->MaxPlanes() == 2);
-    //const bool isDualPhase(!sigtypeSet.count(geo::kInduction));
     const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     for (LArDriftVolumeList::const_iterator iter1 = driftVolumeList.begin(),
@@ -245,7 +230,6 @@ namespace lar_pandora {
 
     // ATTN: Expectations here are that the input geometry corresponds to either a single or dual phase LArTPC.  For single phase we expect
     // three views, U, V and either W or Y, for dual phase we expect two views, W and Y.
-    //const bool isDualPhase(theGeometry->MaxPlanes() == 2);
     const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     if (nWirePlanes != planeSet.size())

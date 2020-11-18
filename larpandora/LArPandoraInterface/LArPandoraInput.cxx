@@ -5,7 +5,6 @@
  */
 
 #include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/GeometryCore.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
@@ -57,7 +56,6 @@ namespace lar_pandora {
 
     art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
-    //const bool isDualPhase(theGeometry->MaxPlanes() == 2);
     const bool isDualPhase(lar_pandora::LArPandoraHelper::IsDualPhase());
 
     // Loop over ART hits
@@ -253,7 +251,6 @@ namespace lar_pandora {
   {
     //ATTN - Unlike SP, DP detector gaps are not in the drift direction
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    //const bool isDualPhase(theGeometry->MaxPlanes() == 2);
     const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** "
@@ -350,7 +347,6 @@ namespace lar_pandora {
     const lariov::ChannelStatusProvider& channelStatus(
       art::ServiceHandle<lariov::ChannelStatusService const>()->GetProvider());
 
-    //const bool isDualPhase(theGeometry->MaxPlanes() == 2);
     const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat) {
