@@ -134,7 +134,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     if (isDualPhase && (!planeSet.count(geo::kW) || !planeSet.count(geo::kY)))
         throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- dual phase scenario; expect to find w and y views ";
 
-    if (isDualPhase && (!planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))))
+    if (!isDualPhase && (!planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))))
         throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- single phase scenatio; expect to find u and v views; if there is one further view, it must be w or y ";
 
     const bool useYPlane((nWirePlanes > 2) && planeSet.count(geo::kY));
