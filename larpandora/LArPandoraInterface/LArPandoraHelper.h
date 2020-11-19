@@ -748,7 +748,6 @@ namespace lar_pandora {
      */
     static bool IsDualPhase();
 
-
   };
 
 } // namespace lar_pandora

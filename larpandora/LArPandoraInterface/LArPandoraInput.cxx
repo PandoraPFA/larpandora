@@ -56,7 +56,7 @@ namespace lar_pandora {
 
     art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
-    const bool isDualPhase(lar_pandora::LArPandoraHelper::IsDualPhase());
+    const bool isDualPhase(LArPandoraHelper::IsDualPhase());
 
     // Loop over ART hits
     int hitCounter(settings.m_hitCounterOffset);
