@@ -1508,7 +1508,7 @@ namespace lar_pandora {
     for (readout::ROPID const& rID: theGeometry->IterateROPIDs()) {
       sigtypeSet.insert(theGeometry->SignalType(rID));
     }
-    return ((!sigtypeSet.count(geo::kInduction) || !sigtypeSet.count(geo::kCollection)) && !sigtypeSet.count(geo::kMysteryType));
+    return (!(sigtypeSet.count(geo::kInduction) && sigtypeSet.count(geo::kCollection)) && !sigtypeSet.count(geo::kMysteryType));
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
