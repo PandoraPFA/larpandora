@@ -9,10 +9,6 @@
 
 #include "art/Framework/Principal/Event.h"
 
-#include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/GeometryCore.h"
-#include "larcorealg/Geometry/PlaneGeo.h"
-
 #include "lardataobj/Simulation/SimChannel.h"
 
 #include <map>

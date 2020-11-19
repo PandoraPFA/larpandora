@@ -29,6 +29,9 @@
 #include "nusimdata/SimulationBase/MCTruth.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
