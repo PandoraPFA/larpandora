@@ -134,16 +134,30 @@ namespace ShowerRecoTools {
       throw cet::exception("ShowerTrackFinderCheater") << "Spacepoint and hit association not valid. Stopping.";
     }
 
-    // If we have a photon we cannot use the +/- TrackID to differentiate between the shower primary and
-    // shower daughters. Instead take all of the shower hits, because it is better than taking none
-    const int trueParticleId(trueParticle->PdgCode() == 22 ? -trueParticle->TrackId() : trueParticle->TrackId());
+    std::vector<int> trueParticleIdVec;
+
+    // If we have an electron, take the hits from the primary only
+    // This will also cover the cases Pandora misclassify a track as a shower
+    if (trueParticle->PdgCode() != 22)
+    {
+      trueParticleIdVec.push_back(trueParticle->TrackId());
+    } else {
+      // If we roll up showers, we have no choice but to take all of the hits from the photon
+      trueParticleIdVec.push_back(-trueParticle->TrackId());
+      // If we do not roll up the showers, take all of the primary daughters
+      for (int i=0; i<trueParticle->NumberDaughters(); i++)
+      {
+        trueParticleIdVec.push_back(trueParticle->Daughter(i));
+      }
+    }
+
     std::vector<art::Ptr<recob::Hit> > trackHits;
     std::vector<art::Ptr<recob::SpacePoint> > trackSpacePoints;
 
     //Get the hits from the true particle
     for (auto hit : showerHits){
       int trueHitId = fLArPandoraShowerCheatingAlg.TrueParticleID(clockData, hit);
-      if (trueHitId == trueParticleId){
+      if (std::find(trueParticleIdVec.cbegin(), trueParticleIdVec.cend(), trueHitId) != trueParticleIdVec.cend()){
         trackHits.push_back(hit);
         std::vector<art::Ptr<recob::SpacePoint> > sps = fmsph.at(hit.key());
         if (sps.size() == 1){
