@@ -360,6 +360,67 @@ double shower::LArPandoraShowerAlg::SpacePointPerpendicular(art::Ptr<recob::Spac
   return pos.Mag();
 }
 
+  //Function to calculate the RMS at segements of the shower and calculate the gradient of this. If negative then the direction is pointing the opposite way to the correct one
+  double shower::LArPandoraShowerAlg::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned nSegments) const {
+
+    //Order the spacepoints
+    this->OrderShowerSpacePoints(sps,ShowerCentre,Direction);
+
+    //Get the length of the shower.
+    const double minProj = this->SpacePointProjection(sps[0],ShowerCentre,Direction);
+    const double maxProj = this->SpacePointProjection(sps[sps.size()-1],ShowerCentre,Direction);
+
+    const double length = (maxProj-minProj);
+    const double segmentsize = length / nSegments;
+
+    std::map<int, std::vector<float> > len_segment_map;
+
+    //Split the the spacepoints into segments.
+    for(auto const& sp: sps){
+
+      //Get the the projected length
+      const double len = this->SpacePointProjection(sp,ShowerCentre,Direction);
+
+      //Get the length to the projection
+      const double  len_perp = this->SpacePointPerpendicular(sp,ShowerCentre,Direction,len);
+
+      int sg_len = std::round(len/segmentsize);
+      //TODO: look at this:
+      //int sg_len = round(len/segmentsize+fNSegments/2); //Add to make positive
+      len_segment_map[sg_len].push_back(len_perp);
+    }
+
+    int counter = 0;
+    float sumx  = 0;
+    float sumy  = 0;
+    float sumx2 = 0;
+    float sumxy = 0;
+
+    //Get the rms of the segments and caclulate the gradient.
+    for(auto const& segment: len_segment_map){
+      if (segment.second.size()<2) continue;
+      float RMS = this->CalculateRMS(segment.second);
+      //Calculate the gradient using regression
+      sumx  += segment.first;
+      sumy  += RMS;
+      sumx2 += segment.first * segment.first;
+      sumxy += RMS * segment.first;
+      ++counter;
+    }
+
+    return (counter*sumxy - sumx*sumy)/(counter*sumx2 - sumx*sumx);
+  }
+
+  double shower::LArPandoraShowerAlg::CalculateRMS(const std::vector<float>& perps) const {
+
+    double sum  = 0;
+    for (const auto &perp : perps){
+      sum += perp*perp;
+    }
+    // No need to bounds check as we have done so already
+    return std::sqrt(sum/(perps.size()-1));
+  }
+
 double shower::LArPandoraShowerAlg::SCECorrectPitch(double const& pitch, TVector3 const& pos,
     TVector3 const& dir, unsigned int const& TPC) const {
   const geo::Point_t geoPos{pos.X(), pos.Y(), pos.z()};

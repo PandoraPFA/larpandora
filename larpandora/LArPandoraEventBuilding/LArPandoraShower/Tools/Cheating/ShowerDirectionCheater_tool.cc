@@ -29,9 +29,6 @@ namespace ShowerRecoTools {
 
     private:
 
-      double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction) const;
-      double CalculateRMS(const std::vector<float>& perps) const;
-
       //Algorithm functions
       shower::LArPandoraShowerCheatingAlg fLArPandoraShowerCheatingAlg;
 
@@ -40,7 +37,7 @@ namespace ShowerRecoTools {
 
       //fcl
       const art::InputTag fPFParticleLabel;
-      const float fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
+      const unsigned fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
       const bool fRMSFlip;    //Flip the direction by considering the rms.
       const bool fVertexFlip; //Flip the direction by considering the vertex position relative to the center position.
 
@@ -60,7 +57,7 @@ namespace ShowerRecoTools {
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fLArPandoraShowerCheatingAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
-    fNSegments(pset.get<float>("NSegments")),
+    fNSegments(pset.get<unsigned>("NSegments")),
     fRMSFlip(pset.get<bool>("RMSFlip")),
     fVertexFlip(pset.get<bool>("VertexFlip")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
@@ -133,6 +130,11 @@ namespace ShowerRecoTools {
     ShowerEleHolder.SetElement(trueDir,trueDirErr,fShowerDirectionOutputLabel);
 
     if (fRMSFlip || fVertexFlip){
+
+      // Reset the tree values to defaults
+      rmsGradient = -5.f;
+      vertexDotProduct = -5.f;
+
       //Get the SpacePoints and hits
       art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, Event, fPFParticleLabel);
 
@@ -171,77 +173,14 @@ namespace ShowerRecoTools {
       }
 
       if (fRMSFlip){
-        // Check against the RMS of the shower. Method adapated from EMShower Thanks Mike.
-        rmsGradient = RMSShowerGradient(spacePoints,ShowerCentre,trueDir);
+        //Otherwise Check against the RMS of the shower. Method adapated from EMShower Thanks Mike.
+        rmsGradient = IShowerTool::GetLArPandoraShowerAlg().RMSShowerGradient(spacePoints,ShowerCentre,trueDir, fNSegments);
       }
       Tree->Fill();
     }
 
     return 0;
   }
-
-
-  //Function to calculate the RMS at segements of the shower and calculate the gradient of this. If negative then the direction is pointing the opposite way to the correct one
-  double ShowerDirectionCheater::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction) const {
-
-    //Order the spacepoints
-    IShowerTool::GetLArPandoraShowerAlg().OrderShowerSpacePoints(sps,ShowerCentre,Direction);
-
-    //Get the length of the shower.
-    double minProj =IShowerTool::GetLArPandoraShowerAlg().SpacePointProjection(sps[0],ShowerCentre,Direction);
-    double maxProj =IShowerTool::GetLArPandoraShowerAlg().SpacePointProjection(sps[sps.size()-1],ShowerCentre,Direction);
-
-    double length = (maxProj-minProj);
-    double segmentsize = length/fNSegments;
-
-    std::map<int, std::vector<float> > len_segment_map;
-
-    //Split the the spacepoints into segments.
-    for(auto const& sp: sps){
-
-      //Get the the projected length
-      double len = IShowerTool::GetLArPandoraShowerAlg().SpacePointProjection(sp,ShowerCentre,Direction);
-
-      //Get the length to the projection
-      double  len_perp = IShowerTool::GetLArPandoraShowerAlg().SpacePointPerpendicular(sp,ShowerCentre,Direction,len);
-
-      int sg_len = round(len/segmentsize);
-      //TODO: look at this:
-      //int sg_len = round(len/segmentsize+fNSegments/2); //Add to make positive
-      len_segment_map[sg_len].push_back(len_perp);
-    }
-
-    int counter = 0;
-    float sumx  = 0;
-    float sumy  = 0;
-    float sumx2 = 0;
-    float sumxy = 0;
-
-    //Get the rms of the segments and caclulate the gradient.
-    for(auto const& segment: len_segment_map){
-      if (segment.second.size()<2) continue;
-      float RMS = CalculateRMS(segment.second);
-      //Calculate the gradient using regression
-      sumx  += segment.first;
-      sumy  += RMS;
-      sumx2 += segment.first * segment.first;
-      sumxy += RMS * segment.first;
-      ++counter;
-    }
-
-    return (counter*sumxy - sumx*sumy)/(counter*sumx2 - sumx*sumx);
-  }
-
-  double ShowerDirectionCheater::CalculateRMS(const std::vector<float>& perps) const {
-
-    double sum  = 0;
-    for (const auto &perp : perps){
-      sum += perp*perp;
-    }
-    // No need to bounds check as we have done so already
-    return std::sqrt(sum/(perps.size()-1));
-  }
-
 }
 
 DEFINE_ART_CLASS_TOOL(ShowerRecoTools::ShowerDirectionCheater)

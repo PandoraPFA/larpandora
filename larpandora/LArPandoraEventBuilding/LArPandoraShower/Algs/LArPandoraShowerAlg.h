@@ -100,6 +100,10 @@ class shower::LArPandoraShowerAlg {
     double SpacePointPerpendicular(art::Ptr<recob::SpacePoint> const& sp, TVector3 const& vertex,
         TVector3 const& direction, double proj) const;
 
+    double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned nSegments) const;
+
+    double CalculateRMS(const std::vector<float>& perps) const;
+
   // The SCE service requires thing in geo::Point/Vector form, so overload and be nice
     double SCECorrectPitch(double const& pitch, TVector3 const& pos, TVector3 const& dir, unsigned int const& TPC) const;
     double SCECorrectPitch(double const& pitch, geo::Point_t const& pos, geo::Vector_t const& dir, unsigned int const& TPC) const;
