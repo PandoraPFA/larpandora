@@ -105,6 +105,14 @@ namespace ShowerRecoTools{
     std::vector<art::Ptr<recob::SpacePoint> > spacepoints;
     ShowerEleHolder.GetElement(fInitialTrackSpacePointsInputLabel,spacepoints);
 
+    // The track fitter tries to create a traj point from each spacepoint so if we don't have enough
+    // spacepoints we will not get enough tracj points, so let's not even try
+    if (spacepoints.size() < fMinTrajectoryPoints){
+      if (fVerbose)
+        mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Insufficient space points points to build track: " << spacepoints.size();
+      return 1;
+    }
+
     const unsigned int nWirePlanes(fGeom->MaxPlanes());
 
     if (nWirePlanes > 3)
