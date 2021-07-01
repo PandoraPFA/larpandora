@@ -239,22 +239,25 @@ void reco::shower::LArPandoraModularShowerCreation::produce(art::Event& evt)
     if (!showerClusters.size())
       continue;
 
+    if (fVerbose>1)
+      mf::LogInfo("LArPandoraModularShowerCreation") << "Running on shower: " << shower_iter << std::endl;
+
     //Calculate the shower properties
     //Loop over the shower tools
     int err = 0;
-    unsigned int i = 0;
-    for (auto const& fShowerTool : fShowerTools) {
+    for (unsigned int i=0; i<fShowerTools.size(); i++) {
 
       //Calculate the metric
+      if (fVerbose>1)
+        mf::LogInfo("LArPandoraModularShowerCreation") << "Running shower tool: " << fShowerToolNames[i] << std::endl;
       std::string evd_disp_append = fShowerToolNames[i] + "_iteration" + std::to_string(0) + "_" + this->moduleDescription().moduleLabel();
 
-      err = fShowerTool->RunShowerTool(pfp, evt, showerEleHolder, evd_disp_append);
+      err = fShowerTools[i]->RunShowerTool(pfp, evt, showerEleHolder, evd_disp_append);
 
       if (err && fVerbose) {
         mf::LogError("LArPandoraModularShowerCreation") << "Error in shower tool: " << fShowerToolNames[i]
                                                         << " with code: " << err << std::endl;
       }
-      ++i;
     }
 
     //If we are are not allowing partial shower check all of the things
