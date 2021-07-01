@@ -32,12 +32,11 @@ namespace ShowerRecoTools {
       shower::LArPandoraShowerCheatingAlg fLArPandoraShowerCheatingAlg;
 
       //FCL
-      art::InputTag fPFParticleLabel;
-      art::InputTag fHitModuleLabel;
+      const art::InputTag fPFParticleLabel;
+      const art::InputTag fHitModuleLabel;
 
-      std::string fShowerStartPositionOutputLabel;
-      std::string fTrueParticleOutputLabel;
-
+      const std::string fShowerStartPositionOutputLabel;
+      const std::string fTrueParticleOutputLabel;
   };
 
 
@@ -91,7 +90,12 @@ namespace ShowerRecoTools {
     }
 
     const simb::MCParticle* trueParticle = trueParticles[ShowerTrackInfo.first];
+    if (!trueParticle){
+      mf::LogError("ShowerDirectionCheater") << "True shower not found, returning";
+      return 1;
+    }
 
+    ShowerEleHolder.SetElement(trueParticle,fTrueParticleOutputLabel);
 
     TVector3 trueStartPos = {-999,-999,-999};
     // If the true particle is a photon, we need to be smarter.
@@ -111,8 +115,6 @@ namespace ShowerRecoTools {
 
     TVector3 trueStartPosErr = {-999,-999,-999};
     ShowerEleHolder.SetElement(trueStartPos,trueStartPosErr,fShowerStartPositionOutputLabel);
-
-    ShowerEleHolder.SetElement(trueParticle,fTrueParticleOutputLabel);
 
     return 0;
   }

@@ -29,9 +29,8 @@ namespace ShowerRecoTools {
 
     private:
 
-      TVector3 ShowerPCAVector(std::vector<art::Ptr<recob::SpacePoint> >& spacePoints_pfp, art::FindManyP<recob::Hit>& fmh, TVector3& ShowerCentre);
-      double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, TVector3& ShowerCentre, TVector3& Direction);
-      double CalculateRMS(std::vector<float> perps);
+      double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction) const;
+      double CalculateRMS(const std::vector<float>& perps) const;
 
       //Algorithm functions
       shower::LArPandoraShowerCheatingAlg fLArPandoraShowerCheatingAlg;
@@ -40,19 +39,19 @@ namespace ShowerRecoTools {
       art::ServiceHandle<art::TFileService> tfs;
 
       //fcl
-      art::InputTag fPFParticleLabel;
-      float fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
-      bool fRMSFlip;    //Flip the direction by considering the rms.
-      bool fVertexFlip; //Flip the direction by considering the vertex position relative to the center position.
+      const art::InputTag fPFParticleLabel;
+      const float fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
+      const bool fRMSFlip;    //Flip the direction by considering the rms.
+      const bool fVertexFlip; //Flip the direction by considering the vertex position relative to the center position.
 
       //TTree Branch variables
       TTree* Tree;
       float vertexDotProduct;
       float rmsGradient;
 
-      std::string fShowerStartPositionInputLabel;
-      std::string fTrueParticleInputLabel;
-      std::string fShowerDirectionOutputLabel;
+      const std::string fShowerStartPositionInputLabel;
+      const std::string fTrueParticleInputLabel;
+      const std::string fShowerDirectionOutputLabel;
 
   };
 
@@ -68,7 +67,7 @@ namespace ShowerRecoTools {
     fTrueParticleInputLabel(pset.get<std::string>("TrueParticleInputLabel")),
     fShowerDirectionOutputLabel(pset.get<std::string>("ShowerDirectionOutputLabel"))
   {
-    if (vertexDotProduct||rmsGradient){
+    if (fVertexFlip || fRMSFlip){
       Tree = tfs->make<TTree>("DebugTreeDirCheater", "DebugTree from shower direction cheater");
       if (fVertexFlip) Tree->Branch("vertexDotProduct",&vertexDotProduct);
       if (fRMSFlip)    Tree->Branch("rmsGradient",&rmsGradient);
@@ -120,10 +119,15 @@ namespace ShowerRecoTools {
         return 1;
       }
       trueParticle = trueParticles[ShowerTrackInfo.first];
+      ShowerEleHolder.SetElement(trueParticle,fTrueParticleInputLabel);
     }
 
-    TVector3 trueDir = {trueParticle->Px(),trueParticle->Py(),trueParticle->Pz()};
-    trueDir = trueDir.Unit(); // TODO: Can probably remove?
+    if (!trueParticle){
+      mf::LogError("ShowerDirectionCheater") << "True shower not found, returning";
+      return 1;
+    }
+
+    TVector3 trueDir = TVector3{trueParticle->Px(),trueParticle->Py(),trueParticle->Pz()}.Unit();
 
     TVector3 trueDirErr = {-999,-999,-999};
     ShowerEleHolder.SetElement(trueDir,trueDirErr,fShowerDirectionOutputLabel);
@@ -143,12 +147,15 @@ namespace ShowerRecoTools {
       }
       std::vector<art::Ptr<recob::SpacePoint> > spacePoints = fmspp.at(pfparticle.key());
 
-      if (spacePoints.empty()) return 1;
+      if (spacePoints.empty()) {
+        mf::LogError("ShowerDirectionCheater") << "No spacepoints in shower" << std::endl;
+        return 1;
+      }
 
       //Get Shower Centre
       float TotalCharge;
 
-      TVector3 ShowerCentre = IShowerTool::GetLArPandoraShowerAlg().ShowerCentre(clockData, detProp, spacePoints, fmh, TotalCharge);
+      const TVector3 ShowerCentre = IShowerTool::GetLArPandoraShowerAlg().ShowerCentre(clockData, detProp, spacePoints, fmh, TotalCharge);
 
       //Check if we are pointing the correct direction or not, First try the start position
       if(ShowerEleHolder.CheckElement(fShowerStartPositionInputLabel) && fVertexFlip){
@@ -157,32 +164,15 @@ namespace ShowerRecoTools {
         TVector3 StartPositionVec = {-999, -999, -999};
         ShowerEleHolder.GetElement(fShowerStartPositionInputLabel,StartPositionVec);
 
-        TVector3 GeneralDir       = (ShowerCentre - StartPositionVec).Unit();
+        TVector3 GeneralDir = (ShowerCentre - StartPositionVec).Unit();
 
         //Dot product
         vertexDotProduct = trueDir.Dot(GeneralDir);
-
-        //If the dotproduct is negative the Direction needs Flipping
-        if(vertexDotProduct < 0){
-          trueDir[0] = - trueDir[0];
-          trueDir[1] = - trueDir[1];
-          trueDir[2] = - trueDir[2];
-        }
-
-        //ShowerEleHolder.SetShowerDirection(trueDir);
       }
 
       if (fRMSFlip){
-        //Otherwise Check against the RMS of the shower. Method adapated from EMShower Thanks Mike.
+        // Check against the RMS of the shower. Method adapated from EMShower Thanks Mike.
         rmsGradient = RMSShowerGradient(spacePoints,ShowerCentre,trueDir);
-        if(rmsGradient < 0){
-
-          trueDir[0] = - trueDir[0];
-          trueDir[1] = - trueDir[1];
-          trueDir[2] = - trueDir[2];
-        }
-
-        //ShowerEleHolder.SetShowerDirection(trueDir);
       }
       Tree->Fill();
     }
@@ -192,7 +182,7 @@ namespace ShowerRecoTools {
 
 
   //Function to calculate the RMS at segements of the shower and calculate the gradient of this. If negative then the direction is pointing the opposite way to the correct one
-  double ShowerDirectionCheater::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, TVector3& ShowerCentre, TVector3& Direction){
+  double ShowerDirectionCheater::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction) const {
 
     //Order the spacepoints
     IShowerTool::GetLArPandoraShowerAlg().OrderShowerSpacePoints(sps,ShowerCentre,Direction);
@@ -239,21 +229,17 @@ namespace ShowerRecoTools {
       ++counter;
     }
 
-    double RMSgradient = (counter*sumxy - sumx*sumy)/(counter*sumx2 - sumx*sumx);
-    return RMSgradient;
-
+    return (counter*sumxy - sumx*sumy)/(counter*sumx2 - sumx*sumx);
   }
 
-  double ShowerDirectionCheater::CalculateRMS(std::vector<float> perps){
-    int counter = 0;
+  double ShowerDirectionCheater::CalculateRMS(const std::vector<float>& perps) const {
+
     double sum  = 0;
     for (const auto &perp : perps){
-      sum= perp*perp;
-      ++counter;
+      sum += perp*perp;
     }
-    double rms = std::sqrt(sum/(counter-1));
-
-    return rms;
+    // No need to bounds check as we have done so already
+    return std::sqrt(sum/(perps.size()-1));
   }
 
 }

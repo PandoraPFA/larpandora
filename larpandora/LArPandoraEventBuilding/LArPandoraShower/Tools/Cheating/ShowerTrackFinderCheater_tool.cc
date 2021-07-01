@@ -33,15 +33,15 @@ namespace ShowerRecoTools {
 
 
       //fcl
-      bool fDebugEVD;
-      art::InputTag fPFParticleLabel;
-      art::InputTag fHitModuleLabel;
+      const bool fDebugEVD;
+      const art::InputTag fPFParticleLabel;
+      const art::InputTag fHitModuleLabel;
 
-      std::string fTrueParticleIntputLabel;
-      std::string fShowerStartPositionInputTag;
-      std::string fShowerDirectionInputTag;
-      std::string fInitialTrackHitsOutputLabel;
-      std::string fInitialTrackSpacePointsOutputLabel;
+      const std::string fTrueParticleIntputLabel;
+      const std::string fShowerStartPositionInputTag;
+      const std::string fShowerDirectionInputTag;
+      const std::string fInitialTrackHitsOutputLabel;
+      const std::string fInitialTrackSpacePointsOutputLabel;
   };
 
 
@@ -102,6 +102,12 @@ namespace ShowerRecoTools {
         return 1;
       }
       trueParticle = trueParticles[ShowerTrackInfo.first];
+      ShowerEleHolder.SetElement(trueParticle,fTrueParticleIntputLabel);
+    }
+
+    if (!trueParticle){
+      mf::LogError("ShowerDirectionCheater") << "True shower not found, returning";
+      return 1;
     }
 
     //This is all based on the shower vertex being known. If it is not lets not do the track
@@ -146,8 +152,9 @@ namespace ShowerRecoTools {
       }
     }
 
-    std::cout << *trueParticle
-      << " with ID: " << trueParticleId<< " and hits: " << trackHits.size() << std::endl;
+    if (trackHits.empty() || trackSpacePoints.empty())
+      mf::LogWarning("ShowerTrackFinderCheater") << "Creating intial track with " <<
+        trackHits.size() << " hits and " << trackSpacePoints.size() << " spacepoints" << std::endl;
 
     ShowerEleHolder.SetElement(trackHits, fInitialTrackHitsOutputLabel);
     ShowerEleHolder.SetElement(trackSpacePoints,fInitialTrackSpacePointsOutputLabel);

@@ -73,7 +73,7 @@ namespace ShowerRecoTools{
           reco::shower::ShowerElementHolder& ShowerEleHolder){return 0;}
 
     protected:
-      const shower::LArPandoraShowerAlg& GetLArPandoraShowerAlg() { return fLArPandoraShowerAlg; };
+      const shower::LArPandoraShowerAlg& GetLArPandoraShowerAlg() const { return fLArPandoraShowerAlg; };
 
     private:
 
