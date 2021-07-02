@@ -103,8 +103,10 @@ namespace ShowerRecoTools {
     std::vector<art::Ptr<recob::SpacePoint> > spacePoints_pfp = fmspp.at(pfparticle.key());
 
     //We cannot progress with no spacepoints.
-    if(spacePoints_pfp.empty())
+    if(spacePoints_pfp.size() < 3) {
+      mf::LogWarning("ShowerPCADirection") << spacePoints_pfp.size() << " spacepoints in shower, not calculating direction" << std::endl;
       return 1;
+    }
 
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(Event);
     auto const detProp   = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(Event, clockData);
@@ -152,7 +154,8 @@ namespace ShowerRecoTools {
     //Otherwise Check against the RMS of the shower. Method adapated from EMShower Thanks Mike.
     double RMSGradient = IShowerTool::GetLArPandoraShowerAlg().RMSShowerGradient(spacePoints_pfp,ShowerCentre,PCADirection, fNSegments);
 
-    if(RMSGradient < 0){
+    // If the alg fails to calculate the gradient it will return 0. In this case do nothing
+    if(RMSGradient < -std::numeric_limits<double>::epsilon()){
       PCADirection[0] = - PCADirection[0];
       PCADirection[1] = - PCADirection[1];
       PCADirection[2] = - PCADirection[2];

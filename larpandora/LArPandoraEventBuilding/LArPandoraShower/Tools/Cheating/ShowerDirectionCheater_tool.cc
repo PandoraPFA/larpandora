@@ -132,8 +132,8 @@ namespace ShowerRecoTools {
     if (fRMSFlip || fVertexFlip){
 
       // Reset the tree values to defaults
-      rmsGradient = -5.f;
-      vertexDotProduct = -5.f;
+      rmsGradient = std::numeric_limits<float>::lowest();
+      vertexDotProduct = std::numeric_limits<float>::lowest();
 
       //Get the SpacePoints and hits
       art::FindManyP<recob::SpacePoint> fmspp(pfpHandle, Event, fPFParticleLabel);
@@ -149,8 +149,8 @@ namespace ShowerRecoTools {
       }
       std::vector<art::Ptr<recob::SpacePoint> > spacePoints = fmspp.at(pfparticle.key());
 
-      if (spacePoints.empty()) {
-        mf::LogError("ShowerDirectionCheater") << "No spacepoints in shower" << std::endl;
+      if (spacePoints.size() < 3) {
+        mf::LogWarning("ShowerDirectionCheater") << spacePoints.size() << " spacepoints in shower, not calculating direction" << std::endl;
         return 1;
       }
 
