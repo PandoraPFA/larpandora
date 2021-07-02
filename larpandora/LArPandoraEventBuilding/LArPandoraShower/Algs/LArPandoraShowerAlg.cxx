@@ -394,8 +394,6 @@ double shower::LArPandoraShowerAlg::SpacePointPerpendicular(art::Ptr<recob::Spac
       const double  len_perp = this->SpacePointPerpendicular(sp,ShowerCentre,Direction,len);
 
       int sg_len = std::round(len/segmentsize);
-      //TODO: look at this:
-      //int sg_len = round(len/segmentsize+fNSegments/2); //Add to make positive
       len_segment_map[sg_len].push_back(len_perp);
     }
 
