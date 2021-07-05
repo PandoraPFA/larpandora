@@ -150,7 +150,7 @@ namespace ShowerRecoTools {
         trueParticleIdVec.push_back(-trueParticle->TrackId());
       } else {
         // If we do not roll up the showers, take all of the primary daughters
-        for (int i=0; i<trueParticle->NumberDaughters(); i++)
+        for (int i=0; i<nDaughters; i++)
         {
           trueParticleIdVec.push_back(trueParticle->Daughter(i));
         }
