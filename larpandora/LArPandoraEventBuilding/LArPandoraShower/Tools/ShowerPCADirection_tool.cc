@@ -155,7 +155,7 @@ namespace ShowerRecoTools {
     double RMSGradient = IShowerTool::GetLArPandoraShowerAlg().RMSShowerGradient(spacePoints_pfp,ShowerCentre,PCADirection, fNSegments);
 
     // If the alg fails to calculate the gradient it will return 0. In this case do nothing
-    // If the gradient is negavtive, flip the direction of the shower
+    // If the gradient is negative, flip the direction of the shower
     if(RMSGradient < -std::numeric_limits<double>::epsilon()){
       PCADirection[0] = - PCADirection[0];
       PCADirection[1] = - PCADirection[1];
