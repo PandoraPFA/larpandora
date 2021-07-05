@@ -37,7 +37,7 @@ namespace ShowerRecoTools {
 
       //fcl
       const art::InputTag fPFParticleLabel;
-      const unsigned fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
+      const unsigned int fNSegments; //Number of segement to split the shower into the perforam the RMSFlip.
       const bool fRMSFlip;    //Flip the direction by considering the rms.
       const bool fVertexFlip; //Flip the direction by considering the vertex position relative to the center position.
 
@@ -57,7 +57,7 @@ namespace ShowerRecoTools {
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fLArPandoraShowerCheatingAlg(pset.get<fhicl::ParameterSet>("LArPandoraShowerCheatingAlg")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
-    fNSegments(pset.get<unsigned>("NSegments")),
+    fNSegments(pset.get<unsigned int>("NSegments")),
     fRMSFlip(pset.get<bool>("RMSFlip")),
     fVertexFlip(pset.get<bool>("VertexFlip")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),

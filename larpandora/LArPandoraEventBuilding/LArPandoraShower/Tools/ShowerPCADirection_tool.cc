@@ -50,7 +50,7 @@ namespace ShowerRecoTools {
       //fcl
       art::InputTag fPFParticleLabel;
       int                        fVerbose;
-      unsigned fNSegments;        //Used in the RMS gradient. How many segments should we split the shower into.
+      unsigned int fNSegments;        //Used in the RMS gradient. How many segments should we split the shower into.
       bool fUseStartPosition;  //If we use the start position the drection of the
       //PCA vector is decided as (Shower Centre - Shower Start Position).
       bool fChargeWeighted;    //Should the PCA axis be charge weighted.
@@ -66,7 +66,7 @@ namespace ShowerRecoTools {
     IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
     fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
     fVerbose(pset.get<int>("Verbose")),
-    fNSegments(pset.get<unsigned>("NSegments")),
+    fNSegments(pset.get<unsigned int>("NSegments")),
     fUseStartPosition(pset.get<bool>("UseStartPosition")),
     fChargeWeighted(pset.get<bool>("ChargeWeighted")),
     fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel")),
@@ -155,6 +155,7 @@ namespace ShowerRecoTools {
     double RMSGradient = IShowerTool::GetLArPandoraShowerAlg().RMSShowerGradient(spacePoints_pfp,ShowerCentre,PCADirection, fNSegments);
 
     // If the alg fails to calculate the gradient it will return 0. In this case do nothing
+    // If the gradient is negavtive, flip the direction of the shower
     if(RMSGradient < -std::numeric_limits<double>::epsilon()){
       PCADirection[0] = - PCADirection[0];
       PCADirection[1] = - PCADirection[1];

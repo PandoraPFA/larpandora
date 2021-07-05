@@ -361,7 +361,7 @@ double shower::LArPandoraShowerAlg::SpacePointPerpendicular(art::Ptr<recob::Spac
 }
 
   //Function to calculate the RMS at segments of the shower and calculate the gradient of this. If negative then the direction is pointing the opposite way to the correct one
-  double shower::LArPandoraShowerAlg::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned nSegments) const {
+  double shower::LArPandoraShowerAlg::RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned int nSegments) const {
 
     if (nSegments == 0)
       throw cet::exception("LArPandoraShowerAlg") << "Unable to calculate RMS Shower Gradient with 0 segments" << std::endl;

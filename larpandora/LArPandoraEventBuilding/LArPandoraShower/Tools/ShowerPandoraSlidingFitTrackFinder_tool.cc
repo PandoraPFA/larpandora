@@ -106,7 +106,7 @@ namespace ShowerRecoTools{
     ShowerEleHolder.GetElement(fInitialTrackSpacePointsInputLabel,spacepoints);
 
     // The track fitter tries to create a traj point from each spacepoint so if we don't have enough
-    // spacepoints we will not get enough tracj points, so let's not even try
+    // spacepoints we will not get enough traj points, so let's not even try
     if (spacepoints.size() < fMinTrajectoryPoints){
       if (fVerbose)
         mf::LogWarning("ShowerPandoraSlidingFitTrackFinder") << "Insufficient space points points to build track: " << spacepoints.size();

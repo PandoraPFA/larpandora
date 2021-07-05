@@ -100,7 +100,7 @@ class shower::LArPandoraShowerAlg {
     double SpacePointPerpendicular(art::Ptr<recob::SpacePoint> const& sp, TVector3 const& vertex,
         TVector3 const& direction, double proj) const;
 
-    double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned nSegments) const;
+    double RMSShowerGradient(std::vector<art::Ptr<recob::SpacePoint> >& sps, const TVector3& ShowerCentre, const TVector3& Direction, const unsigned int nSegments) const;
 
     double CalculateRMS(const std::vector<float>& perps) const;
 
