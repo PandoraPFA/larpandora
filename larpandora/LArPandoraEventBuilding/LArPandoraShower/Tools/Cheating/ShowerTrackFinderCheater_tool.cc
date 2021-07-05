@@ -142,12 +142,18 @@ namespace ShowerRecoTools {
     {
       trueParticleIdVec.push_back(trueParticle->TrackId());
     } else {
-      // If we roll up showers, we have no choice but to take all of the hits from the photon
-      trueParticleIdVec.push_back(-trueParticle->TrackId());
-      // If we do not roll up the showers, take all of the primary daughters
-      for (int i=0; i<trueParticle->NumberDaughters(); i++)
+      // To check if we are rolling up showers, check the number of daughters the photon has
+      const int nDaughters = trueParticle->NumberDaughters();
+      if (nDaughters == 0)
       {
-        trueParticleIdVec.push_back(trueParticle->Daughter(i));
+        // If we roll up showers, we have no choice but to take all of the hits from the photon
+        trueParticleIdVec.push_back(-trueParticle->TrackId());
+      } else {
+        // If we do not roll up the showers, take all of the primary daughters
+        for (int i=0; i<trueParticle->NumberDaughters(); i++)
+        {
+          trueParticleIdVec.push_back(trueParticle->Daughter(i));
+        }
       }
     }
 
