@@ -10,7 +10,6 @@
 //###              only be used with the sliding calo dEdx                 ###
 //############################################################################
 
-
 //Framework Includes
 #include "art/Utilities/ToolMacros.h"
 
@@ -20,84 +19,87 @@
 //ROOT Includes
 #include "TFile.h"
 
-
 namespace ShowerRecoTools {
 
+  class ShowerBayesianTrucatingdEdx : public IShowerTool {
 
-  class ShowerBayesianTrucatingdEdx: public IShowerTool {
+  public:
+    ShowerBayesianTrucatingdEdx(const fhicl::ParameterSet& pset);
 
-    public:
+    //Generic Direction Finder
+    int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                         art::Event& Event,
+                         reco::shower::ShowerElementHolder& ShowerEleHolder) override;
 
-      ShowerBayesianTrucatingdEdx(const fhicl::ParameterSet& pset);
+  private:
+    double CalculatePosterior(std::string priorname,
+                              std::vector<double>& values,
+                              int& minprob,
+                              float& mean,
+                              float& likelihood);
+    double CalculatePosterior(std::string priorname, std::vector<double>& values);
 
-      //Generic Direction Finder
-      int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-          art::Event& Event,
-          reco::shower::ShowerElementHolder& ShowerEleHolder
-          ) override;
+    bool
+    isProbabilityGood(float& old_prob, float& new_prob)
+    {
+      return (old_prob - new_prob) < fProbSeedCut;
+    }
 
-    private:
+    bool
+    isPosteriorProbabilityGood(double& prob, double& old_posteior)
+    {
+      return (old_posteior - prob) < fPostiorCut;
+    }
 
-      double CalculatePosterior(std::string priorname, std::vector<double>& values, int& minprob, float& mean, float& likelihood);
-      double CalculatePosterior(std::string priorname, std::vector<double>& values);
+    bool CheckPoint(std::string priorname, double& value);
 
+    std::vector<double> GetLikelihooddEdxVec(double& electronprob,
+                                             double& photonprob,
+                                             std::string prior,
+                                             std::vector<double>& dEdxVec);
 
-      bool isProbabilityGood(float& old_prob, float& new_prob){
-        return (old_prob-new_prob) < fProbSeedCut;
-      }
+    std::vector<double> MakeSeed(std::vector<double>& dEdxVec);
 
-      bool isPosteriorProbabilityGood(double& prob, double& old_posteior){
-        return (old_posteior - prob) < fPostiorCut;
-      }
+    void ForceSeedToFit(std::vector<double>& SeedTrack,
+                        std::string& prior,
+                        float& mean,
+                        double& posterior);
 
-      bool CheckPoint(std::string priorname, double& value);
+    void RecurivelyAddHit(std::vector<double>& SeedTrack,
+                          std::vector<double>& dEdxVec,
+                          std::string& prior,
+                          int& SkippedHitsNum,
+                          float& old_mean,
+                          double& old_posteior);
 
-      std::vector<double> GetLikelihooddEdxVec(double& electronprob, double& photonprob,
-          std::string prior,
-          std::vector<double>& dEdxVec
-          );
+    TH1F* electronpriorHist;
+    TH1F* photonpriorHist;
 
-      std::vector<double> MakeSeed(std::vector<double>& dEdxVec);
-
-      void ForceSeedToFit(std::vector<double>& SeedTrack, std::string& prior, float& mean,double& posterior);
-
-      void RecurivelyAddHit(std::vector<double>& SeedTrack,
-          std::vector<double>& dEdxVec,
-          std::string& prior,
-          int& SkippedHitsNum,
-          float& old_mean,
-          double& old_posteior
-          );
-
-      TH1F* electronpriorHist;
-      TH1F* photonpriorHist;
-
-      //fcl params
-      int fVerbose;
-      std::string fdEdxInputLabel;
-      int fNumSeedHits;
-      float fProbSeedCut;
-      float fProbPointCut;
-      float fPostiorCut;
-      int fnSkipHits;
-      std::string fShowerdEdxOutputLabel;
-      bool fDefineBestPlane;
-      std::string fShowerBestPlaneOutputLabel;
+    //fcl params
+    int fVerbose;
+    std::string fdEdxInputLabel;
+    int fNumSeedHits;
+    float fProbSeedCut;
+    float fProbPointCut;
+    float fPostiorCut;
+    int fnSkipHits;
+    std::string fShowerdEdxOutputLabel;
+    bool fDefineBestPlane;
+    std::string fShowerBestPlaneOutputLabel;
   };
 
-
-  ShowerBayesianTrucatingdEdx::ShowerBayesianTrucatingdEdx(const fhicl::ParameterSet& pset) :
-    IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fVerbose(pset.get<int>("Verbose")),
-    fdEdxInputLabel(pset.get<std::string>("dEdxInputLabel")),
-    fNumSeedHits(pset.get<int>("NumSeedHits")),
-    fProbSeedCut(pset.get<float>("ProbSeedCut")),
-    fProbPointCut(pset.get<float>("ProbPointCut")),
-    fPostiorCut(pset.get<float>("PostiorCut")),
-    fnSkipHits(pset.get<int>("nSkipHits")),
-    fShowerdEdxOutputLabel(pset.get<std::string>("ShowerdEdxOutputLabel")),
-    fDefineBestPlane(pset.get<bool>("DefineBestPlane")),
-    fShowerBestPlaneOutputLabel(pset.get<std::string>("ShowerBestPlaneOutputLabel"))
+  ShowerBayesianTrucatingdEdx::ShowerBayesianTrucatingdEdx(const fhicl::ParameterSet& pset)
+    : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools"))
+    , fVerbose(pset.get<int>("Verbose"))
+    , fdEdxInputLabel(pset.get<std::string>("dEdxInputLabel"))
+    , fNumSeedHits(pset.get<int>("NumSeedHits"))
+    , fProbSeedCut(pset.get<float>("ProbSeedCut"))
+    , fProbPointCut(pset.get<float>("ProbPointCut"))
+    , fPostiorCut(pset.get<float>("PostiorCut"))
+    , fnSkipHits(pset.get<int>("nSkipHits"))
+    , fShowerdEdxOutputLabel(pset.get<std::string>("ShowerdEdxOutputLabel"))
+    , fDefineBestPlane(pset.get<bool>("DefineBestPlane"))
+    , fShowerBestPlaneOutputLabel(pset.get<std::string>("ShowerBestPlaneOutputLabel"))
   {
 
     //Get the prior file name
@@ -125,19 +127,20 @@ namespace ShowerRecoTools {
       throw cet::exception("ShowerBayesianTrucatingdEdx") << "Could not read the photon hist ";
     }
 
-    if(electronpriorHist->GetNbinsX() != photonpriorHist->GetNbinsX()){
+    if (electronpriorHist->GetNbinsX() != photonpriorHist->GetNbinsX()) {
       throw cet::exception("ShowerBayesianTrucatingdEdx") << "Histrogram bins do not match";
     }
 
-
     //Normalise the histograms.
-    electronpriorHist->Scale(1/electronpriorHist->Integral());
-    photonpriorHist->Scale(1/photonpriorHist->Integral());
-
+    electronpriorHist->Scale(1 / electronpriorHist->Integral());
+    photonpriorHist->Scale(1 / photonpriorHist->Integral());
   }
 
-  int ShowerBayesianTrucatingdEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-      art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
+  int
+  ShowerBayesianTrucatingdEdx::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                                                art::Event& Event,
+                                                reco::shower::ShowerElementHolder& ShowerEleHolder)
+  {
 
     //The idea , to some peoples distaste, is to attempt to improve the dEdx value by assuming
     //The particle is either a) electron b) a e-e+ pair.
@@ -147,24 +150,22 @@ namespace ShowerRecoTools {
     //      planes and on the 2 planes with the most hits. Made things worse.
 
     //Get the vectors of the dEdx Elements
-    if(!ShowerEleHolder.CheckElement(fdEdxInputLabel)){
+    if (!ShowerEleHolder.CheckElement(fdEdxInputLabel)) {
       if (fVerbose)
-        mf::LogError("ShowerBayesianTrucatingdEdx") << "Start position not set, returning "<< std::endl;
+        mf::LogError("ShowerBayesianTrucatingdEdx")
+          << "Start position not set, returning " << std::endl;
       return 1;
     }
 
-
-
-    std::map<int,std::vector<double > > dEdx_plane_final;
-    std::map<int,std::vector<double > > dEdx_vec_planes;
-    ShowerEleHolder.GetElement(fdEdxInputLabel,dEdx_vec_planes);
+    std::map<int, std::vector<double>> dEdx_plane_final;
+    std::map<int, std::vector<double>> dEdx_vec_planes;
+    ShowerEleHolder.GetElement(fdEdxInputLabel, dEdx_vec_planes);
 
     //Do this for each plane;
-    for(auto const& dEdx_vec_plane: dEdx_vec_planes){
-
+    for (auto const& dEdx_vec_plane : dEdx_vec_planes) {
 
       //Set up out final value if we don't have any points.
-      if(dEdx_vec_plane.second.size() < 1){
+      if (dEdx_vec_plane.second.size() < 1) {
         dEdx_plane_final[dEdx_vec_plane.first] = {};
         continue;
       }
@@ -172,42 +173,43 @@ namespace ShowerRecoTools {
       std::vector<double> dEdx_vec = dEdx_vec_plane.second;
 
       double electronprob_eprior = 0;
-      double photonprob_eprior   = 0;
+      double photonprob_eprior = 0;
 
       double electronprob_pprior = 0;
-      double photonprob_pprior   = 0;
+      double photonprob_pprior = 0;
 
-      std::vector<double> dEdx_electronprior = GetLikelihooddEdxVec(electronprob_eprior,photonprob_eprior,"electron",dEdx_vec);
-      std::vector<double> dEdx_photonprior   = GetLikelihooddEdxVec(electronprob_pprior,photonprob_pprior,"photon",dEdx_vec);
-
+      std::vector<double> dEdx_electronprior =
+        GetLikelihooddEdxVec(electronprob_eprior, photonprob_eprior, "electron", dEdx_vec);
+      std::vector<double> dEdx_photonprior =
+        GetLikelihooddEdxVec(electronprob_pprior, photonprob_pprior, "photon", dEdx_vec);
 
       //Use the vector which maximises both priors.
-      if(electronprob_eprior < photonprob_pprior){
+      if (electronprob_eprior < photonprob_pprior) {
         dEdx_plane_final[dEdx_vec_plane.first] = dEdx_photonprior;
       }
-      else{
+      else {
         dEdx_plane_final[dEdx_vec_plane.first] = dEdx_electronprior;
       }
 
-    }//Plane Loop
+    } //Plane Loop
 
     //Calculate the median of the of dEdx.
     std::vector<double> dEdx_final;
     std::vector<double> dEdx_finalErr;
 
-    int max_hits   = -999;
+    int max_hits = -999;
     int best_plane = -999;
 
     bool check = false;
-    for(auto const& dEdx_plane: dEdx_plane_final){
+    for (auto const& dEdx_plane : dEdx_plane_final) {
 
       //Redefine the best plane
-      if((int) (dEdx_plane.second).size() > max_hits){
+      if ((int)(dEdx_plane.second).size() > max_hits) {
         best_plane = dEdx_plane.first;
-        max_hits   = (dEdx_plane.second).size();
+        max_hits = (dEdx_plane.second).size();
       }
 
-      if((dEdx_plane.second).empty()){
+      if ((dEdx_plane.second).empty()) {
         dEdx_final.push_back(-999);
         dEdx_finalErr.push_back(-999);
         continue;
@@ -219,30 +221,36 @@ namespace ShowerRecoTools {
     }
 
     //Check at least one plane has the information
-    if(!check)
-      return 1;
+    if (!check) return 1;
 
-    if(fDefineBestPlane){
-      ShowerEleHolder.SetElement(best_plane,fShowerBestPlaneOutputLabel);
-    }
+    if (fDefineBestPlane) { ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel); }
 
-    ShowerEleHolder.SetElement(dEdx_final,dEdx_finalErr,fShowerdEdxOutputLabel);
+    ShowerEleHolder.SetElement(dEdx_final, dEdx_finalErr, fShowerdEdxOutputLabel);
 
     return 0;
   }
 
-  double ShowerBayesianTrucatingdEdx::CalculatePosterior(std::string priorname, std::vector<double>& values){
+  double
+  ShowerBayesianTrucatingdEdx::CalculatePosterior(std::string priorname,
+                                                  std::vector<double>& values)
+  {
     int minprob_iter = -999;
-    float mean       = -999;
+    float mean = -999;
     float likelihood = -999;
-    return CalculatePosterior(priorname,values,minprob_iter,mean,likelihood);
+    return CalculatePosterior(priorname, values, minprob_iter, mean, likelihood);
   }
 
-  double ShowerBayesianTrucatingdEdx::CalculatePosterior(std::string priorname, std::vector<double>& values, int& minprob_iter, float& mean, float& likelihood){
+  double
+  ShowerBayesianTrucatingdEdx::CalculatePosterior(std::string priorname,
+                                                  std::vector<double>& values,
+                                                  int& minprob_iter,
+                                                  float& mean,
+                                                  float& likelihood)
+  {
 
     //Posterior prob;
-    float posterior  = 1;
-    float meanprob  = 0;
+    float posterior = 1;
+    float meanprob = 0;
     float likelihood_other = 1;
     likelihood = 1;
 
@@ -253,69 +261,77 @@ namespace ShowerRecoTools {
     TH1F* prior_hist = nullptr;
     TH1F* other_hist = nullptr;
 
-    if(priorname=="electron"){prior_hist = electronpriorHist; other_hist = photonpriorHist;}
-    if(priorname=="photon")  {prior_hist = photonpriorHist; other_hist = electronpriorHist;}
+    if (priorname == "electron") {
+      prior_hist = electronpriorHist;
+      other_hist = photonpriorHist;
+    }
+    if (priorname == "photon") {
+      prior_hist = photonpriorHist;
+      other_hist = electronpriorHist;
+    }
 
-    TAxis *xaxis = prior_hist->GetXaxis();
+    TAxis* xaxis = prior_hist->GetXaxis();
 
     //Loop over the hits and calculate the probability
-    for(int i=0; i<(int)values.size(); ++i){
+    for (int i = 0; i < (int)values.size(); ++i) {
 
       float value = values[i];
 
       Int_t bin = xaxis->FindBin(value);
 
       float prob = -9999;
-      float other_prob =-9999;
+      float other_prob = -9999;
 
-      if(bin != xaxis->GetNbins() || bin == 0){
+      if (bin != xaxis->GetNbins() || bin == 0) {
         //Calculate the likelihood
         prob = prior_hist->GetBinContent(bin);
         other_prob = other_hist->GetBinContent(bin);
       }
-      else{
+      else {
         prob = 0;
         other_prob = 0;
       }
 
-      if(prob < minprob_temp){
+      if (prob < minprob_temp) {
         minprob_temp = prob;
         minprob_iter = i;
       }
 
-      if(prob == 0 && other_prob == 0){continue;}
+      if (prob == 0 && other_prob == 0) { continue; }
 
       //Calculate the posterior the mean probability and liklihood
-      meanprob   += prior_hist->GetBinContent(bin);
+      meanprob += prior_hist->GetBinContent(bin);
       likelihood *= prob;
       likelihood_other *= other_prob;
     }
 
-    posterior = likelihood/(likelihood+likelihood_other);
+    posterior = likelihood / (likelihood + likelihood_other);
 
     meanprob /= values.size();
     mean = meanprob;
     return posterior;
   }
 
-  bool ShowerBayesianTrucatingdEdx::CheckPoint(std::string priorname, double& value){
+  bool
+  ShowerBayesianTrucatingdEdx::CheckPoint(std::string priorname, double& value)
+  {
 
     TH1F* prior_hist = nullptr;
 
-    if(priorname=="electron"){prior_hist = electronpriorHist;}
-    if(priorname=="photon")  {prior_hist = photonpriorHist;}
+    if (priorname == "electron") { prior_hist = electronpriorHist; }
+    if (priorname == "photon") { prior_hist = photonpriorHist; }
 
-    TAxis *xaxis = prior_hist->GetXaxis();
+    TAxis* xaxis = prior_hist->GetXaxis();
 
     Int_t bin = xaxis->FindBin(value);
 
     float prob = -9999;
 
-    if(bin != xaxis->GetNbins()+1 || bin == 0){
+    if (bin != xaxis->GetNbins() + 1 || bin == 0) {
       //Calculate the likelihood
       prob = prior_hist->GetBinContent(bin);
     }
-    else{
+    else {
       prob = 0;
     }
 
@@ -323,8 +339,12 @@ namespace ShowerRecoTools {
     return prob > fProbPointCut;
   }
 
-
-  std::vector<double> ShowerBayesianTrucatingdEdx::GetLikelihooddEdxVec(double& electronprob, double& photonprob,std::string prior,std::vector<double>& dEdxVec){
+  std::vector<double>
+  ShowerBayesianTrucatingdEdx::GetLikelihooddEdxVec(double& electronprob,
+                                                    double& photonprob,
+                                                    std::string prior,
+                                                    std::vector<double>& dEdxVec)
+  {
 
     //have a pool
     std::vector<double> dEdxVec_temp = dEdxVec;
@@ -338,33 +358,34 @@ namespace ShowerRecoTools {
     //Force the seed the be a good likelihood.
     float mean = 999;
     double posterior = 999;
-    ForceSeedToFit(SeedTrack,prior,mean,posterior);
+    ForceSeedToFit(SeedTrack, prior, mean, posterior);
 
     //Recursively add dEdx
     int SkippedHitsNum = 0;
-    RecurivelyAddHit(SeedTrack,dEdxVec_temp,prior,SkippedHitsNum,mean,posterior);
+    RecurivelyAddHit(SeedTrack, dEdxVec_temp, prior, SkippedHitsNum, mean, posterior);
 
     //Calculate the likelihood of the vector  with the photon and electron priors.
-    electronprob = CalculatePosterior("electron",SeedTrack);
-    photonprob   = CalculatePosterior("photon",SeedTrack);
+    electronprob = CalculatePosterior("electron", SeedTrack);
+    photonprob = CalculatePosterior("photon", SeedTrack);
 
     return SeedTrack;
-
   }
 
-  std::vector<double> ShowerBayesianTrucatingdEdx::MakeSeed(std::vector<double>& dEdxVec){
+  std::vector<double>
+  ShowerBayesianTrucatingdEdx::MakeSeed(std::vector<double>& dEdxVec)
+  {
 
     std::vector<double> seed_vector;
 
     //Add the first hits to the seed
     int MaxHit = fNumSeedHits;
-    if(fNumSeedHits > (int) dEdxVec.size()){MaxHit = (int) dEdxVec.size();}
+    if (fNumSeedHits > (int)dEdxVec.size()) { MaxHit = (int)dEdxVec.size(); }
 
     //    if(MaxHit == 0){
     //  mf::LogError("ShowerBayesianTrucatingdEdx") << "Size of the vector is 0 cannot perform the dEdx cutting "<< std::endl;
     //}
 
-    for(int hit_iter=0; hit_iter<MaxHit; ++hit_iter){
+    for (int hit_iter = 0; hit_iter < MaxHit; ++hit_iter) {
       seed_vector.push_back(dEdxVec[0]);
       dEdxVec.erase(dEdxVec.begin());
     }
@@ -372,12 +393,17 @@ namespace ShowerRecoTools {
     return seed_vector;
   }
 
-  void ShowerBayesianTrucatingdEdx::ForceSeedToFit(std::vector<double>& SeedTrack, std::string& prior, float& mean, double& posterior){
+  void
+  ShowerBayesianTrucatingdEdx::ForceSeedToFit(std::vector<double>& SeedTrack,
+                                              std::string& prior,
+                                              float& mean,
+                                              double& posterior)
+  {
 
     int minprob_iter = 999;
     float likelihood = -999;
-    float prob = CalculatePosterior(prior,SeedTrack,minprob_iter,mean,likelihood);
-    while((mean < fProbSeedCut || prob <= 0) && SeedTrack.size() > 1){
+    float prob = CalculatePosterior(prior, SeedTrack, minprob_iter, mean, likelihood);
+    while ((mean < fProbSeedCut || prob <= 0) && SeedTrack.size() > 1) {
 
       //Remove the the worse point.
       // std::cout << "removing hit with dEdx: " << SeedTrack.at(minprob_iter) << std::endl;
@@ -385,20 +411,26 @@ namespace ShowerRecoTools {
       minprob_iter = 999;
 
       //Recalculate
-      prob = CalculatePosterior(prior,SeedTrack,minprob_iter,mean,likelihood);
+      prob = CalculatePosterior(prior, SeedTrack, minprob_iter, mean, likelihood);
     }
     posterior = prob;
     // std::cout << "seed has been fit with size: " << SeedTrack.size() << std::endl;
     return;
   }
 
-  void ShowerBayesianTrucatingdEdx::RecurivelyAddHit(std::vector<double>& SeedTrack, std::vector<double>& dEdxVec, std::string& prior, int& SkippedHitsNum, float& old_mean, double& old_posteior){
+  void
+  ShowerBayesianTrucatingdEdx::RecurivelyAddHit(std::vector<double>& SeedTrack,
+                                                std::vector<double>& dEdxVec,
+                                                std::string& prior,
+                                                int& SkippedHitsNum,
+                                                float& old_mean,
+                                                double& old_posteior)
+  {
 
     //If we have no more hits to add then lets finish.
-    if(dEdxVec.size() < 1){return;}
+    if (dEdxVec.size() < 1) { return; }
 
-
-    bool ok = CheckPoint(prior,dEdxVec[0]);
+    bool ok = CheckPoint(prior, dEdxVec[0]);
     // int minprob_iter=999;
     // float mean = -999;
     // float likelihood =999;
@@ -412,15 +444,14 @@ namespace ShowerRecoTools {
     // if(ok){std::cout << "passed this cut" << std::endl;}
     // else{std::cout << "failed third cut" << std::endl;}
 
-
     //If we failed lets try the next hits
-    if(!ok){
+    if (!ok) {
       // std::cout << "failed the pass point: " << dEdxVec[0] << " trying another hit" << SkippedHitsNum << std::endl;
       //if(SeedTrack.size() > 1){SeedTrack.pop_back();}
       ++SkippedHitsNum;
-      if(SkippedHitsNum > fnSkipHits){return;}
+      if (SkippedHitsNum > fnSkipHits) { return; }
     }
-    else{
+    else {
       //Add the next point in question.
       // std::cout << "adding value: " << dEdxVec[0] << std::endl;
       //Reset the skip number
@@ -431,7 +462,7 @@ namespace ShowerRecoTools {
     //We have analysed this hit now lets remove it.
     dEdxVec.erase(dEdxVec.begin());
 
-    RecurivelyAddHit(SeedTrack,dEdxVec,prior,SkippedHitsNum,old_mean,old_posteior);
+    RecurivelyAddHit(SeedTrack, dEdxVec, prior, SkippedHitsNum, old_mean, old_posteior);
 
     return;
   }

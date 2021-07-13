@@ -10,58 +10,54 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
-#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 #include "lardataobj/RecoBase/PCAxis.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
 
 namespace ShowerRecoTools {
 
+  class ShowerPCAEigenvalueLength : public IShowerTool {
 
-  class ShowerPCAEigenvalueLength: public IShowerTool {
+  public:
+    ShowerPCAEigenvalueLength(const fhicl::ParameterSet& pset);
 
-    public:
+    //Generic Direction Finder
+    int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                         art::Event& Event,
+                         reco::shower::ShowerElementHolder& ShowerEleHolder) override;
 
-      ShowerPCAEigenvalueLength(const fhicl::ParameterSet& pset);
-
-      //Generic Direction Finder
-      int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-          art::Event& Event,
-          reco::shower::ShowerElementHolder& ShowerEleHolder
-          ) override;
-
-    private:
-
-      art::InputTag fPFParticleLabel;
-      int           fVerbose;
-      std::string fShowerPCAInputLabel;
-      std::string fShowerLengthOutputLabel;
-      std::string fShowerOpeningAngleOutputLabel;
-      float fNSigma;
+  private:
+    art::InputTag fPFParticleLabel;
+    int fVerbose;
+    std::string fShowerPCAInputLabel;
+    std::string fShowerLengthOutputLabel;
+    std::string fShowerOpeningAngleOutputLabel;
+    float fNSigma;
   };
 
+  ShowerPCAEigenvalueLength::ShowerPCAEigenvalueLength(const fhicl::ParameterSet& pset)
+    : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools"))
+    , fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel"))
+    , fVerbose(pset.get<int>("Verbose"))
+    , fShowerPCAInputLabel(pset.get<std::string>("ShowerPCAInputLabel"))
+    , fShowerLengthOutputLabel(pset.get<std::string>("ShowerLengthOutputLabel"))
+    , fShowerOpeningAngleOutputLabel(pset.get<std::string>("ShowerOpeningAngleOutputLabel"))
+    , fNSigma(pset.get<float>("NSigma"))
+  {}
 
-  ShowerPCAEigenvalueLength::ShowerPCAEigenvalueLength(const fhicl::ParameterSet& pset) :
-    IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
-    fVerbose(pset.get<int>("Verbose")),
-    fShowerPCAInputLabel(pset.get<std::string>("ShowerPCAInputLabel")),
-    fShowerLengthOutputLabel(pset.get<std::string>("ShowerLengthOutputLabel")),
-    fShowerOpeningAngleOutputLabel(pset.get<std::string>("ShowerOpeningAngleOutputLabel")),
-    fNSigma(pset.get<float>("NSigma"))
+  int
+  ShowerPCAEigenvalueLength::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                                              art::Event& Event,
+                                              reco::shower::ShowerElementHolder& ShowerEleHolder)
   {
-  }
 
-  int ShowerPCAEigenvalueLength::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-      art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
-
-
-    if(!ShowerEleHolder.CheckElement(fShowerPCAInputLabel)){
+    if (!ShowerEleHolder.CheckElement(fShowerPCAInputLabel)) {
       if (fVerbose)
-        mf::LogError("ShowerPCAEigenvalueLength") << "PCA not set, returning "<< std::endl;
+        mf::LogError("ShowerPCAEigenvalueLength") << "PCA not set, returning " << std::endl;
       return 1;
     }
 
     recob::PCAxis PCA = recob::PCAxis();
-    ShowerEleHolder.GetElement(fShowerPCAInputLabel,PCA);
+    ShowerEleHolder.GetElement(fShowerPCAInputLabel, PCA);
 
     const double* eigenValues = PCA.getEigenValues();
 
@@ -81,7 +77,7 @@ namespace ShowerRecoTools {
     double secondaryEigenValue = (eigenValues)[1];
     double ShowerWidth = std::sqrt(secondaryEigenValue) * 2 * fNSigma;
 
-    double ShowerAngle = std::atan(ShowerWidth/ShowerLength);
+    double ShowerAngle = std::atan(ShowerWidth / ShowerLength);
     double ShowerAngleError = -999;
 
     // Fill the shower element holder

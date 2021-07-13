@@ -53,7 +53,6 @@ namespace lar_pandora {
 
     std::string m_pfParticleLabel; ///< The pf particle label
     bool m_useAllParticles;        ///< Build a recob::Track for every recob::PFParticle
-
   };
 
   DEFINE_ART_MODULE(LArPandoraShowerCreation)

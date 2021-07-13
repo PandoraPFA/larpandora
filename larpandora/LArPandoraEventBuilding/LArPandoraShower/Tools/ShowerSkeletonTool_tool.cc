@@ -13,46 +13,46 @@
 
 namespace ShowerRecoTools {
 
+  class ShowerSkeletonTool : public IShowerTool {
 
-  class ShowerSkeletonTool: public IShowerTool {
+  public:
+    ShowerSkeletonTool(const fhicl::ParameterSet& pset);
 
-    public:
+    //Generic Direction Finder
+    int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                         art::Event& Event,
+                         reco::shower::ShowerElementHolder& ShowerEleHolder) override;
 
-      ShowerSkeletonTool(const fhicl::ParameterSet& pset);
+  private:
+    //Function to add the assoctions
+    int AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr,
+                        art::Event& Event,
+                        reco::shower::ShowerElementHolder& ShowerEleHolder) override;
 
-      //Generic Direction Finder
-      int CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-          art::Event& Event,
-          reco::shower::ShowerElementHolder& ShowerEleHolder
-          ) override;
-
-    private:
-
-      //Function to add the assoctions
-      int AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr, art::Event& Event,
-          reco::shower::ShowerElementHolder& ShowerEleHolder) override;
-
-      // Stuff you will probably need that inherits from the module
-      art::InputTag              fPFParticleLabel;
-      int                        fVerbose;
+    // Stuff you will probably need that inherits from the module
+    art::InputTag fPFParticleLabel;
+    int fVerbose;
   };
 
+  ShowerSkeletonTool::ShowerSkeletonTool(const fhicl::ParameterSet& pset)
+    : IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools"))
+    , fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel"))
+    , fVerbose(pset.get<int>("Verbose"))
+  {}
 
-  ShowerSkeletonTool::ShowerSkeletonTool(const fhicl::ParameterSet& pset) :
-    IShowerTool(pset.get<fhicl::ParameterSet>("BaseTools")),
-    fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel")),
-    fVerbose(pset.get<int>("Verbose"))
+  int
+  ShowerSkeletonTool::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
+                                       art::Event& Event,
+                                       reco::shower::ShowerElementHolder& ShowerEleHolder)
   {
-  }
-
-  int ShowerSkeletonTool::CalculateElement(const art::Ptr<recob::PFParticle>& pfparticle,
-      art::Event& Event, reco::shower::ShowerElementHolder& ShowerEleHolder){
     return 0;
   }
 
-  int ShowerSkeletonTool::AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr, art::Event& Event,
-      reco::shower::ShowerElementHolder& ShowerEleHolder
-      ){
+  int
+  ShowerSkeletonTool::AddAssociations(const art::Ptr<recob::PFParticle>& pfpPtr,
+                                      art::Event& Event,
+                                      reco::shower::ShowerElementHolder& ShowerEleHolder)
+  {
     return 0;
   }
 }
