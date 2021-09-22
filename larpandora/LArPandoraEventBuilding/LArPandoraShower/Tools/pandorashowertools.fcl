@@ -48,6 +48,17 @@ showernumelectronsenergy:{
      ShowerBestPlaneOutputLabel: "ShowerBestPlane"
  }
 
+showerestarenergy:{
+     tool_type:  ShowerESTAREnergy
+     BaseTools: @local::showerbasetools
+     CalorimetryAlg: @nil
+     # PFParticleLabel: "pandora"
+     ShowerEnergyOutputLabel: "ShowerEnergy"
+     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
+     SCECorrectEField: false
+     ESTARFname: @nil
+     ESTARTGraph: @nil
+}
 
 shower2Dlinearregressiontrackhitfinder:{
     tool_type:             Shower2DLinearRegressionTrackHitFinder
