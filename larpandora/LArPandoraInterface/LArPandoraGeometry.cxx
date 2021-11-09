@@ -11,8 +11,8 @@
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcorealg/Geometry/WireGeo.h"
 
-#include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 #include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
+#include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 
 #include <iomanip>
 #include <set>
@@ -32,7 +32,7 @@ namespace lar_pandora {
     LArDriftVolumeList driftVolumeList;
     LArPandoraGeometry::LoadGeometry(driftVolumeList, useActiveBoundingBox);
 
-    LArPandoraDetectorType *detType(detector_functions::GetDetectorType());
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
     for (LArDriftVolumeList::const_iterator iter1 = driftVolumeList.begin(),
                                             iterEnd1 = driftVolumeList.end();
@@ -77,11 +77,10 @@ namespace lar_pandora {
                                 (driftVolume2.GetCenterZ() + 0.5f * driftVolume2.GetWidthZ())));
 
         geo::Vector_t gaps(gapX, gapY, gapZ), deltas(deltaX, deltaY, deltaZ);
-        if (detType->CheckDetectorGapSize(gaps, deltas, maxDisplacement))
-        {
-            geo::Point_t point1(X1, Y1, Z1), point2(X2, Y2, Z2);
-            geo::Vector_t widths(widthX, widthY, widthZ);
-            listOfGaps.emplace_back(detType->CreateDetectorGap(point1, point2, widths));
+        if (detType->CheckDetectorGapSize(gaps, deltas, maxDisplacement)) {
+          geo::Point_t point1(X1, Y1, Z1), point2(X2, Y2, Z2);
+          geo::Vector_t widths(widthX, widthY, widthZ);
+          listOfGaps.emplace_back(detType->CreateDetectorGap(point1, point2, widths));
         }
       }
 
@@ -242,7 +241,7 @@ namespace lar_pandora {
 
     // Pandora requires three independent images, and ability to correlate features between images (via wire angles and transformation plugin).
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    LArPandoraDetectorType *detType(detector_functions::GetDetectorType());
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
     const float wirePitchU(detType->WirePitchU());
     const float wirePitchV(detType->WirePitchV());
     const float wirePitchW(detType->WirePitchW());
@@ -260,9 +259,9 @@ namespace lar_pandora {
         const geo::TPCGeo& theTpc1(theGeometry->TPC(itpc1, icstat));
         cstatList.insert(itpc1);
 
-        const float wireAngleU(detType->WireAngleU(itpc1, icstat));            
-        const float wireAngleV(detType->WireAngleV(itpc1, icstat));            
-        const float wireAngleW(detType->WireAngleW(itpc1, icstat));            
+        const float wireAngleU(detType->WireAngleU(itpc1, icstat));
+        const float wireAngleV(detType->WireAngleV(itpc1, icstat));
+        const float wireAngleW(detType->WireAngleW(itpc1, icstat));
 
         double localCoord1[3] = {0., 0., 0.};
         double worldCoord1[3] = {0., 0., 0.};
@@ -313,9 +312,12 @@ namespace lar_pandora {
 
           if (theTpc1.DriftDirection() != theTpc2.DriftDirection()) continue;
 
-          const float dThetaU(detType->WireAngleU(itpc1, icstat) - detType->WireAngleU(itpc2, icstat));
-          const float dThetaV(detType->WireAngleV(itpc1, icstat) - detType->WireAngleV(itpc2, icstat));
-          const float dThetaW(detType->WireAngleW(itpc1, icstat) - detType->WireAngleW(itpc2, icstat));
+          const float dThetaU(detType->WireAngleU(itpc1, icstat) -
+                              detType->WireAngleU(itpc2, icstat));
+          const float dThetaV(detType->WireAngleV(itpc1, icstat) -
+                              detType->WireAngleV(itpc2, icstat));
+          const float dThetaW(detType->WireAngleW(itpc1, icstat) -
+                              detType->WireAngleW(itpc2, icstat));
           if (dThetaU > maxDeltaTheta || dThetaV > maxDeltaTheta || dThetaW > maxDeltaTheta)
             continue;
 
@@ -418,11 +420,11 @@ namespace lar_pandora {
       throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalDaughterGeometry --- "
                                             "detector geometry has not yet been loaded ";
 
-    std::cout<<"The size of the drif list is: " << driftVolumeList.size() << std::endl;
+    std::cout << "The size of the drif list is: " << driftVolumeList.size() << std::endl;
     int count(0);
     // Create daughter drift volumes
     for (const LArDriftVolume& driftVolume : driftVolumeList) {
-        std::cout<<"Looking at dau vol: " << count++ << std::endl; 
+      std::cout << "Looking at dau vol: " << count++ << std::endl;
       const bool switchViews(LArPandoraGeometry::ShouldSwitchUV(driftVolume.IsPositiveDrift()));
 
       const float daughterWirePitchU(switchViews ? driftVolume.GetWirePitchV() :

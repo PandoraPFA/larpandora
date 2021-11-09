@@ -29,9 +29,9 @@
 
 #include "larpandoracontent/LArObjects/LArCaloHit.h"
 
+#include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
-#include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -57,7 +57,7 @@ namespace lar_pandora {
 
     art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
-    LArPandoraDetectorType *detType(detector_functions::GetDetectorType());
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
     // Loop over ART hits
     int hitCounter(settings.m_hitCounterOffset);
@@ -246,7 +246,7 @@ namespace lar_pandora {
   {
     //ATTN - Unlike SP, DP detector gaps are not in the drift direction
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    LArPandoraDetectorType *detType(detector_functions::GetDetectorType());
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** "
                                << std::endl;
@@ -261,7 +261,7 @@ namespace lar_pandora {
       PandoraApi::Geometry::LineGap::Parameters parameters;
 
       try {
-          parameters = detType->CreateLineGapParametersFromDetectorGaps(gap);
+        parameters = detType->CreateLineGapParametersFromDetectorGaps(gap);
       }
       catch (const pandora::StatusCodeException&) {
         mf::LogWarning("LArPandora")
@@ -303,7 +303,7 @@ namespace lar_pandora {
     const lariov::ChannelStatusProvider& channelStatus(
       art::ServiceHandle<lariov::ChannelStatusService const>()->GetProvider());
 
-    LArPandoraDetectorType *detType(detector_functions::GetDetectorType());
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
     for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat) {
       for (unsigned int itpc = 0; itpc < theGeometry->NTPC(icstat); ++itpc) {
@@ -356,14 +356,13 @@ namespace lar_pandora {
               LArDriftVolumeMap::const_iterator volumeIter(driftVolumeMap.find(volumeId));
 
               if (driftVolumeMap.end() != volumeIter) {
-                xFirst =
-                  volumeIter->second.GetCenterX() - 0.5f * volumeIter->second.GetWidthX();
-                xLast =
-                  volumeIter->second.GetCenterX() + 0.5f * volumeIter->second.GetWidthX();
+                xFirst = volumeIter->second.GetCenterX() - 0.5f * volumeIter->second.GetWidthX();
+                xLast = volumeIter->second.GetCenterX() + 0.5f * volumeIter->second.GetWidthX();
               }
 
               const geo::View_t iview = plane.View();
-              parameters = detType->CreateLineGapParametersFromReadoutGaps(iview, itpc, icstat, firstXYZ, lastXYZ, halfWirePitch, xFirst, xLast, pPandora);
+              parameters = detType->CreateLineGapParametersFromReadoutGaps(
+                iview, itpc, icstat, firstXYZ, lastXYZ, halfWirePitch, xFirst, xLast, pPandora);
             }
             catch (const pandora::StatusCodeException&) {
               mf::LogWarning("LArPandora")
