@@ -22,6 +22,10 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 
+// For Calorimetry normalization
+#include "art/Utilities/make_tool.h"
+#include "larreco/Calorimetry/INormalizeCharge.h"
+
 namespace ShowerRecoTools {
 
   class ShowerTrajPointdEdx : IShowerTool {
@@ -37,9 +41,19 @@ namespace ShowerRecoTools {
     void FinddEdxLength(std::vector<double>& dEdx_vec, std::vector<double>& dEdx_val);
 
   private:
+    // Normalization function
+    double Normalize(double dQdx,
+		     const art::Event& e,
+		     const recob::Hit& h,
+		     const geo::Point_t& location,
+		     const geo::Vector_t& direction,
+		     double t0);
+
     //Servcies and Algorithms
     art::ServiceHandle<geo::Geometry> fGeom;
     calo::CalorimetryAlg fCalorimetryAlg;
+
+    std::vector< std::unique_ptr<INormalizeCharge> > fNormalizationTools;
 
     //fcl parameters
     float fMinAngleToWire; //Minimum angle between the wire direction and the shower
@@ -64,6 +78,8 @@ namespace ShowerRecoTools {
       fSCECorrectEField; // Whether to use the local electric field, from SpaceChargeService, in recombination calc.
     bool
       fSCEInputCorrected; // Whether the input has already been corrected for spatial SCE distortions
+
+    bool fApplyCorrectionsInNorm; // Whether to instead apply calorimetry corrections in norm.
 
     art::InputTag fPFParticleLabel;
     int fVerbose;
@@ -91,6 +107,7 @@ namespace ShowerRecoTools {
     , fSCECorrectPitch(pset.get<bool>("SCECorrectPitch"))
     , fSCECorrectEField(pset.get<bool>("SCECorrectEField"))
     , fSCEInputCorrected(pset.get<bool>("SCEInputCorrected"))
+    , fApplyCorrectionsInNorm(pset.get<bool>("ApplyCorrectionsInNorm"))
     , fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel"))
     , fVerbose(pset.get<int>("Verbose"))
     , fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel"))
@@ -103,6 +120,14 @@ namespace ShowerRecoTools {
     if ((fSCECorrectPitch || fSCECorrectEField) && !fSCEInputCorrected) {
       throw cet::exception("ShowerTrajPointdEdx")
         << "Can only correct for SCE if input is already corrected" << std::endl;
+    }
+
+    if ( fApplyCorrectionsInNorm ) {
+      auto tool_psets = pset.get< std::vector< fhicl::ParameterSet > >("NormTools");
+
+      for ( auto const& tool_pset : tool_psets ) {
+	fNormalizationTools.push_back( art::make_tool<INormalizeCharge>(tool_pset) );
+      }
     }
   }
 
@@ -297,6 +322,17 @@ namespace ShowerRecoTools {
       if (fSCECorrectEField) {
         localEField = IShowerTool::GetLArPandoraShowerAlg().SCECorrectEField(localEField, pos);
       }
+
+      // Attempt the normalization
+      if ( fApplyCorrectionsInNorm ) {
+	dQdx = Normalize( dQdx,
+			  Event,
+			  *hit,
+			  InitialTrack.LocationAtPoint(index),
+			  InitialTrack.DirectionAtPoint(index),
+			  pfpT0Time );
+      }
+
       double dEdx = fCalorimetryAlg.dEdx_AREA(
         clockData, detProp, dQdx, hit->PeakTime(), planeid.Plane, pfpT0Time, localEField);
 
@@ -373,6 +409,12 @@ namespace ShowerRecoTools {
       }
     }
 
+    // BH - test
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+    std::cout << "  Init trk start (" << InitialTrack.Start().X() << ", " << InitialTrack.Start().Y() << ", " << InitialTrack.Start().Z() << ")" << std::endl;
+    std::cout << "  dE/dx on plane2: " << dEdx_val[2] << " MeV/cm" << std::endl;
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+    
     //Need to sort out errors sensibly.
     ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
     ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
@@ -474,6 +516,21 @@ namespace ShowerRecoTools {
       }
     }
     return;
+  }
+  
+  double ShowerTrajPointdEdx::Normalize(double dQdx,
+					const art::Event& e,
+					const recob::Hit& h,
+					const geo::Point_t& location,
+					const geo::Vector_t& direction,
+					double t0)
+  {
+    double ret = dQdx;
+    for (auto const& nt : fNormalizationTools) {
+      ret = nt->Normalize(ret, e, h, location, direction, t0);
+    }
+    
+    return ret;
   }
 
 }
