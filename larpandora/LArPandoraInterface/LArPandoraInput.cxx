@@ -89,7 +89,7 @@ namespace lar_pandora {
                     hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
 
       // Get hit Y and Z coordinates, based on central position of wire
-      auto const xyz = theGeometry->Wire(hit_WireID).GetCenter();
+      auto const xyz = detType->RotateToDriftX(theGeometry->Wire(hit_WireID).GetCenter());
       const double y0_cm(xyz.Y());
       const double z0_cm(xyz.Z());
 
