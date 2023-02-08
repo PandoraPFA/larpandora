@@ -58,8 +58,12 @@ namespace lar_pandora {
       return new DUNEFarDetVDThreeView; //TODO Address bare pointer
     }
     else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
-             planeSet.count(geo::kW)) {
+             planeSet.count(geo::kW) && (driftDirectionSet.count(1) || driftDirectionSet.count(-1))) {
       return new VintageLArTPCThreeView;
+    }
+    else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
+             planeSet.count(geo::kW) && (driftDirectionSet.count(2) || driftDirectionSet.count(-2))) {
+      return new DUNEFarDetVDThreeView30DegDriftY;
     }
     else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
              planeSet.count(geo::kY)) {
