@@ -26,6 +26,8 @@
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/Vertex.h"
 
+#include "larpandora/LArPandoraInterface/Detectors/GetDetectorType.h"
+
 #include "larpandoracontent/LArControlFlow/MultiPandoraApi.h"
 #include "larpandoracontent/LArHelpers/LArClusterHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
@@ -117,19 +119,23 @@ namespace lar_pandora {
     LArPandoraOutput::GetPandoraToArtHitMap(
       clusterList, threeDHitList, idToHitMap, pandoraHitToArtHitMap);
 
+    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+
     // Build the ART outputs from the pandora objects
-    LArPandoraOutput::BuildVertices(vertexVector, outputVertices);
+    LArPandoraOutput::BuildVertices(vertexVector, outputVertices, detType);
 
     if (settings.m_shouldProduceTestBeamInteractionVertices)
       LArPandoraOutput::BuildVertices(testBeamInteractionVertexVector,
-                                      outputTestBeamInteractionVertices);
+                                      outputTestBeamInteractionVertices,
+                                      detType);
 
     LArPandoraOutput::BuildSpacePoints(evt,
                                        instanceLabel,
                                        threeDHitList,
                                        pandoraHitToArtHitMap,
                                        outputSpacePoints,
-                                       outputSpacePointsToHits);
+                                       outputSpacePointsToHits,
+                                       detType);
 
     IdToIdVectorMap pfoToArtClustersMap;
     LArPandoraOutput::BuildClusters(evt,
@@ -575,10 +581,11 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   void LArPandoraOutput::BuildVertices(const pandora::VertexVector& vertexVector,
-                                       VertexCollection& outputVertices)
+                                       VertexCollection& outputVertices,
+                                       const LArPandoraDetectorType* detType)
   {
     for (size_t vertexId = 0; vertexId < vertexVector.size(); ++vertexId)
-      outputVertices->push_back(LArPandoraOutput::BuildVertex(vertexVector.at(vertexId), vertexId));
+      outputVertices->push_back(LArPandoraOutput::BuildVertex(vertexVector.at(vertexId), vertexId, detType));
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -588,7 +595,8 @@ namespace lar_pandora {
                                           const pandora::CaloHitList& threeDHitList,
                                           const CaloHitToArtHitMap& pandoraHitToArtHitMap,
                                           SpacePointCollection& outputSpacePoints,
-                                          SpacePointToHitCollection& outputSpacePointsToHits)
+                                          SpacePointToHitCollection& outputSpacePointsToHits,
+                                          const LArPandoraDetectorType* detType)
   {
     pandora::CaloHitVector threeDHitVector;
     threeDHitVector.insert(threeDHitVector.end(), threeDHitList.begin(), threeDHitList.end());
@@ -603,7 +611,7 @@ namespace lar_pandora {
 
       LArPandoraOutput::AddAssociation(
         event, instanceLabel, hitId, {it->second}, outputSpacePointsToHits);
-      outputSpacePoints->push_back(LArPandoraOutput::BuildSpacePoint(pCaloHit, hitId));
+      outputSpacePoints->push_back(LArPandoraOutput::BuildSpacePoint(pCaloHit, hitId, detType));
     }
   }
 
@@ -958,11 +966,14 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   recob::Vertex LArPandoraOutput::BuildVertex(const pandora::Vertex* const pVertex,
-                                              const size_t vertexId)
+                                              const size_t vertexId,
+                                              const LArPandoraDetectorType* detType)
   {
-    double pos[3] = {
+    geo::Point_t pos = {
       pVertex->GetPosition().GetX(), pVertex->GetPosition().GetY(), pVertex->GetPosition().GetZ()};
-    return recob::Vertex(pos, vertexId);
+    pos = detType->UndoRotateToDriftX(pos);
+    double xyz[3] = {pos.X(), pos.Y(), pos.Z()};
+    return recob::Vertex(xyz, vertexId);
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1130,14 +1141,17 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const pandora::CaloHit* const pCaloHit,
-                                                      const size_t spacePointId)
+                                                      const size_t spacePointId,
+                                                      const LArPandoraDetectorType* detType)
   {
     if (pandora::TPC_3D != pCaloHit->GetHitType())
       throw cet::exception("LArPandora")
         << " LArPandoraOutput::BuildSpacePoint --- trying to build a space point from a 2D hit";
 
     const pandora::CartesianVector point(pCaloHit->GetPositionVector());
-    double xyz[3] = {point.GetX(), point.GetY(), point.GetZ()};
+    geo::Point_t posPoint_t = {point.GetX(), point.GetY(), point.GetZ()};
+    posPoint_t = detType->UndoRotateToDriftX(posPoint_t);
+    double xyz[3] = {posPoint_t.X(), posPoint_t.Y(), posPoint_t.Z()};
 
     // ATTN using dummy information
     double dxdydz[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // TODO: Fill in the error matrix

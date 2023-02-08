@@ -21,6 +21,7 @@ namespace cluster {
 
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 
 #include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/RecoBase/Cluster.h"
@@ -289,9 +290,11 @@ namespace lar_pandora {
      *
      *  @param  vertexVector the input list of pandora vertices
      *  @param  outputVertices the output vector of ART vertices
+     *  @param  detType Underlying detector specifics
      */
     static void BuildVertices(const pandora::VertexVector& vertexVector,
-                              VertexCollection& outputVertices);
+                              VertexCollection& outputVertices, 
+                              const LArPandoraDetectorType* detType);
 
     /**
      *  @brief  Convert pandora 3D hits to ART spacepoints and add them to the output vector
@@ -302,13 +305,15 @@ namespace lar_pandora {
      *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  outputSpacePoints the output vector of spacepoints
      *  @param  outputSpacePointsToHits the output associations between spacepoints and hits
+     *  @param  detType Underlying detector specifics
      */
     static void BuildSpacePoints(const art::Event& event,
                                  const std::string& instanceLabel,
                                  const pandora::CaloHitList& threeDHitList,
                                  const CaloHitToArtHitMap& pandoraHitToArtHitMap,
                                  SpacePointCollection& outputSpacePoints,
-                                 SpacePointToHitCollection& outputSpacePointsToHits);
+                                 SpacePointToHitCollection& outputSpacePointsToHits,
+                                 const LArPandoraDetectorType* detType);
 
     /**
      *  @brief  Convert pandora 2D clusters to ART clusters and add them to the output vector
@@ -476,21 +481,25 @@ namespace lar_pandora {
      *
      *  @param  pVertex the input vertex
      *  @param  vertexId the id of the vertex to produce
+     *  @param  detType Underlying detector specifics
      *
      *  @param  the ART vertex
      */
-    static recob::Vertex BuildVertex(const pandora::Vertex* const pVertex, const size_t vertexId);
+    static recob::Vertex BuildVertex(const pandora::Vertex* const pVertex, const size_t vertexId,
+                                     const LArPandoraDetectorType* detType);
 
     /**
      *  @brief  Convert from a pandora 3D hit to an ART spacepoint
      *
      *  @param  pCaloHit the input hit
      *  @param  spacePointId the id of the space-point to produce
+     *  @param  detType Underlying detector specifics
      *
      *  @param  the ART spacepoint
      */
     static recob::SpacePoint BuildSpacePoint(const pandora::CaloHit* const pCaloHit,
-                                             const size_t spacePointId);
+                                             const size_t spacePointId,
+                                             const LArPandoraDetectorType* detType);
 
     /**
      *  @brief  Collect a sorted list of all 2D hits in a cluster
