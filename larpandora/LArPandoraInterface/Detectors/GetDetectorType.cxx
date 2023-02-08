@@ -21,7 +21,7 @@
 
 namespace lar_pandora {
 
-  LArPandoraDetectorType* detector_functions::GetDetectorType()
+    std::unique_ptr<LArPandoraDetectorType> detector_functions::GetDetectorType()
   {
     art::ServiceHandle<geo::Geometry const> geo;
 
@@ -55,22 +55,22 @@ namespace lar_pandora {
 
     if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kY) &&
         planeSet.count(geo::kZ)) {
-      return new DUNEFarDetVDThreeView; //TODO Address bare pointer
+      return std::make_unique<DUNEFarDetVDThreeView>();
     }
     else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
              planeSet.count(geo::kW) && (driftDirectionSet.count(1) || driftDirectionSet.count(-1))) {
-      return new VintageLArTPCThreeView;
+      return std::make_unique<VintageLArTPCThreeView>();
     }
     else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
              planeSet.count(geo::kW) && (driftDirectionSet.count(2) || driftDirectionSet.count(-2))) {
-      return new DUNEFarDetVDThreeView30DegDriftY;
+      return std::make_unique<DUNEFarDetVDThreeView30DegDriftY>();
     }
     else if (nPlanes == 3 && planeSet.count(geo::kU) && planeSet.count(geo::kV) &&
              planeSet.count(geo::kY)) {
-      return new ICARUS;
+      return std::make_unique<ICARUS>();
     }
     else if (nPlanes == 2 && planeSet.count(geo::kW) && planeSet.count(geo::kY)) {
-      return new ProtoDUNEDualPhase;
+      return std::make_unique<ProtoDUNEDualPhase>();
     }
 
     throw cet::exception("LArPandora") << "LArPandoraDetectorType::GetDetectorType --- unable to "

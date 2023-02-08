@@ -36,6 +36,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <numeric> // std::iota()
 
 namespace lar_pandora {
@@ -119,7 +120,7 @@ namespace lar_pandora {
     LArPandoraOutput::GetPandoraToArtHitMap(
       clusterList, threeDHitList, idToHitMap, pandoraHitToArtHitMap);
 
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
 
     // Build the ART outputs from the pandora objects
     LArPandoraOutput::BuildVertices(vertexVector, outputVertices, detType);
@@ -582,7 +583,7 @@ namespace lar_pandora {
 
   void LArPandoraOutput::BuildVertices(const pandora::VertexVector& vertexVector,
                                        VertexCollection& outputVertices,
-                                       const LArPandoraDetectorType* detType)
+                                       const std::unique_ptr<LArPandoraDetectorType>& detType)
   {
     for (size_t vertexId = 0; vertexId < vertexVector.size(); ++vertexId)
       outputVertices->push_back(LArPandoraOutput::BuildVertex(vertexVector.at(vertexId), vertexId, detType));
@@ -596,7 +597,7 @@ namespace lar_pandora {
                                           const CaloHitToArtHitMap& pandoraHitToArtHitMap,
                                           SpacePointCollection& outputSpacePoints,
                                           SpacePointToHitCollection& outputSpacePointsToHits,
-                                          const LArPandoraDetectorType* detType)
+                                          const std::unique_ptr<LArPandoraDetectorType>& detType)
   {
     pandora::CaloHitVector threeDHitVector;
     threeDHitVector.insert(threeDHitVector.end(), threeDHitList.begin(), threeDHitList.end());
@@ -967,7 +968,7 @@ namespace lar_pandora {
 
   recob::Vertex LArPandoraOutput::BuildVertex(const pandora::Vertex* const pVertex,
                                               const size_t vertexId,
-                                              const LArPandoraDetectorType* detType)
+                                              const std::unique_ptr<LArPandoraDetectorType>& detType)
   {
     geo::Point_t pos = {
       pVertex->GetPosition().GetX(), pVertex->GetPosition().GetY(), pVertex->GetPosition().GetZ()};
@@ -1142,7 +1143,7 @@ namespace lar_pandora {
 
   recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const pandora::CaloHit* const pCaloHit,
                                                       const size_t spacePointId,
-                                                      const LArPandoraDetectorType* detType)
+                                                      const std::unique_ptr<LArPandoraDetectorType>& detType)
   {
     if (pandora::TPC_3D != pCaloHit->GetHitType())
       throw cet::exception("LArPandora")

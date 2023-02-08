@@ -22,6 +22,8 @@
 #include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
 
+#include <memory>
+
 namespace ShowerRecoTools {
 
   class ShowerPandoraSlidingFitTrackFinder : IShowerTool {
@@ -121,7 +123,7 @@ namespace ShowerRecoTools {
           << "Insufficient space points points to build track: " << spacepoints.size();
       return 1;
     }
-    lar_pandora::LArPandoraDetectorType* detType(
+    std::unique_ptr<lar_pandora::LArPandoraDetectorType> detType(
       lar_pandora::detector_functions::GetDetectorType());
     // 'wirePitchW` is here used only to provide length scale for binning hits and performing sliding/local linear fits.
     const float wirePitchW(detType->WirePitchW());

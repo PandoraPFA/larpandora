@@ -294,7 +294,7 @@ namespace lar_pandora {
      */
     static void BuildVertices(const pandora::VertexVector& vertexVector,
                               VertexCollection& outputVertices, 
-                              const LArPandoraDetectorType* detType);
+                              const std::unique_ptr<LArPandoraDetectorType>& detType);
 
     /**
      *  @brief  Convert pandora 3D hits to ART spacepoints and add them to the output vector
@@ -313,7 +313,7 @@ namespace lar_pandora {
                                  const CaloHitToArtHitMap& pandoraHitToArtHitMap,
                                  SpacePointCollection& outputSpacePoints,
                                  SpacePointToHitCollection& outputSpacePointsToHits,
-                                 const LArPandoraDetectorType* detType);
+                                 const std::unique_ptr<LArPandoraDetectorType>& detType);
 
     /**
      *  @brief  Convert pandora 2D clusters to ART clusters and add them to the output vector
@@ -486,7 +486,7 @@ namespace lar_pandora {
      *  @param  the ART vertex
      */
     static recob::Vertex BuildVertex(const pandora::Vertex* const pVertex, const size_t vertexId,
-                                     const LArPandoraDetectorType* detType);
+                                     const std::unique_ptr<LArPandoraDetectorType>& detType);
 
     /**
      *  @brief  Convert from a pandora 3D hit to an ART spacepoint
@@ -499,7 +499,7 @@ namespace lar_pandora {
      */
     static recob::SpacePoint BuildSpacePoint(const pandora::CaloHit* const pCaloHit,
                                              const size_t spacePointId,
-                                             const LArPandoraDetectorType* detType);
+                                             const std::unique_ptr<LArPandoraDetectorType>& detType);
 
     /**
      *  @brief  Collect a sorted list of all 2D hits in a cluster

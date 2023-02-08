@@ -18,6 +18,7 @@
 #include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 
 #include <iomanip>
+#include <memory>
 #include <set>
 
 namespace lar_pandora {
@@ -34,7 +35,7 @@ namespace lar_pandora {
     LArDriftVolumeList driftVolumeList;
     LArPandoraGeometry::LoadGeometry(driftVolumeList, useActiveBoundingBox);
 
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
 
     for (LArDriftVolumeList::const_iterator iter1 = driftVolumeList.begin(),
                                             iterEnd1 = driftVolumeList.end();
@@ -234,7 +235,7 @@ namespace lar_pandora {
 
     // Pandora requires three independent images, and ability to correlate features between images (via wire angles and transformation plugin).
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
     const float wirePitchU(detType->WirePitchU());
     const float wirePitchV(detType->WirePitchV());
     const float wirePitchW(detType->WirePitchW());
