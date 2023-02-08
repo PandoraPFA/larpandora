@@ -31,10 +31,10 @@ namespace lar_pandora {
             (void)driftDirectionSet.insert(TPC.DetectDriftDirection());
         }
     }
-    const int driftDirectionCount( (driftDirectionSet.count(1) || driftDirectionSet.count(-1)) +
-                                   (driftDirectionSet.count(2) || driftDirectionSet.count(-2)) +
-                                   (driftDirectionSet.count(3) || driftDirectionSet.count(-3)) +
-                                   driftDirectionSet.count(0) );
+    const short int driftDirectionCount( (driftDirectionSet.count(1) || driftDirectionSet.count(-1)) +
+                                         (driftDirectionSet.count(2) || driftDirectionSet.count(-2)) +
+                                         (driftDirectionSet.count(3) || driftDirectionSet.count(-3)) +
+                                          driftDirectionSet.count(0) );
 
     if (driftDirectionCount > 1)
         throw cet::exception("LArPandora") << "LArPandoraDetectorType::GetDetectorType -- unable to "
