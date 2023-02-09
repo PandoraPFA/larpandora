@@ -95,6 +95,12 @@ namespace lar_pandora {
       const double y0_cm(xyz.Y());
       const double z0_cm(xyz.Z());
 
+      if (hit_View == detType->TargetViewW(hit_WireID.TPC, hit_WireID.Cryostat)){
+          auto const xyznorot = theGeometry->Wire(hit_WireID).GetCenter();
+          std::cout<<"norot: " << "  " << xpos_cm << "  " << xyznorot.X() << "  " << xyznorot.Y() << "  " << xyznorot.z() << std::endl;
+          std::cout<<"wirot: " << "  " << xpos_cm << "  " << xyz.X() << "  " << xyz.Y() << "  " << xyz.z() << std::endl;
+
+      }
       // Get other hit properties here
       const double wire_pitch_cm(theGeometry->WirePitch(hit_View)); // cm
       const double mips(LArPandoraInput::GetMips(detProp, settings, hit_Charge, hit_View));

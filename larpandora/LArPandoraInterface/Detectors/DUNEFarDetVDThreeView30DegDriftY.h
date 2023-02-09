@@ -32,11 +32,11 @@ namespace lar_pandora {
 
   DUNEFarDetVDThreeView30DegDriftY::DUNEFarDetVDThreeView30DegDriftY() :
       VintageLArTPCThreeView(),
-      m_DriftXRotation (0., -1., 0.,
-                        1.,  0., 0.,
-                        0.,  0., 1.),
-      m_InverseDriftXRotation ( 0.,  1., 0.,
-                               -1.,  0., 0.,
+      m_DriftXRotation ( 0.,  1., 0.,
+                        -1.,  0., 0.,
+                         0.,  0., 1.),
+      m_InverseDriftXRotation ( 0., -1., 0.,
+                                1.,  0., 0.,
                                 0.,  0., 1.) {}
 
 
