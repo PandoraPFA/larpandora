@@ -51,6 +51,10 @@ namespace lar_pandora {
     virtual float WireAngleW(const geo::TPCID::TPCID_t tpc,
                              const geo::CryostatID::CryostatID_t cstat) const override;
 
+    virtual geo::Point_t RotateToDriftX(const geo::Point_t& globalPoint) const override;
+
+    virtual geo::Point_t UndoRotateToDriftX(const geo::Point_t& localPoint) const override;
+
     virtual bool CheckDetectorGapSize(const geo::Vector_t& gaps,
                                       const geo::Vector_t& deltas,
                                       const float maxDisplacement) const override;
@@ -165,6 +169,20 @@ namespace lar_pandora {
   {
     return detector_functions::WireAngle(
       this->TargetViewW(tpc, cstat), tpc, cstat, m_LArSoftGeometry);
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline geo::Point_t VintageLArTPCThreeView::RotateToDriftX(const geo::Point_t& globalPoint) const
+  {
+    return globalPoint;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline geo::Point_t VintageLArTPCThreeView::UndoRotateToDriftX(const geo::Point_t& localPoint) const
+  {
+    return localPoint;
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------

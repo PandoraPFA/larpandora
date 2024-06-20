@@ -113,7 +113,7 @@ namespace lar_pandora {
     std::unique_ptr<art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta>>
       outputTracksToHitsWithMeta(new art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta>);
 
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
     // 'wirePitchW` is here used only to provide length scale for binning hits and performing sliding/local linear fits.
     const float wirePitchW(detType->WirePitchW());
 

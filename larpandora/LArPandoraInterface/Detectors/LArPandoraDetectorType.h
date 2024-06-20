@@ -104,6 +104,22 @@ namespace lar_pandora {
                              const geo::CryostatID::CryostatID_t cstat) const = 0;
 
     /**
+         *  @brief  Apply a rotation to a point so that the drift axis is parallel to the x-axis
+         *
+         *  @param  globalPoint the point to rotate
+         *  @return the rotated point
+         */
+    virtual geo::Point_t RotateToDriftX(const geo::Point_t& globalPoint) const = 0;
+
+    /**
+         *  @brief  Undo a RotateToDriftX rotation
+         *
+         *  @param  localPoint the point to rotate
+         *  @return the rotated point
+         */
+    virtual geo::Point_t UndoRotateToDriftX(const geo::Point_t& localPoint) const = 0;
+
+    /**
              *  @brief  Check whether a gap size is small enough to be registered as a detector gap
              *
              *  @param  gaps a cartesean vector holding gap sizes between adjacent TPCs

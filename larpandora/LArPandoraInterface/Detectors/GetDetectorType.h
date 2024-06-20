@@ -1,6 +1,8 @@
 #ifndef LAR_PANDORA_GET_DETECTOR_TYPE_H
 #define LAR_PANDORA_GET_DETECTOR_TYPE_H 1
 
+#include <memory>
+
 namespace lar_pandora {
 
   class LArPandoraDetectorType;
@@ -12,7 +14,7 @@ namespace lar_pandora {
          *
          *  @result The detector type interface
          */
-    LArPandoraDetectorType* GetDetectorType();
+      std::unique_ptr<LArPandoraDetectorType> GetDetectorType();
 
   } // namespace detector_functions
 

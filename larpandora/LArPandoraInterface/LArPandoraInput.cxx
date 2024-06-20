@@ -38,6 +38,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <limits>
+#include <memory>
 #include <utility>
 
 namespace lar_pandora {
@@ -59,7 +60,7 @@ namespace lar_pandora {
 
     art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
 
     // Loop over ART hits
     int hitCounter(settings.m_hitCounterOffset);
@@ -89,10 +90,17 @@ namespace lar_pandora {
                     hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
 
       // Get hit Y and Z coordinates, based on central position of wire
-      auto const xyz = theGeometry->Wire(hit_WireID).GetCenter();
+      auto const xyz = detType->RotateToDriftX(theGeometry->Wire(hit_WireID).GetCenter());
+
       const double y0_cm(xyz.Y());
       const double z0_cm(xyz.Z());
 
+      if (hit_View == detType->TargetViewW(hit_WireID.TPC, hit_WireID.Cryostat)){
+          auto const xyznorot = theGeometry->Wire(hit_WireID).GetCenter();
+          std::cout<<"norot: " << "  " << xpos_cm << "  " << xyznorot.X() << "  " << xyznorot.Y() << "  " << xyznorot.z() << std::endl;
+          std::cout<<"wirot: " << "  " << xpos_cm << "  " << xyz.X() << "  " << xyz.Y() << "  " << xyz.z() << std::endl;
+
+      }
       // Get other hit properties here
       const double wire_pitch_cm(theGeometry->WirePitch(hit_View)); // cm
       const double mips(LArPandoraInput::GetMips(detProp, settings, hit_Charge, hit_View));
@@ -241,7 +249,7 @@ namespace lar_pandora {
   {
     //ATTN - Unlike SP, DP detector gaps are not in the drift direction
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
 
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** "
                                << std::endl;
@@ -297,7 +305,7 @@ namespace lar_pandora {
     const lariov::ChannelStatusProvider& channelStatus(
       art::ServiceHandle<lariov::ChannelStatusService const>()->GetProvider());
 
-    LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
+    std::unique_ptr<LArPandoraDetectorType> detType(detector_functions::GetDetectorType());
 
     for (auto const& plane : theGeometry->Iterate<geo::PlaneGeo>()) {
       const float halfWirePitch(0.5f * theGeometry->WirePitch(plane.View()));
