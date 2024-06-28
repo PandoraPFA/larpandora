@@ -423,7 +423,10 @@ namespace lar_pandora {
         lar_content::LArMCParticleParameters mcParticleParameters;
 
         try {
-          mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
+          if (truth->Origin() == simb::kSuperNovaNeutrino)
+            mcParticleParameters.m_nuanceCode = 4000;
+          else
+            mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
           mcParticleParameters.m_process = lar_content::MC_PROC_INCIDENT_NU;
           mcParticleParameters.m_energy = neutrino.Nu().E();
           mcParticleParameters.m_momentum =
@@ -549,6 +552,9 @@ namespace lar_pandora {
       }
       else if (simb::kSingleParticle == origin) {
         nuanceCode = 2000;
+      }
+      else if (simb::kSuperNovaNeutrino == origin) {
+        nuanceCode = 4000;
       }
 
       // Create 3D Pandora MC Particle
