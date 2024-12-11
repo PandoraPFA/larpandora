@@ -142,7 +142,7 @@ namespace lar_pandora {
 
   inline float VintageLArTPCThreeView::WirePitchW() const
   {
-    return m_wireReadoutGeom->Plane({0, 0, TargetViewW(0, 0)}).WirePitch();
+    return m_wireReadoutGeom->Plane({0, 0}, TargetViewW(0, 0)).WirePitch();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
