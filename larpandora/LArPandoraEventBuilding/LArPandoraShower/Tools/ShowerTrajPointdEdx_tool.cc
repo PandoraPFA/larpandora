@@ -339,14 +339,15 @@ namespace ShowerRecoTools {
         localEField = IShowerTool::GetLArPandoraShowerAlg().SCECorrectEField(localEField, pos);
       }
 
-      // Attempt the normalization
+      // Attempt the normalization //Ivan
       if ( fApplyCorrectionsInNorm ) {
-	dQdx = Normalize( dQdx,
-			  Event,
-			  *hit,
-			  InitialTrack.LocationAtPoint(index),
-			  InitialTrack.DirectionAtPoint(index),
-			  pfpT0Time );
+        //std::cout << "Running the CorrectionsInNorm for showers" << std::endl;
+	      dQdx = Normalize( dQdx,
+			    Event,
+			    *hit,
+			    InitialTrack.LocationAtPoint(index),
+			    InitialTrack.DirectionAtPoint(index),
+			    pfpT0Time );
       }
 
       double dEdx = fCalorimetryAlg.dEdx_AREA(

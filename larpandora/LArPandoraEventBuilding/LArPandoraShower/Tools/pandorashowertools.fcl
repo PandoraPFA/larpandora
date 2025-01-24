@@ -298,7 +298,7 @@ showertrajpointdedx:{
     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
     ShowerdEdxVecOutputLabel: "ShowerdEdxVec"
 
-    ApplyCorrectionsInNorm: false # do not expect INormalizeCharge tools
+    ApplyCorrectionsInNorm: true # do not expect INormalizeCharge tools
     NormTools: []                 # empty list of INormalizeCharge tools
 }
 
