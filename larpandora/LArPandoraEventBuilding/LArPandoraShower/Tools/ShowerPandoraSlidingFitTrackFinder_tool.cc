@@ -11,6 +11,7 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
+#include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardataobj/RecoBase/Hit.h"

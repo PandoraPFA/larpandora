@@ -13,6 +13,8 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -44,6 +46,7 @@ namespace ShowerRecoTools {
   private:
     //Servcies and Algorithms
     art::ServiceHandle<geo::Geometry> fGeom;
+    geo::WireReadoutGeom const& fChannelMap = art::ServiceHandle<geo::WireReadout>()->Get();
     calo::CalorimetryAlg fCalorimetryAlg;
 
     //fcl parameters
@@ -181,7 +184,7 @@ namespace ShowerRecoTools {
     std::map<int, std::vector<double>> dEdx_vecErr;
     std::map<int, int> num_hits;
 
-    for (unsigned i = 0; i != fGeom->MaxPlanes(); ++i) {
+    for (unsigned i = 0; i != fChannelMap.MaxPlanes(); ++i) {
       dEdx_vec[i] = {};
       dEdx_vecErr[i] = {};
       num_hits[i] = 0;
@@ -215,7 +218,7 @@ namespace ShowerRecoTools {
 
       if (fSumHitSnippets && !hitSnippets.count(hit)) continue;
 
-      double wirepitch = fGeom->WirePitch((geo::PlaneID)hit->WireID());
+      double wirepitch = fChannelMap.Plane(hit->WireID()).WirePitch();
 
       //Only consider hits in the same tpc
       geo::PlaneID planeid = hit->WireID();
@@ -270,7 +273,7 @@ namespace ShowerRecoTools {
       // Note that we project in the YZ plane to make sure we are not cutting on
       // the angle into the wire planes, that should be done by the shaping time cut
       geo::Vector_t const TrajDirectionYZ{0, TrajDirection.Y(), TrajDirection.Z()};
-      auto const PlaneDirection = fGeom->Plane(planeid).GetIncreasingWireDirection();
+      auto const PlaneDirection = fChannelMap.Plane(planeid).GetIncreasingWireDirection();
 
       if (std::abs((TMath::Pi() / 2 - Angle(TrajDirectionYZ, PlaneDirection))) < fMinAngleToWire) {
         if (fVerbose) mf::LogWarning("ShowerTrajPointdEdx") << "remove from angle cut" << std::endl;
@@ -344,7 +347,7 @@ namespace ShowerRecoTools {
     //If there is very large dEdx we have either calculated it wrong (probably) or the Electron is coming to end.
     //Assumes hits are ordered!
     std::map<int, std::vector<double>> dEdx_vec_cut;
-    for (geo::PlaneID plane_id : fGeom->Iterate<geo::PlaneID>()) {
+    for (geo::PlaneID plane_id : fChannelMap.Iterate<geo::PlaneID>()) {
       dEdx_vec_cut[plane_id.Plane] = {};
     }
 

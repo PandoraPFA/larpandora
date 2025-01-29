@@ -7,6 +7,7 @@
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
@@ -57,7 +58,7 @@ namespace lar_pandora {
 
     const pandora::Pandora* pPandora(settings.m_pPrimaryPandora);
 
-    art::ServiceHandle<geo::Geometry const> theGeometry;
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout const>()->Get();
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
     LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
@@ -66,10 +67,7 @@ namespace lar_pandora {
 
     lar_content::LArCaloHitFactory caloHitFactory;
 
-    for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end();
-         iter != iterEnd;
-         ++iter) {
-      const art::Ptr<recob::Hit> hit = *iter;
+    for (auto const& hit : hitVector) {
       const geo::WireID hit_WireID(hit->WireID());
 
       // Get basic hit properties (view, time, charge)
@@ -80,21 +78,18 @@ namespace lar_pandora {
       const double hit_TimeEnd(hit->PeakTimePlusRMS());
 
       // Get hit X coordinate and, if using a single global drift volume, remove any out-of-time hits here
-      const double xpos_cm(
-        detProp.ConvertTicksToX(hit_Time, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
+      const double xpos_cm(detProp.ConvertTicksToX(hit_Time, hit_WireID.parentID()));
       const double dxpos_cm(
-        std::fabs(detProp.ConvertTicksToX(
-                    hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
-                  detProp.ConvertTicksToX(
-                    hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
+        std::fabs(detProp.ConvertTicksToX(hit_TimeEnd, hit_WireID.parentID()) -
+                  detProp.ConvertTicksToX(hit_TimeStart, hit_WireID.parentID())));
 
       // Get hit Y and Z coordinates, based on central position of wire
-      auto const xyz = theGeometry->Wire(hit_WireID).GetCenter();
+      auto const xyz = wireReadoutGeom.Wire(hit_WireID).GetCenter();
       const double y0_cm(xyz.Y());
       const double z0_cm(xyz.Z());
 
       // Get other hit properties here
-      const double wire_pitch_cm(theGeometry->WirePitch(hit_View)); // cm
+      const double wire_pitch_cm(wireReadoutGeom.Plane({0, 0}, hit_View).WirePitch()); // cm
       const double mips(LArPandoraInput::GetMips(detProp, settings, hit_Charge, hit_View));
 
       // Create Pandora CaloHit
@@ -293,21 +288,21 @@ namespace lar_pandora {
 
     const pandora::Pandora* pPandora(settings.m_pPrimaryPandora);
 
-    art::ServiceHandle<geo::Geometry const> theGeometry;
     const lariov::ChannelStatusProvider& channelStatus(
       art::ServiceHandle<lariov::ChannelStatusService const>()->GetProvider());
 
     LArPandoraDetectorType* detType(detector_functions::GetDetectorType());
 
-    for (auto const& plane : theGeometry->Iterate<geo::PlaneGeo>()) {
-      const float halfWirePitch(0.5f * theGeometry->WirePitch(plane.View()));
-      const unsigned int nWires(theGeometry->Nwires(plane.ID()));
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout const>()->Get();
+    for (auto const& plane : wireReadoutGeom.Iterate<geo::PlaneGeo>()) {
+      const float halfWirePitch(0.5f * plane.WirePitch());
+      const unsigned int nWires(wireReadoutGeom.Nwires(plane.ID()));
 
       int firstBadWire(-1), lastBadWire(-1);
 
       for (unsigned int iwire = 0; iwire < nWires; ++iwire) {
         const raw::ChannelID_t channel(
-          theGeometry->PlaneWireToChannel(geo::WireID{plane.ID(), iwire}));
+          wireReadoutGeom.PlaneWireToChannel(geo::WireID{plane.ID(), iwire}));
         const bool isBadChannel(channelStatus.IsBad(channel));
         const bool isLastWire(nWires == (iwire + 1));
 
@@ -423,7 +418,10 @@ namespace lar_pandora {
         lar_content::LArMCParticleParameters mcParticleParameters;
 
         try {
-          mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
+          if (truth->Origin() == simb::kSuperNovaNeutrino)
+            mcParticleParameters.m_nuanceCode = 4000;
+          else
+            mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
           mcParticleParameters.m_process = lar_content::MC_PROC_INCIDENT_NU;
           mcParticleParameters.m_energy = neutrino.Nu().E();
           mcParticleParameters.m_momentum =
@@ -549,6 +547,9 @@ namespace lar_pandora {
       }
       else if (simb::kSingleParticle == origin) {
         nuanceCode = 2000;
+      }
+      else if (simb::kSuperNovaNeutrino == origin) {
+        nuanceCode = 4000;
       }
 
       // Create 3D Pandora MC Particle
@@ -782,8 +783,8 @@ namespace lar_pandora {
     const float vtxTDC(clock_data.TPCG4Time2Tick(vtxT));
     const float vtxTDC0(trigger_offset(clock_data));
 
-    const geo::TPCGeo& theTpc = theGeometry->TPC(tpcID);
-    const float driftDir((theTpc.DriftDirection() == geo::kNegX) ? +1.0 : -1.0);
+    auto const [_, sign] = theGeometry->TPC(tpcID).DriftAxisWithSign();
+    const float driftDir(sign == geo::DriftSign::Negative ? +1.0 : -1.0);
     return (driftDir * (vtxTDC - vtxTDC0) * det_prop.GetXTicksCoefficient());
   }
 
@@ -794,10 +795,10 @@ namespace lar_pandora {
                                   const double hit_Charge,
                                   const geo::View_t hit_View)
   {
-    art::ServiceHandle<geo::Geometry const> theGeometry;
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout const>()->Get();
 
     // TODO: Unite this procedure with other calorimetry procedures under development
-    const double dQdX(hit_Charge / (theGeometry->WirePitch(hit_View))); // ADC/cm
+    const double dQdX(hit_Charge / (wireReadoutGeom.Plane({0, 0}, hit_View).WirePitch())); // ADC/cm
     const double dQdX_e(dQdX /
                         (detProp.ElectronsToADC() * settings.m_recombination_factor)); // e/cm
     const double dEdX(settings.m_useBirksCorrection ?

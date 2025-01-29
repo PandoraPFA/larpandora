@@ -15,8 +15,8 @@
 namespace lar_pandora {
 
   /**
-     *  @brief  Detector interface for ICARUS
-     */
+   *  @brief  Detector interface for ICARUS
+   */
   class ICARUS : public VintageLArTPCThreeView {
   public:
     geo::View_t TargetViewU(const geo::TPCID::TPCID_t tpc,
@@ -36,9 +36,9 @@ namespace lar_pandora {
                                          const geo::CryostatID::CryostatID_t cstat) const
   {
     geo::TPCID const tpcID{cstat, tpc};
-    return (this->GetLArSoftGeometry()->TPC(tpcID).DriftDirection() == geo::kPosX ?
-              this->GetLArSoftGeometry()->View(geo::PlaneID(tpcID, 1)) :
-              this->GetLArSoftGeometry()->View(geo::PlaneID(tpcID, 2)));
+    return GetLArSoftGeometry().TPC(tpcID).DriftSign() == geo::DriftSign::Positive ?
+             GetChannelMap().Plane(geo::PlaneID(tpcID, 1)).View() :
+             GetChannelMap().Plane(geo::PlaneID(tpcID, 2)).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,9 +47,9 @@ namespace lar_pandora {
                                          const geo::CryostatID::CryostatID_t cstat) const
   {
     geo::TPCID const tpcID{cstat, tpc};
-    return (this->GetLArSoftGeometry()->TPC(tpcID).DriftDirection() == geo::kPosX ?
-              this->GetLArSoftGeometry()->View(geo::PlaneID(tpcID, 2)) :
-              this->GetLArSoftGeometry()->View(geo::PlaneID(tpcID, 1)));
+    return GetLArSoftGeometry().TPC(tpcID).DriftSign() == geo::DriftSign::Positive ?
+             GetChannelMap().Plane(geo::PlaneID(tpcID, 2)).View() :
+             GetChannelMap().Plane(geo::PlaneID(tpcID, 1)).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ namespace lar_pandora {
   inline geo::View_t ICARUS::TargetViewW(const geo::TPCID::TPCID_t tpc,
                                          const geo::CryostatID::CryostatID_t cstat) const
   {
-    return this->GetLArSoftGeometry()->View(geo::PlaneID(cstat, tpc, 0));
+    return GetChannelMap().Plane(geo::PlaneID(cstat, tpc, 0)).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,8 +65,8 @@ namespace lar_pandora {
   inline float ICARUS::WireAngleW(const geo::TPCID::TPCID_t tpc,
                                   const geo::CryostatID::CryostatID_t cstat) const
   {
-    return std::abs(detector_functions::WireAngle(
-      this->TargetViewW(tpc, cstat), tpc, cstat, this->GetLArSoftGeometry()));
+    return std::abs(
+      detector_functions::WireAngle(TargetViewW(tpc, cstat), tpc, cstat, GetChannelMap()));
   }
 
 } // namespace lar_pandora

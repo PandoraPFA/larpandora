@@ -11,6 +11,8 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Tools/IShowerTool.h"
@@ -31,6 +33,7 @@ namespace ShowerRecoTools {
   private:
     //Define the services and algorithms
     art::ServiceHandle<geo::Geometry> fGeom;
+    geo::WireReadoutGeom const& fChannelMap = art::ServiceHandle<geo::WireReadout>()->Get();
     calo::CalorimetryAlg fCalorimetryAlg;
 
     //fcl parameters.
@@ -108,7 +111,7 @@ namespace ShowerRecoTools {
     // Split the track hits per plane
     std::vector<double> dEdxVec;
     std::vector<std::vector<art::Ptr<recob::Hit>>> trackHits;
-    unsigned int numPlanes = fGeom->Nplanes();
+    unsigned int numPlanes = fChannelMap.Nplanes();
     trackHits.resize(numPlanes);
 
     // Loop over the track hits and split into planes
@@ -146,10 +149,10 @@ namespace ShowerRecoTools {
         double pitch = 0;
 
         //Calculate the pitch
-        double wirepitch = fGeom->WirePitch(trackPlaneHits.at(0)->WireID().planeID());
+        double wirepitch = fChannelMap.Plane(trackPlaneHits.at(0)->WireID()).WirePitch();
         double angleToVert =
-          fGeom->WireAngleToVertical(fGeom->Plane(geo::PlaneID{0, 0, plane}).View(),
-                                     trackPlaneHits[0]->WireID().planeID()) -
+          fChannelMap.WireAngleToVertical(fChannelMap.Plane(geo::PlaneID{0, 0, plane}).View(),
+                                          trackPlaneHits[0]->WireID().planeID()) -
           0.5 * TMath::Pi();
         double cosgamma =
           std::abs(std::sin(angleToVert) * showerDir.Y() + std::cos(angleToVert) * showerDir.Z());

@@ -7,6 +7,7 @@
  */
 
 #include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
+#include "larcorealg/Geometry/WireReadoutGeom.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometryComponents.h"
 
 #include <limits>
@@ -16,9 +17,9 @@ namespace lar_pandora {
   float detector_functions::WireAngle(const geo::View_t view,
                                       const geo::TPCID::TPCID_t tpc,
                                       const geo::CryostatID::CryostatID_t cstat,
-                                      const art::ServiceHandle<geo::Geometry>& larsoftGeometry)
+                                      const geo::WireReadoutGeom& wireReadoutGeom)
   {
-    return 0.5f * M_PI - larsoftGeometry->WireAngleToVertical(view, geo::TPCID{cstat, tpc});
+    return 0.5f * M_PI - wireReadoutGeom.WireAngleToVertical(view, geo::TPCID{cstat, tpc});
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------

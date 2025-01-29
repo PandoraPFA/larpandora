@@ -11,6 +11,7 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
+#include "larcore/Geometry/WireReadout.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardataobj/RecoBase/Cluster.h"
@@ -48,7 +49,7 @@ namespace ShowerRecoTools {
     std::string fShowerBestPlaneOutputLabel;
 
     //Services
-    art::ServiceHandle<geo::Geometry> fGeom;
+    geo::WireReadoutGeom const& fChannelMap = art::ServiceHandle<geo::WireReadout>()->Get();
   };
 
   ShowerLinearEnergy::ShowerLinearEnergy(const fhicl::ParameterSet& pset)
@@ -60,7 +61,7 @@ namespace ShowerRecoTools {
     , fShowerEnergyOutputLabel(pset.get<std::string>("ShowerEnergyOutputLabel"))
     , fShowerBestPlaneOutputLabel(pset.get<std::string>("ShowerBestPlaneOutputLabel"))
   {
-    fNumPlanes = fGeom->Nplanes();
+    fNumPlanes = fChannelMap.Nplanes();
     if (fNumPlanes != fGradients.size() || fNumPlanes != fIntercepts.size()) {
       throw cet::exception("ShowerLinearEnergy")
         << "The number of planes does not match the size of the fcl parametes passed: Num Planes: "
@@ -134,7 +135,7 @@ namespace ShowerRecoTools {
 
     ShowerEleHolder.SetElement(energyVec, energyError, fShowerEnergyOutputLabel);
     // Only set the best plane if it has some hits in it
-    if (bestPlane < fGeom->Nplanes()) {
+    if (bestPlane < fChannelMap.Nplanes()) {
       // Need to cast as an int for legacy default of -999
       // have to define a new variable as we pass-by-reference when filling
       int bestPlaneVal(bestPlane);

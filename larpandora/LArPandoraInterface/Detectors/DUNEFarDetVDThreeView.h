@@ -33,7 +33,7 @@ namespace lar_pandora {
     const geo::TPCID::TPCID_t tpc,
     const geo::CryostatID::CryostatID_t cstat) const
   {
-    return this->GetLArSoftGeometry()->View(geo::PlaneID(cstat, tpc, 0));
+    return this->GetChannelMap().Plane(geo::PlaneID(cstat, tpc, 0)).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ namespace lar_pandora {
     const geo::TPCID::TPCID_t tpc,
     const geo::CryostatID::CryostatID_t cstat) const
   {
-    return this->GetLArSoftGeometry()->View(geo::PlaneID(cstat, tpc, 1));
+    return this->GetChannelMap().Plane(geo::PlaneID(cstat, tpc, 1)).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ namespace lar_pandora {
     const geo::TPCID::TPCID_t tpc,
     const geo::CryostatID::CryostatID_t cstat) const
   {
-    return this->GetLArSoftGeometry()->View(geo::PlaneID(cstat, tpc, 2));
+    return this->GetChannelMap().Plane(geo::PlaneID(cstat, tpc, 2)).View();
   }
 
 } // namespace lar_pandora

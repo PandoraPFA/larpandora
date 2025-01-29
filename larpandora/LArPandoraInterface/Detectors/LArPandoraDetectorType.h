@@ -9,11 +9,9 @@
 #ifndef LAR_PANDORA_DETECTOR_TYPE_H
 #define LAR_PANDORA_DETECTOR_TYPE_H 1
 
-#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/fwd.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h"
-
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 
 #include "Api/PandoraApi.h"
 
@@ -187,7 +185,7 @@ namespace lar_pandora {
     float WireAngle(const geo::View_t view,
                     const geo::TPCID::TPCID_t tpc,
                     const geo::CryostatID::CryostatID_t cstat,
-                    const art::ServiceHandle<geo::Geometry>& larsoftGeometry);
+                    const geo::WireReadoutGeom& wireReadoutGeom);
 
     /**
          *  @brief  Make the drift gap parameters for the Pandora API

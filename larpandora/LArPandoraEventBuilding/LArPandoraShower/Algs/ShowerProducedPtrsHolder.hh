@@ -82,7 +82,7 @@ class reco::shower::ShowerUniqueProductPtr<std::vector<T>>
   : public reco::shower::ShowerUniqueProduerPtrBase {
 
 public:
-  ShowerUniqueProductPtr<std::vector<T>>(const std::string& Instancename)
+  ShowerUniqueProductPtr(const std::string& Instancename)
   {
     ptr = 1;
     showeruniqueptr = std::make_unique<std::vector<T>>();

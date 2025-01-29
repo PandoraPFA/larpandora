@@ -2,6 +2,7 @@
 #include "larpandora/LArPandoraEventBuilding/LArPandoraShower/Algs/ShowerElementHolder.hh"
 
 #include "larcore/CoreUtils/ServiceUtil.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "lardataalg/DetectorInfo/DetectorClocksData.h"
 #include "lardataalg/DetectorInfo/DetectorPropertiesData.h"
 #include "lardataobj/RecoBase/Hit.h"
@@ -41,7 +42,6 @@ void shower::LArPandoraShowerAlg::OrderShowerHits(detinfo::DetectorPropertiesDat
                                                   geo::Point_t const& ShowerStartPosition,
                                                   geo::Vector_t const& ShowerDirection) const
 {
-
   std::map<double, art::Ptr<recob::Hit>> OrderedHits;
   art::Ptr<recob::Hit> startHit = hits.front();
 
@@ -52,14 +52,14 @@ void shower::LArPandoraShowerAlg::OrderShowerHits(detinfo::DetectorPropertiesDat
   const geo::PlaneID planeid = startWireID.asPlaneID();
 
   //Get the pitch
-  double pitch = fGeom->WirePitch(planeid);
+  auto const& plane = fChannelMap->Plane(planeid);
+  double pitch = plane.WirePitch();
 
-  TVector2 Shower2DStartPosition = {
-    fGeom->WireCoordinate(ShowerStartPosition, startHit->WireID().planeID()) * pitch,
-    ShowerStartPosition.X()};
+  TVector2 Shower2DStartPosition = {plane.WireCoordinate(ShowerStartPosition) * pitch,
+                                    ShowerStartPosition.X()};
 
   //Vector of the plane
-  auto const PlaneDirection = fGeom->Plane(planeid).GetIncreasingWireDirection();
+  auto const PlaneDirection = plane.GetIncreasingWireDirection();
 
   //get the shower 2D direction
   TVector2 Shower2DDirection = {ShowerDirection.Dot(PlaneDirection), ShowerDirection.X()};
@@ -71,7 +71,7 @@ void shower::LArPandoraShowerAlg::OrderShowerHits(detinfo::DetectorPropertiesDat
     //Get the wireID
     const geo::WireID WireID = hit->WireID();
 
-    if (WireID.asPlaneID() != startWireID.asPlaneID()) { break; }
+    if (WireID.asPlaneID() != planeid) { break; }
 
     //Get the hit Vector.
     TVector2 hitcoord = HitCoordinates(detProp, hit);
@@ -351,11 +351,10 @@ double shower::LArPandoraShowerAlg::SpacePointTime(art::Ptr<recob::SpacePoint> c
 TVector2 shower::LArPandoraShowerAlg::HitCoordinates(detinfo::DetectorPropertiesData const& detProp,
                                                      art::Ptr<recob::Hit> const& hit) const
 {
-
   //Get the pitch
   const geo::WireID WireID = hit->WireID();
   const geo::PlaneID planeid = WireID.asPlaneID();
-  double pitch = fGeom->WirePitch(planeid);
+  double pitch = fChannelMap->Plane(planeid).WirePitch();
 
   return TVector2(WireID.Wire * pitch, detProp.ConvertTicksToX(hit->PeakTime(), planeid));
 }

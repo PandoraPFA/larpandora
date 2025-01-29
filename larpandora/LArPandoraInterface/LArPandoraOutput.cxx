@@ -17,6 +17,7 @@
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardataobj/RecoBase/Hit.h"
@@ -621,11 +622,12 @@ namespace lar_pandora {
     cluster::StandardClusterParamsAlg clusterParamAlgo;
 
     art::ServiceHandle<geo::Geometry const> geom{};
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout const>()->Get();
     auto const clock_data =
       art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(event);
     auto const det_prop =
       art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(event, clock_data);
-    util::GeometryUtilities const gser{*geom, clock_data, det_prop};
+    util::GeometryUtilities const gser{*geom, wireReadoutGeom, clock_data, det_prop};
 
     // Produce the art clusters
     size_t nextClusterId(0);

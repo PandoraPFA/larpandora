@@ -10,6 +10,7 @@
 
 #include "TTree.h"
 
+#include "larcore/Geometry/WireReadout.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
@@ -21,8 +22,8 @@
 namespace lar_pandora {
 
   /**
- *  @brief  PFParticleHitDumper class
- */
+   *  @brief  PFParticleHitDumper class
+   */
   class PFParticleHitDumper : public art::EDAnalyzer {
   public:
     /**
@@ -185,7 +186,6 @@ namespace lar_pandora {
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larcore/Geometry/Geometry.h"
 #include "larcorealg/Geometry/CryostatGeo.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/TPCGeo.h"
@@ -332,9 +332,6 @@ namespace lar_pandora {
       std::cout << "  Run: " << m_run << std::endl;
       std::cout << "  Event: " << m_event << std::endl;
     }
-
-    // Need geometry service to convert channel to wire ID
-    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     // Get particles, tracks, space points, hits (and wires)
     // ====================================================
@@ -662,20 +659,18 @@ namespace lar_pandora {
     // Create dummy entry if there are no wires
     if (wireVector.empty()) { m_pRecoWire->Fill(); }
 
-    // Need geometry service to convert channel to wire ID
-    art::ServiceHandle<geo::Geometry const> theGeometry;
-
     // Need DetectorProperties service to convert from ticks to X
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(e);
 
     // Loop over wires
     int signalCounter(0);
 
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout const>()->Get();
     for (unsigned int i = 0; i < wireVector.size(); ++i) {
       const art::Ptr<recob::Wire> wire = wireVector.at(i);
 
       const std::vector<float>& signals(wire->Signal());
-      const std::vector<geo::WireID> wireIds = theGeometry->ChannelToWire(wire->Channel());
+      const std::vector<geo::WireID> wireIds = wireReadoutGeom.ChannelToWire(wire->Channel());
 
       if ((signalCounter++) < 10 && m_printDebug)
         std::cout << "    numWires=" << wireVector.size() << " numSignals=" << signals.size()
@@ -718,13 +713,13 @@ namespace lar_pandora {
   double PFParticleHitDumper::GetUVW(const geo::WireID& wireID) const
   {
     // define UVW as closest distance from (0,0) to wire axis
-    art::ServiceHandle<geo::Geometry const> theGeometry;
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout>()->Get();
 
-    auto const xyzStart = theGeometry->Wire(wireID).GetStart();
+    auto const xyzStart = wireReadoutGeom.Wire(wireID).GetStart();
     const double ay(xyzStart.Y());
     const double az(xyzStart.Z());
 
-    auto const xyzEnd = theGeometry->Wire(wireID).GetEnd();
+    auto const xyzEnd = wireReadoutGeom.Wire(wireID).GetEnd();
     const double by(xyzEnd.Y());
     const double bz(xyzEnd.Z());
 
@@ -747,8 +742,8 @@ namespace lar_pandora {
                                     const double z) const
   {
     // TODO: Check that this stills works in DUNE
-    art::ServiceHandle<geo::Geometry const> theGeometry;
-    const double m_theta(theGeometry->WireAngleToVertical(geo::kU, geo::TPCID{cstat, tpc}));
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout>()->Get();
+    const double m_theta(wireReadoutGeom.WireAngleToVertical(geo::kU, geo::TPCID{cstat, tpc}));
     return z * std::sin(m_theta) - y * std::cos(m_theta);
   }
 
@@ -760,8 +755,8 @@ namespace lar_pandora {
                                     const double z) const
   {
     // TODO; Check that this still works in DUNE
-    art::ServiceHandle<geo::Geometry const> theGeometry;
-    const double m_theta(theGeometry->WireAngleToVertical(geo::kV, geo::TPCID{cstat, tpc}));
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout>()->Get();
+    const double m_theta(wireReadoutGeom.WireAngleToVertical(geo::kV, geo::TPCID{cstat, tpc}));
     return z * std::sin(m_theta) - y * std::cos(m_theta);
   }
 

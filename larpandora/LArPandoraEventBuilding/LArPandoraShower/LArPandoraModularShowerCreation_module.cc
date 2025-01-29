@@ -20,6 +20,7 @@
 #include "art/Utilities/make_tool.h"
 
 //LArSoft includes
+#include "larcore/Geometry/Geometry.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
@@ -71,9 +72,6 @@ private:
 
   //map to the unique ptrs to
   reco::shower::ShowerProducedPtrsHolder uniqueproducerPtrs;
-
-  // Required services
-  art::ServiceHandle<geo::Geometry> fGeom;
 };
 
 //This function returns the art::Ptr to the data object InstanceName.
@@ -162,7 +160,8 @@ reco::shower::LArPandoraModularShowerCreation::LArPandoraModularShowerCreation(
     fShowerTools.push_back(art::make_tool<ShowerRecoTools::IShowerTool>(tool_pset));
     fShowerToolNames.push_back(tool_name);
 
-    fNumPlanes = fGeom->Nplanes();
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout>()->Get();
+    fNumPlanes = wireReadoutGeom.Nplanes();
   }
 
   //  Initialise the EDProducer ptr in the tools

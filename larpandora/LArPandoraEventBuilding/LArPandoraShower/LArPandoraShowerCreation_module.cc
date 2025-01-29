@@ -10,6 +10,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
+#include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Shower.h"

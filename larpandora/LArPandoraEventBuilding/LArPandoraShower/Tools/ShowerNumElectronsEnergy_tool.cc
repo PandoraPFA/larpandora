@@ -12,6 +12,7 @@
 #include "art/Utilities/ToolMacros.h"
 
 //LArSoft Includes
+#include "larcore/Geometry/WireReadout.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
@@ -48,7 +49,7 @@ namespace ShowerRecoTools {
     std::string fShowerBestPlaneOutputLabel;
 
     //Services
-    art::ServiceHandle<geo::Geometry> fGeom;
+    geo::WireReadoutGeom const& fChannelMap = art::ServiceHandle<geo::WireReadout>()->Get();
     calo::CalorimetryAlg fCalorimetryAlg;
 
     // Declare stuff
@@ -110,8 +111,8 @@ namespace ShowerRecoTools {
     unsigned int bestPlaneNumHits = 0;
 
     //Holder for the final product
-    std::vector<double> energyVec(fGeom->Nplanes(), -999.);
-    std::vector<double> energyError(fGeom->Nplanes(), -999.);
+    std::vector<double> energyVec(fChannelMap.Nplanes(), -999.);
+    std::vector<double> energyError(fChannelMap.Nplanes(), -999.);
 
     auto const clockData =
       art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(Event);
@@ -135,7 +136,7 @@ namespace ShowerRecoTools {
 
     ShowerEleHolder.SetElement(energyVec, energyError, fShowerEnergyOutputLabel);
     // Only set the best plane if it has some hits in it
-    if (bestPlane < fGeom->Nplanes()) {
+    if (bestPlane < fChannelMap.Nplanes()) {
       // Need to cast as an int for legacy default of -999
       // have to define a new variable as we pass-by-reference when filling
       int bestPlaneVal(bestPlane);

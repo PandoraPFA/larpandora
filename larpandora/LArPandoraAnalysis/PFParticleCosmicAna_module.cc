@@ -29,11 +29,6 @@ namespace lar_pandora {
      */
     PFParticleCosmicAna(fhicl::ParameterSet const& pset);
 
-    /**
-     *  @brief  Destructor
-     */
-    virtual ~PFParticleCosmicAna();
-
     void beginJob();
     void endJob();
     void analyze(const art::Event& evt);
@@ -170,17 +165,6 @@ namespace lar_pandora {
 namespace lar_pandora {
 
   PFParticleCosmicAna::PFParticleCosmicAna(fhicl::ParameterSet const& pset) : art::EDAnalyzer(pset)
-  {
-    this->reconfigure(pset);
-  }
-
-  //------------------------------------------------------------------------------------------------------------------------------------------
-
-  PFParticleCosmicAna::~PFParticleCosmicAna() {}
-
-  //------------------------------------------------------------------------------------------------------------------------------------------
-
-  void PFParticleCosmicAna::reconfigure(fhicl::ParameterSet const& pset)
   {
     m_cosmicLabel = pset.get<std::string>("CosmicTagModule", "cosmictagger");
     m_particleLabel = pset.get<std::string>("PFParticleModule", "pandora");
@@ -357,14 +341,14 @@ namespace lar_pandora {
   {
     // Set up Geometry Service
     // =======================
-    art::ServiceHandle<geo::Geometry const> theGeometry;
+    auto const& tpc = art::ServiceHandle<geo::Geometry const>()->TPC({0, 0});
 
     const double xmin(0.0);
-    const double xmax(2.0 * theGeometry->DetHalfWidth());
-    const double ymin(-theGeometry->DetHalfHeight());
-    const double ymax(+theGeometry->DetHalfHeight());
+    const double xmax(2.0 * tpc.HalfWidth());
+    const double ymin(-tpc.HalfHeight());
+    const double ymax(+tpc.HalfHeight());
     const double zmin(0.0);
-    const double zmax(theGeometry->DetLength());
+    const double zmax(tpc.Length());
     const double xyzCut(m_cosmicContainmentCut);
 
     m_index = 0;

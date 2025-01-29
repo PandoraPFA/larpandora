@@ -10,6 +10,7 @@
 #include "cetlib_except/exception.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcorealg/Geometry/WireGeo.h"
@@ -201,9 +202,9 @@ namespace lar_pandora {
   {
     // We determine whether U and V views should be switched by checking the drift direction
     art::ServiceHandle<geo::Geometry const> theGeometry;
-    const geo::TPCGeo& theTpc{theGeometry->TPC(geo::TPCID(cstat, tpc))};
 
-    const bool isPositiveDrift(theTpc.DriftDirection() == geo::kPosX);
+    const bool isPositiveDrift(theGeometry->TPC({cstat, tpc}).DriftSign() ==
+                               geo::DriftSign::Positive);
     return LArPandoraGeometry::ShouldSwitchUV(isPositiveDrift);
   }
 
@@ -212,8 +213,8 @@ namespace lar_pandora {
   bool LArPandoraGeometry::ShouldSwitchUV(const bool isPositiveDrift)
   {
     // ATTN: In the dual phase scenario the wire planes pointing along two orthogonal directions and so interchanging U and V is unnecessary
-    art::ServiceHandle<geo::Geometry const> theGeometry;
-    if (theGeometry->MaxPlanes() == 2) return false;
+    auto const& wireReadoutGeom = art::ServiceHandle<geo::WireReadout>()->Get();
+    if (wireReadoutGeom.MaxPlanes() == 2) return false;
 
     // We assume that all multiple drift volume detectors have the APA - CPA - APA - CPA design
     return isPositiveDrift;
@@ -281,7 +282,7 @@ namespace lar_pandora {
             (0.5 * (driftMinX + driftMaxX) + 0.25 * std::fabs(driftMaxX - driftMinX)) :
             (worldCoord1.X() + 0.5 * theTpc1.ActiveHalfWidth()));
 
-        const bool isPositiveDrift(theTpc1.DriftDirection() == geo::kPosX);
+        const bool isPositiveDrift(theTpc1.DriftSign() == geo::DriftSign::Positive);
 
         UIntSet tpcList;
         tpcList.insert(itpc1);
@@ -300,8 +301,7 @@ namespace lar_pandora {
         for (auto const& theTpc2 : theGeometry->Iterate<geo::TPCGeo>(cryostat.ID())) {
           auto const itpc2 = theTpc2.ID().TPC;
           if (cstatList.end() != cstatList.find(itpc2)) continue;
-
-          if (theTpc1.DriftDirection() != theTpc2.DriftDirection()) continue;
+          if (theTpc1.DriftSign() != theTpc2.DriftSign()) continue;
 
           const float dThetaU(detType->WireAngleU(itpc1, icstat) -
                               detType->WireAngleU(itpc2, icstat));

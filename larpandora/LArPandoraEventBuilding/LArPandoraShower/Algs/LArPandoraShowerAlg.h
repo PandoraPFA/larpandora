@@ -10,7 +10,7 @@ namespace detinfo {
   class DetectorPropertiesData;
 }
 
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 
 namespace recob {
   class Hit;
@@ -124,7 +124,7 @@ private:
   bool fSCEXFlip; // If a (legacy) flip is needed in x componant of spatial SCE correction
 
   spacecharge::SpaceCharge const* fSCE;
-  art::ServiceHandle<geo::Geometry const> fGeom;
+  geo::WireReadoutGeom const* fChannelMap = &art::ServiceHandle<geo::WireReadout>()->Get();
   art::ServiceHandle<art::TFileService> tfs;
 
   const std::string fInitialTrackInputLabel;

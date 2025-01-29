@@ -19,54 +19,55 @@
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 
 namespace lar_pandora {
 
   /**
-     *  @brief  Detector interface for a 3view, horizontal drift, single-phase LArTPC
-     */
+   *  @brief  Detector interface for a 3view, horizontal drift, single-phase LArTPC
+   */
   class VintageLArTPCThreeView : public LArPandoraDetectorType {
   public:
-    virtual geo::View_t TargetViewU(const geo::TPCID::TPCID_t tpc,
-                                    const geo::CryostatID::CryostatID_t cstat) const override;
+    geo::View_t TargetViewU(const geo::TPCID::TPCID_t tpc,
+                            const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual geo::View_t TargetViewV(const geo::TPCID::TPCID_t tpc,
-                                    const geo::CryostatID::CryostatID_t cstat) const override;
+    geo::View_t TargetViewV(const geo::TPCID::TPCID_t tpc,
+                            const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual geo::View_t TargetViewW(const geo::TPCID::TPCID_t tpc,
-                                    const geo::CryostatID::CryostatID_t cstat) const override;
+    geo::View_t TargetViewW(const geo::TPCID::TPCID_t tpc,
+                            const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual float WirePitchU() const override;
+    float WirePitchU() const override;
 
-    virtual float WirePitchV() const override;
+    float WirePitchV() const override;
 
-    virtual float WirePitchW() const override;
+    float WirePitchW() const override;
 
-    virtual float WireAngleU(const geo::TPCID::TPCID_t tpc,
-                             const geo::CryostatID::CryostatID_t cstat) const override;
+    float WireAngleU(const geo::TPCID::TPCID_t tpc,
+                     const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual float WireAngleV(const geo::TPCID::TPCID_t tpc,
-                             const geo::CryostatID::CryostatID_t cstat) const override;
+    float WireAngleV(const geo::TPCID::TPCID_t tpc,
+                     const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual float WireAngleW(const geo::TPCID::TPCID_t tpc,
-                             const geo::CryostatID::CryostatID_t cstat) const override;
+    float WireAngleW(const geo::TPCID::TPCID_t tpc,
+                     const geo::CryostatID::CryostatID_t cstat) const override;
 
-    virtual bool CheckDetectorGapSize(const geo::Vector_t& gaps,
-                                      const geo::Vector_t& deltas,
-                                      const float maxDisplacement) const override;
+    bool CheckDetectorGapSize(const geo::Vector_t& gaps,
+                              const geo::Vector_t& deltas,
+                              const float maxDisplacement) const override;
 
-    virtual LArDetectorGap CreateDetectorGap(const geo::Point_t& point1,
-                                             const geo::Point_t& point2,
-                                             const geo::Vector_t& widths) const override;
+    LArDetectorGap CreateDetectorGap(const geo::Point_t& point1,
+                                     const geo::Point_t& point2,
+                                     const geo::Vector_t& widths) const override;
 
-    virtual void LoadDaughterDetectorGaps(const LArDriftVolume& driftVolume,
-                                          const float maxDisplacement,
-                                          LArDetectorGapList& listOfGaps) const override;
+    void LoadDaughterDetectorGaps(const LArDriftVolume& driftVolume,
+                                  const float maxDisplacement,
+                                  LArDetectorGapList& listOfGaps) const override;
 
-    virtual PandoraApi::Geometry::LineGap::Parameters CreateLineGapParametersFromDetectorGaps(
+    PandoraApi::Geometry::LineGap::Parameters CreateLineGapParametersFromDetectorGaps(
       const LArDetectorGap& gap) const override;
 
-    virtual PandoraApi::Geometry::LineGap::Parameters CreateLineGapParametersFromReadoutGaps(
+    PandoraApi::Geometry::LineGap::Parameters CreateLineGapParametersFromReadoutGaps(
       const geo::View_t view,
       const geo::TPCID::TPCID_t tpc,
       const geo::CryostatID::CryostatID_t cstat,
@@ -78,14 +79,16 @@ namespace lar_pandora {
       const pandora::Pandora* pPandora) const override;
 
     /**
-             *  @brief  Loan the LArSoft geometry handle owned by this class
-             *
-             *  @result The LArSoft geometry handle
-             */
-    const art::ServiceHandle<geo::Geometry>& GetLArSoftGeometry() const;
+     *  @brief  Loan the LArSoft geometry handle owned by this class
+     *
+     *  @result The LArSoft geometry handle
+     */
+    const geo::GeometryCore& GetLArSoftGeometry() const;
+    const geo::WireReadoutGeom& GetChannelMap() const;
 
   private:
     art::ServiceHandle<geo::Geometry> m_LArSoftGeometry; ///< the LArSoft geometry handle
+    geo::WireReadoutGeom const* m_wireReadoutGeom = &art::ServiceHandle<geo::WireReadout>()->Get();
   };
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,9 +98,10 @@ namespace lar_pandora {
     const geo::CryostatID::CryostatID_t cstat) const
   {
     geo::TPCID const tpcID{cstat, tpc};
-    return (m_LArSoftGeometry->TPC(tpcID).DriftDirection() == geo::kPosX ?
-              m_LArSoftGeometry->View(geo::PlaneID(tpcID, 1)) :
-              m_LArSoftGeometry->View(geo::PlaneID(tpcID, 0)));
+    auto const [_, sign] = m_LArSoftGeometry->TPC(tpcID).DriftAxisWithSign();
+    return (sign == geo::DriftSign::Positive ?
+              m_wireReadoutGeom->Plane(geo::PlaneID(tpcID, 1)).View() :
+              m_wireReadoutGeom->Plane(geo::PlaneID(tpcID, 0)).View());
   }
 
   inline geo::View_t VintageLArTPCThreeView::TargetViewV(
@@ -105,9 +109,10 @@ namespace lar_pandora {
     const geo::CryostatID::CryostatID_t cstat) const
   {
     geo::TPCID const tpcID{cstat, tpc};
-    return (m_LArSoftGeometry->TPC(tpcID).DriftDirection() == geo::kPosX ?
-              m_LArSoftGeometry->View(geo::PlaneID(tpcID, 0)) :
-              m_LArSoftGeometry->View(geo::PlaneID(tpcID, 1)));
+    auto const [_, sign] = m_LArSoftGeometry->TPC(tpcID).DriftAxisWithSign();
+    return (sign == geo::DriftSign::Positive ?
+              m_wireReadoutGeom->Plane(geo::PlaneID(tpcID, 0)).View() :
+              m_wireReadoutGeom->Plane(geo::PlaneID(tpcID, 1)).View());
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,28 +121,28 @@ namespace lar_pandora {
     const geo::TPCID::TPCID_t tpc,
     const geo::CryostatID::CryostatID_t cstat) const
   {
-    return m_LArSoftGeometry->View(geo::PlaneID(cstat, tpc, 2));
+    return m_wireReadoutGeom->Plane({cstat, tpc, 2}).View();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   inline float VintageLArTPCThreeView::WirePitchU() const
   {
-    return m_LArSoftGeometry->WirePitch(this->TargetViewU(0, 0));
+    return m_wireReadoutGeom->Plane({0, 0}, TargetViewU(0, 0)).WirePitch();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   inline float VintageLArTPCThreeView::WirePitchV() const
   {
-    return m_LArSoftGeometry->WirePitch(this->TargetViewV(0, 0));
+    return m_wireReadoutGeom->Plane({0, 0}, TargetViewV(0, 0)).WirePitch();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
   inline float VintageLArTPCThreeView::WirePitchW() const
   {
-    return m_LArSoftGeometry->WirePitch(this->TargetViewW(0, 0));
+    return m_wireReadoutGeom->Plane({0, 0}, TargetViewW(0, 0)).WirePitch();
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,8 +150,7 @@ namespace lar_pandora {
   inline float VintageLArTPCThreeView::WireAngleU(const geo::TPCID::TPCID_t tpc,
                                                   const geo::CryostatID::CryostatID_t cstat) const
   {
-    return detector_functions::WireAngle(
-      this->TargetViewU(tpc, cstat), tpc, cstat, m_LArSoftGeometry);
+    return detector_functions::WireAngle(TargetViewU(tpc, cstat), tpc, cstat, *m_wireReadoutGeom);
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,8 +158,7 @@ namespace lar_pandora {
   inline float VintageLArTPCThreeView::WireAngleV(const geo::TPCID::TPCID_t tpc,
                                                   const geo::CryostatID::CryostatID_t cstat) const
   {
-    return detector_functions::WireAngle(
-      this->TargetViewV(tpc, cstat), tpc, cstat, m_LArSoftGeometry);
+    return detector_functions::WireAngle(TargetViewV(tpc, cstat), tpc, cstat, *m_wireReadoutGeom);
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -163,8 +166,7 @@ namespace lar_pandora {
   inline float VintageLArTPCThreeView::WireAngleW(const geo::TPCID::TPCID_t tpc,
                                                   const geo::CryostatID::CryostatID_t cstat) const
   {
-    return detector_functions::WireAngle(
-      this->TargetViewW(tpc, cstat), tpc, cstat, m_LArSoftGeometry);
+    return detector_functions::WireAngle(TargetViewW(tpc, cstat), tpc, cstat, *m_wireReadoutGeom);
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,18 +223,18 @@ namespace lar_pandora {
   {
     float first(0.f), last(0.f);
     pandora::LineGapType gapType(pandora::TPC_DRIFT_GAP);
-    if (view == this->TargetViewW(tpc, cstat)) {
+    if (view == TargetViewW(tpc, cstat)) {
       first = firstXYZ.Z();
       last = lastXYZ.Z();
       gapType = pandora::TPC_WIRE_GAP_VIEW_W;
     }
-    else if (view == this->TargetViewU(tpc, cstat)) {
+    else if (view == TargetViewU(tpc, cstat)) {
       first =
         pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoU(firstXYZ.Y(), firstXYZ.Z());
       last = pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoU(lastXYZ.Y(), lastXYZ.Z());
       gapType = pandora::TPC_WIRE_GAP_VIEW_U;
     }
-    else if (view == this->TargetViewV(tpc, cstat)) {
+    else if (view == TargetViewV(tpc, cstat)) {
       first =
         pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoV(firstXYZ.Y(), firstXYZ.Z());
       last = pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoV(lastXYZ.Y(), lastXYZ.Z());
@@ -244,9 +246,14 @@ namespace lar_pandora {
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
-  inline const art::ServiceHandle<geo::Geometry>& VintageLArTPCThreeView::GetLArSoftGeometry() const
+  inline const geo::GeometryCore& VintageLArTPCThreeView::GetLArSoftGeometry() const
   {
-    return m_LArSoftGeometry;
+    return *m_LArSoftGeometry;
+  }
+
+  inline const geo::WireReadoutGeom& VintageLArTPCThreeView::GetChannelMap() const
+  {
+    return *m_wireReadoutGeom;
   }
 
 } // namespace lar_pandora
