@@ -20,9 +20,7 @@ namespace recob {
 
 //Framwork Includes
 #include "art/Framework/Core/ProducesCollector.h"
-namespace art {
-  class Event;
-}
+#include "art/Framework/Principal/fwd.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "fhiclcpp/ParameterSet.h"
 

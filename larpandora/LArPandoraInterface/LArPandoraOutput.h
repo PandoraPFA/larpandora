@@ -8,7 +8,7 @@
 #define LAR_PANDORA_OUTPUT_H
 
 #include "art/Persistency/Common/PtrMaker.h"
-#include "lardata/Utilities/AssociationUtil.h"
+#include "canvas/Persistency/Common/Assns.h"
 
 namespace recob {
   class Cluster;

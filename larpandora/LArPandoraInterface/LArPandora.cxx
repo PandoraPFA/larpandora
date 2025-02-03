@@ -11,6 +11,7 @@
 #include "art/Utilities/make_tool.h"
 #include "art_root_io/TFileService.h"
 #include "cetlib/cpu_timer.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
