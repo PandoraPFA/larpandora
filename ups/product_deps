@@ -248,8 +248,8 @@ fwdir	product_dir	scripts
 #
 ####################################
 product			version		qual	flags		<table_format=2>
-larpandoracontent	v04_13_01	-
-larreco			v10_01_06	-
+larpandoracontent	v04_14_00	-
+larreco			v10_01_07	-
 cetmodules		v3_24_01	-	only_for_build
 end_product_list
 ####################################
