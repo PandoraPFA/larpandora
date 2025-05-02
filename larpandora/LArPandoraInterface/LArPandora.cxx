@@ -177,10 +177,19 @@ namespace lar_pandora {
 
   void LArPandora::SetPandoraEventInformation(art::Event& evt)
   {
-    pandora::PandoraInputType run(evt.run());
-    pandora::PandoraInputType subrun(evt.subRun());
-    pandora::PandoraInputType event(evt.event());
-    PandoraApi::SetEventInformation(*m_pPrimaryPandora, run, subrun, event);
+
+    try
+    {
+        pandora::PandoraInputType run(evt.run());
+        pandora::PandoraInputType subrun(evt.subRun());
+        pandora::PandoraInputType event(evt.event());
+        PandoraApi::SetEventInformation(*m_pPrimaryPandora, run, subrun, event);
+    }
+    catch (...)
+    {
+        throw cet::exception("LArPandora") << "LArPandora::SetPandoraEventInformation --- unable to "
+            "form PandoraInputType from R:S:E info";
+    }
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
