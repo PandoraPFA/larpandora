@@ -30,7 +30,6 @@
 
 #include "nusimdata/SimulationBase/MCParticle.h"
 
-#include "Pandora/PandoraInputTypes.h"
 #include "Api/PandoraApi.h"
 
 #include "larpandoracontent/LArContent.h"
@@ -177,19 +176,7 @@ namespace lar_pandora {
 
   void LArPandora::SetPandoraEventInformation(art::Event& evt)
   {
-
-    try
-    {
-        pandora::PandoraInputType run(evt.run());
-        pandora::PandoraInputType subrun(evt.subRun());
-        pandora::PandoraInputType event(evt.event());
-        PandoraApi::SetEventInformation(*m_pPrimaryPandora, run, subrun, event);
-    }
-    catch (...)
-    {
-        throw cet::exception("LArPandora") << "LArPandora::SetPandoraEventInformation --- unable to "
-            "form PandoraInputType from R:S:E info";
-    }
+      PandoraApi::SetEventInformation(*m_pPrimaryPandora, evt.run(), evt.subRun(), evt.event());
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
