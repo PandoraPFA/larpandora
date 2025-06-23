@@ -176,11 +176,10 @@ namespace lar_pandora {
 
   void LArPandora::SetPandoraEventInformation(art::Event& evt)
   {
-      PandoraApi::SetEventInformation(*m_pPrimaryPandora, evt.run(), evt.subRun(), evt.event());
+    PandoraApi::SetEventInformation(*m_pPrimaryPandora, evt.run(), evt.subRun(), evt.event());
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
-
 
   void LArPandora::CreatePandoraInput(art::Event& evt, IdToHitMap& idToHitMap)
   {
