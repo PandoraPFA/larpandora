@@ -413,10 +413,10 @@ namespace ShowerRecoTools {
 
       //Always override previous results
       //This will keep the previous result only if the current tool fails on all planes
-      case 0:
+      case 0: {
 
         if (fVerbose > 1) {
-          std::cout << "Always overriding the previous result." << std::endl;
+          std::cout << "Always overriding the previous result" << std::endl;
         } 
 
         ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
@@ -424,12 +424,13 @@ namespace ShowerRecoTools {
         ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
 
         break;
+      }
 
       //Override plane-by-plane
-      case 1:
+      case 1: {
 
         if (fVerbose > 1) {
-          std::cout << "Overriding the previous result plane-by-plane." << std::endl;
+          std::cout << "Overriding the previous result plane-by-plane" << std::endl;
         } 
 
         std::vector<double> dEdx_val_overriddenPerPlane(dEdx_val);
@@ -452,12 +453,13 @@ namespace ShowerRecoTools {
         ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
         ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
         break;
+      }
 
       //Override only if all three planes are well-defined
-      case 2:
+      case 2: {
 
         if (fVerbose > 1) {
-          std::cout << "Only overriding if all three planes are well-defined." << std::endl;
+          std::cout << "Only overriding if all three planes are well-defined" << std::endl;
         } 
 
         if (dEdx_val[0] > 0. &&
@@ -474,6 +476,7 @@ namespace ShowerRecoTools {
         }
 
         break;
+      }
     }
     
     return 0;
