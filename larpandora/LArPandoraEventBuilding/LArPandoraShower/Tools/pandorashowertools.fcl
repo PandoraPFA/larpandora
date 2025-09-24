@@ -297,6 +297,9 @@ showertrajpointdedx:{
     ShowerdEdxOutputLabel: "ShowerdEdx"
     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
     ShowerdEdxVecOutputLabel: "ShowerdEdxVec"
+
+    ApplyCorrectionsInNorm: true # do not expect INormalizeCharge tools
+    NormTools: []                 # empty list of INormalizeCharge tools
 }
 
 showerincrementaltrackhitfinder:{
