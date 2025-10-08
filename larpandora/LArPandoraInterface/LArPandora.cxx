@@ -51,6 +51,7 @@ namespace lar_pandora {
     , m_shouldRunCosmicRecoOption(pset.get<bool>("ShouldRunCosmicRecoOption"))
     , m_shouldPerformSliceId(pset.get<bool>("ShouldPerformSliceId"))
     , m_shouldProduceAllOutcomes(pset.get<bool>("ProduceAllOutcomes", false))
+    , m_shouldCollectHitPredictions(pset.get<bool>("CollectHitPredictions", false))
     , m_printOverallRecoStatus(pset.get<bool>("PrintOverallRecoStatus", false))
     , m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", ""))
     , m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant"))
@@ -78,6 +79,7 @@ namespace lar_pandora {
     m_inputSettings.m_mips_if_negative = pset.get<double>("MipsIfNegative", 0.);
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
+    m_inputSettings.m_useHitPredictions = pset.get<bool>("UseHitPredictions", false);
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
     m_outputSettings.m_shouldProduceSlices = pset.get<bool>("ShouldProduceSlices", true);
     m_outputSettings.m_shouldProduceTestBeamInteractionVertices =
@@ -190,6 +192,7 @@ namespace lar_pandora {
     }
 
     HitVector artHits;
+    std::map<art::Ptr<recob::Hit>, std::pair<float, float>> hitToPred;
     SimChannelVector artSimChannels;
     HitsToTrackIDEs artHitsToTrackIDEs;
     MCParticleVector artMCParticleVector;
@@ -200,6 +203,10 @@ namespace lar_pandora {
     bool areSimChannelsValid(false);
 
     m_collectHitsTool->CollectHits(evt, m_hitfinderModuleLabel, artHits);
+
+    if (m_shouldCollectHitPredictions) {
+      LArPandoraHelper::CollectNuGraphHitLabels(evt, m_hitfinderModuleLabel, hitToPred);
+    }
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {
       LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCParticleVector);
@@ -233,7 +240,7 @@ namespace lar_pandora {
     }
 
     LArPandoraInput::CreatePandoraHits2D(
-      evt, m_inputSettings, m_driftVolumeMap, artHits, idToHitMap);
+      evt, m_inputSettings, m_driftVolumeMap, artHits, hitToPred, idToHitMap);
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {
       LArPandoraInput::CreatePandoraMCParticles(m_inputSettings,

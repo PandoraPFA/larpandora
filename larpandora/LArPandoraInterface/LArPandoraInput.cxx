@@ -47,6 +47,7 @@ namespace lar_pandora {
                                             const Settings& settings,
                                             const LArDriftVolumeMap& driftVolumeMap,
                                             const HitVector& hitVector,
+                                            HitToPred& hitToPred,
                                             IdToHitMap& idToHitMap)
   {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraHits2D(...) *** "
@@ -148,6 +149,19 @@ namespace lar_pandora {
              "be finite, calo hit omitted "
           << std::endl;
         continue;
+      }
+
+      // If wanted, populate the hit predictions
+      if (settings.m_useHitPredictions) {
+        auto itPred = hitToPred.find(hit);
+        if (itPred != hitToPred.end()) {
+            const auto &pred = itPred->second;
+            caloHitParameters.m_pTrack  = pred.first;
+            caloHitParameters.m_pShower = pred.second;
+        } else {
+            caloHitParameters.m_pTrack  = -1.;
+            caloHitParameters.m_pShower = -1.;
+        }
       }
 
       // Store the hit address

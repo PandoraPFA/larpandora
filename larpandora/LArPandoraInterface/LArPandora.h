@@ -56,6 +56,7 @@ namespace lar_pandora {
     bool
       m_shouldPerformSliceId; ///< Steering: whether to identify slices and select most appropriate pfos
     bool m_shouldProduceAllOutcomes; ///< Steering: whether to produce all reconstruction outcomes
+    bool m_shouldCollectHitPredictions; ///< Whether there are some hit-level predicted labels to be collected
     bool m_printOverallRecoStatus; ///< Steering: whether to print current operation status messages
 
     std::string m_generatorModuleLabel;   ///< The generator module label

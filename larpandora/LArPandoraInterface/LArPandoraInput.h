@@ -61,6 +61,7 @@ namespace lar_pandora {
       bool m_useHitWidths;                       ///<
       bool m_useBirksCorrection;                 ///<
       bool m_useActiveBoundingBox;               ///<
+      bool m_useHitPredictions;                  ///<
       int m_uidOffset;                           ///<
       int m_hitCounterOffset;                    ///<
       double m_dx_cm;                            ///<
@@ -80,12 +81,14 @@ namespace lar_pandora {
      *  @param  settings the settings
      *  @param  driftVolumeMap the mapping from volume id to drift volume
      *  @param  hits the input list of ART hits for this event
+     *  @param  hitToPred to receive the mapping between Pandora hits and their predictions, if available
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
      */
     static void CreatePandoraHits2D(const art::Event& evt,
                                     const Settings& settings,
                                     const LArDriftVolumeMap& driftVolumeMap,
                                     const HitVector& hitVector,
+                                    HitToPred& hitToPred,
                                     IdToHitMap& idToHitMap);
 
     /**
