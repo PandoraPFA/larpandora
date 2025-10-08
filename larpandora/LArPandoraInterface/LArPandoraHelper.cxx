@@ -18,6 +18,7 @@
 #include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/MVAOutput.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -86,6 +87,59 @@ namespace lar_pandora {
       const art::Ptr<recob::Hit> hit(theHits, i);
       hitVector.push_back(hit);
     }
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  void LArPandoraHelper::CollectNuGraphHitLabels(const art::Event& evt,
+                                                 const std::string& label,
+                                                 HitToPred& hitToPred)
+  {
+    float pFilter, pSemantic;
+
+    art::Handle<std::vector<recob::Hit>> theHits;
+    evt.getByLabel(label, theHits);    
+
+    if (!theHits.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
+      return;
+    }
+    else {
+      mf::LogDebug("LArPandora") << "  Found: " << theHits->size() << " Hits " << std::endl;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<1>>> filterHandle;
+    evt.getByLabel(label, filterHandle);
+
+    if (!filterHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find filter label... " << std::endl;
+      return;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<5>>> semanticHandle;
+    evt.getByLabel(label, semanticHandle);
+
+    if (!semanticHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find semantic label... " << std::endl;
+      return;
+    }
+
+    for (unsigned int i = 0; i < theHits->size(); ++i) {
+      const art::Ptr<recob::Hit> hit(theHits, i);
+
+      // filter 
+      pFilter = filterHandle->at(i).at(0);
+
+      // semantic 
+      // encoding: <first_semantic_category><second_semantic_category>.<confidence>
+      // pSemantic = hitToSemanticAssoc.at(i)->at(0); // placeholder :) this is just the score of the MIP category
+      pSemantic = semanticHandle->at(i).at(0); ///< placeholder :) this is just the score of the MIP category
+                                               ///< to do, actually perform the encoding -- this was just to test the infrastructure
+      std::cout << pFilter << "\t" << pSemantic << std::endl;
+
+      hitToPred[hit] = std::make_pair(pFilter, pSemantic);
+    }
+
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
