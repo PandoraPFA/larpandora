@@ -140,21 +140,16 @@ namespace lar_pandora {
 
       const float pSemanticFirst = pSemanticIdx[0];   ///< Best category
       const float pSemanticSecond = pSemanticIdx[1];  ///< Next-to-best category
-      const float pSemanticConfidence = (scores[pSemanticIdx[1]] > 0.) ? 
-                                        (scores[pSemanticIdx[0]] / scores[pSemanticIdx[1]]) : 
-                                        1.;           ///< Ratio of the two scores
 
-      // Encoding: <first_semantic_category+1><second_semantic_category+1>.<log10(confidence)_capped>
-      const float pSemantic = static_cast<float>((pSemanticFirst+1) * 10 + (pSemanticSecond+1))
-                              + 0.1 * std::clamp(std::log10(pSemanticConfidence), 0.f, 9.99f);
+      // Encoding: <first_semantic_category><second_semantic_category>.<second_score.2><first_score.2>
+      const float pSemantic = static_cast<float>((pSemanticFirst) * 10 + (pSemanticSecond))
+                              + 1.e-2f * std::clamp(static_cast<int>(std::floor(scores[pSemanticSecond] * 1e2)), 0, 99)
+                              + 1.e-4f * std::clamp(static_cast<int>(std::floor(scores[pSemanticFirst] * 1e2)), 0, 99);
 
-
-      // std::cout << filterHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(1) 
-      //                                        << "\t" << semanticHandle->at(i).at(2) << "\t" << semanticHandle->at(i).at(3) 
-      //                                        << "\t" <<  semanticHandle->at(i).at(4) << std::endl;
-      // std::cout << pFilter << "\t" << pSemanticFirst << "\t" << 
-      //              pSemanticSecond << "\t" << pSemanticConfidence << "\t" <<
-      //              pSemantic << std::endl;
+      // std::cout << semanticHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(1) 
+      //           << "\t" << semanticHandle->at(i).at(2) << "\t" << semanticHandle->at(i).at(3) 
+      //           << "\t" << semanticHandle->at(i).at(4) << std::endl;
+      // std::cout << pSemanticFirst << "\t" << pSemanticSecond << "\t" << std::fixed << std::setprecision(6) << pSemantic << std::endl;
 
       hitToPred[hit] = std::make_pair(pFilter, pSemantic);
     }
