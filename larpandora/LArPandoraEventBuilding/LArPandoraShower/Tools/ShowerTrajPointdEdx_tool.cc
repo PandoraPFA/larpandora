@@ -137,8 +137,11 @@ namespace ShowerRecoTools {
     if ( fApplyCorrectionsInNorm ) {
       auto tool_psets = pset.get< std::vector< fhicl::ParameterSet > >("NormTools");
 
+      int tCounter = 0;
       for ( auto const& tool_pset : tool_psets ) {
-	fNormalizationTools.push_back( art::make_tool<INormalizeCharge>(tool_pset) );
+        std::cout << "pushing back tools..." << tCounter << std::endl;
+        tCounter++;
+	      fNormalizationTools.push_back( art::make_tool<INormalizeCharge>(tool_pset) );
       }
     }
   }
