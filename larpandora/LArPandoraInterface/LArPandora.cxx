@@ -174,7 +174,7 @@ namespace lar_pandora {
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
-  void LArPandora::SetPandoraEventInformation(art::Event& evt)
+  void LArPandora::SetPandoraEventInformation(art::Event const& evt)
   {
     PandoraApi::SetEventInformation(*m_pPrimaryPandora, evt.run(), evt.subRun(), evt.event());
   }
