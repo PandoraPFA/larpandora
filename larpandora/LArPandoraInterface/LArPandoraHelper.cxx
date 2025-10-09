@@ -95,7 +95,6 @@ namespace lar_pandora {
                                                  const std::string& label,
                                                  HitToPred& hitToPred)
   {
-    float pFilter, pSemantic;
 
     art::Handle<std::vector<recob::Hit>> theHits;
     evt.getByLabel(label, theHits);    
@@ -112,7 +111,7 @@ namespace lar_pandora {
     evt.getByLabel(label, filterHandle);
 
     if (!filterHandle.isValid()) {
-      mf::LogDebug("LArPandora") << "  Failed to find filter label... " << std::endl;
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph filter label... " << std::endl;
       return;
     }
 
@@ -120,22 +119,42 @@ namespace lar_pandora {
     evt.getByLabel(label, semanticHandle);
 
     if (!semanticHandle.isValid()) {
-      mf::LogDebug("LArPandora") << "  Failed to find semantic label... " << std::endl;
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph semantic label... " << std::endl;
       return;
     }
 
     for (unsigned int i = 0; i < theHits->size(); ++i) {
       const art::Ptr<recob::Hit> hit(theHits, i);
 
-      // filter 
-      pFilter = filterHandle->at(i).at(0);
+      // Filter 
+      const float pFilter = filterHandle->at(i).at(0);
 
-      // semantic 
-      // encoding: <first_semantic_category><second_semantic_category>.<confidence>
-      // pSemantic = hitToSemanticAssoc.at(i)->at(0); // placeholder :) this is just the score of the MIP category
-      pSemantic = semanticHandle->at(i).at(0); ///< placeholder :) this is just the score of the MIP category
-                                               ///< to do, actually perform the encoding -- this was just to test the infrastructure
-      std::cout << pFilter << "\t" << pSemantic << std::endl;
+      // Semantic 
+      const auto &scores = semanticHandle->at(i);
+
+      // Indices for semantic labels, ordered by best predictions
+      std::vector<int> pSemanticIdx(scores.size());
+      std::iota(pSemanticIdx.begin(), pSemanticIdx.end(), 0);
+      std::sort(pSemanticIdx.begin(), pSemanticIdx.end(), 
+                [&](int a, int b){ return scores[a] > scores[b]; });
+
+      const float pSemanticFirst = pSemanticIdx[0];   ///< Best category
+      const float pSemanticSecond = pSemanticIdx[1];  ///< Next-to-best category
+      const float pSemanticConfidence = (scores[pSemanticIdx[1]] > 0.) ? 
+                                        (scores[pSemanticIdx[0]] / scores[pSemanticIdx[1]]) : 
+                                        1.;           ///< Ratio of the two scores
+
+      // Encoding: <first_semantic_category+1><second_semantic_category+1>.<log10(confidence)_capped>
+      const float pSemantic = static_cast<float>((pSemanticFirst+1) * 10 + (pSemanticSecond+1))
+                              + 0.1 * std::clamp(std::log10(pSemanticConfidence), 0.f, 9.99f);
+
+
+      // std::cout << filterHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(1) 
+      //                                        << "\t" << semanticHandle->at(i).at(2) << "\t" << semanticHandle->at(i).at(3) 
+      //                                        << "\t" <<  semanticHandle->at(i).at(4) << std::endl;
+      // std::cout << pFilter << "\t" << pSemanticFirst << "\t" << 
+      //              pSemanticSecond << "\t" << pSemanticConfidence << "\t" <<
+      //              pSemantic << std::endl;
 
       hitToPred[hit] = std::make_pair(pFilter, pSemantic);
     }
