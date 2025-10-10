@@ -407,14 +407,14 @@ namespace ShowerRecoTools {
       if (fVerbose > 2) {
         std::cout << "Result from previous dEdx tool..." << std::endl;
         for (unsigned int plane = 0; plane < dEdx_val_previousTool.size(); plane++) {
-          std::cout << "Plane: " << plane << " with dEdx: " << dEdx_val_previousTool[plane] << std::endl;
+          std::cout << "Plane: " << plane << " with dEdx: " << dEdx_val_previousTool[plane]
+                    << std::endl;
         }
-      } 
-    } else {
+      }
+    }
+    else {
       //If the previous tool didn't run at all, just use this one
-      if (fVerbose > 1) {
-        std::cout << "No previous tool to be overridden" << std::endl;
-      } 
+      if (fVerbose > 1) { std::cout << "No previous tool to be overridden" << std::endl; }
       ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
       ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
       ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
