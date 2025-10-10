@@ -466,7 +466,7 @@ namespace lar_pandora {
           const int trackID(particle->TrackId());
 
           // Mother/Daughter Links
-          if (particle->Mother() == 0) {
+          if (particle->Mother() == 0 || particle->Process() == "primary") {
             try {
               PANDORA_THROW_RESULT_IF(
                 pandora::STATUS_CODE_SUCCESS,
@@ -492,7 +492,7 @@ namespace lar_pandora {
     int particleCounter(0);
 
     // Find Primary Generator Particles
-    std::map<const simb::MCParticle, bool> primaryGeneratorMCParticleMap;
+    std::map<const simb::MCParticle, bool, MCParticleCompare> primaryGeneratorMCParticleMap;
     LArPandoraInput::FindPrimaryParticles(generatorMCParticleVector, primaryGeneratorMCParticleMap);
 
     for (MCParticleMap::const_iterator iterI = particleMap.begin(), iterEndI = particleMap.end();
@@ -565,7 +565,7 @@ namespace lar_pandora {
         else {
           mcParticleParameters.m_process = lar_content::MC_PROC_UNKNOWN;
           mf::LogWarning("LArPandora")
-            << "CreatePandoraMCParticles - found an unknown process" << std::endl;
+            << "CreatePandoraMCParticles - found an unknown process: " << particle->Process() << std::endl;
         }
         mcParticleParameters.m_energy = E;
         mcParticleParameters.m_particleId = particle->PdgCode();
@@ -624,7 +624,7 @@ namespace lar_pandora {
 
   void LArPandoraInput::FindPrimaryParticles(
     const RawMCParticleVector& mcParticleVector,
-    std::map<const simb::MCParticle, bool>& primaryMCParticleMap)
+    std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap)
   {
     for (const simb::MCParticle& mcParticle : mcParticleVector) {
       if ("primary" == mcParticle.Process()) {
@@ -637,7 +637,7 @@ namespace lar_pandora {
 
   bool LArPandoraInput::IsPrimaryMCParticle(
     const art::Ptr<simb::MCParticle>& mcParticle,
-    std::map<const simb::MCParticle, bool>& primaryMCParticleMap)
+    std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap)
   {
     for (auto& mcParticleIter : primaryMCParticleMap) {
       if (!mcParticleIter.second) {
@@ -867,6 +867,7 @@ namespace lar_pandora {
     processMap["muonNuclear"] = lar_content::MC_PROC_MU_NUCLEAR;
     processMap["tInelastic"] = lar_content::MC_PROC_TRITON_INELASTIC;
     processMap["primaryBackground"] = lar_content::MC_PROC_PRIMARY_BACKGROUND;
+    processMap["RadioactiveDecayBase"] = lar_content::MC_PROC_RADIOACTIVE_DECAY_BASE;
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
