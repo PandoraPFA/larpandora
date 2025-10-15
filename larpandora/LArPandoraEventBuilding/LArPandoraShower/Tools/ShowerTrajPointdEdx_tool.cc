@@ -401,13 +401,25 @@ namespace ShowerRecoTools {
 
     //Get results from the same label, if set by a previous tool of the same type
     std::vector<double> dEdx_val_previousTool;
-    ShowerEleHolder.GetElement(fShowerdEdxOutputLabel, dEdx_val_previousTool);
-    if (fVerbose > 2) {
-      std::cout << "Result from previous dEdx tool..." << std::endl;
-      for (unsigned int plane = 0; plane < dEdx_val_previousTool.size(); plane++) {
-        std::cout << "Plane: " << plane << " with dEdx: " << dEdx_val_previousTool[plane]
-                  << std::endl;
+
+    if (ShowerEleHolder.CheckElement(fShowerdEdxOutputLabel)) {
+      ShowerEleHolder.GetElement(fShowerdEdxOutputLabel, dEdx_val_previousTool);
+      if (fVerbose > 2) {
+        std::cout << "Result from previous dEdx tool..." << std::endl;
+        for (unsigned int plane = 0; plane < dEdx_val_previousTool.size(); plane++) {
+          std::cout << "Plane: " << plane << " with dEdx: " << dEdx_val_previousTool[plane]
+                    << std::endl;
+        }
       }
+    }
+    else {
+      //If the previous tool didn't run at all, just use this one
+      if (fVerbose > 1) { std::cout << "No previous tool to be overridden" << std::endl; }
+      ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
+      ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+      ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+
+      return 0;
     }
 
     //Choose how to override results from the previous tool
