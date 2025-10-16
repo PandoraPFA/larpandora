@@ -18,6 +18,7 @@
 #include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/MVAOutput.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -86,6 +87,73 @@ namespace lar_pandora {
       const art::Ptr<recob::Hit> hit(theHits, i);
       hitVector.push_back(hit);
     }
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  void LArPandoraHelper::CollectNuGraphHitLabels(const art::Event& evt,
+                                                 const std::string& label,
+                                                 HitToPred& hitToPred)
+  {
+
+    art::Handle<std::vector<recob::Hit>> theHits;
+    evt.getByLabel(label, theHits);    
+
+    if (!theHits.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
+      return;
+    }
+    else {
+      mf::LogDebug("LArPandora") << "  Found: " << theHits->size() << " Hits " << std::endl;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<1>>> filterHandle;
+    evt.getByLabel(label, filterHandle);
+
+    if (!filterHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph filter label... " << std::endl;
+      return;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<5>>> semanticHandle;
+    evt.getByLabel(label, semanticHandle);
+
+    if (!semanticHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph semantic label... " << std::endl;
+      return;
+    }
+
+    for (unsigned int i = 0; i < theHits->size(); ++i) {
+      const art::Ptr<recob::Hit> hit(theHits, i);
+
+      // Filter 
+      const float pFilter = filterHandle->at(i).at(0);
+
+      // Semantic 
+      const auto &scores = semanticHandle->at(i);
+
+      // Indices for semantic labels, ordered by best predictions
+      std::vector<int> pSemanticIdx(scores.size());
+      std::iota(pSemanticIdx.begin(), pSemanticIdx.end(), 0);
+      std::sort(pSemanticIdx.begin(), pSemanticIdx.end(), 
+                [&](int a, int b){ return scores[a] > scores[b]; });
+
+      const float pSemanticFirst = pSemanticIdx[0];   ///< Best category
+      const float pSemanticSecond = pSemanticIdx[1];  ///< Next-to-best category
+
+      // Encoding: <first_semantic_category><second_semantic_category>.<second_score.2><first_score.2>
+      const float pSemantic = static_cast<float>((pSemanticFirst) * 10 + (pSemanticSecond))
+                              + 1.e-2f * std::clamp(static_cast<int>(std::floor(scores[pSemanticSecond] * 1e2)), 0, 99)
+                              + 1.e-4f * std::clamp(static_cast<int>(std::floor(scores[pSemanticFirst] * 1e2)), 0, 99);
+
+      // std::cout << semanticHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(1) 
+      //           << "\t" << semanticHandle->at(i).at(2) << "\t" << semanticHandle->at(i).at(3) 
+      //           << "\t" << semanticHandle->at(i).at(4) << std::endl;
+      // std::cout << pSemanticFirst << "\t" << pSemanticSecond << "\t" << std::fixed << std::setprecision(6) << pSemantic << std::endl;
+
+      hitToPred[hit] = std::make_pair(pFilter, pSemantic);
+    }
+
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
