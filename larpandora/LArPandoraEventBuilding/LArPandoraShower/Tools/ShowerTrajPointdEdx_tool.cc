@@ -49,12 +49,12 @@ namespace ShowerRecoTools {
 
   private:
     // Normalization function
-    double Normalize(double dQdx,
+    const double Normalize(const double dQdx,
 		     const art::Event& e,
 		     const recob::Hit& h,
 		     const geo::Point_t& location,
 		     const geo::Vector_t& direction,
-		     double t0);
+		     const double t0);
 
     //Servcies and Algorithms
     art::ServiceHandle<geo::Geometry> fGeom;
@@ -346,9 +346,10 @@ namespace ShowerRecoTools {
       }
 
       // Attempt the normalization //Ivan
+      double dQdxNorm = dQdx;
       if ( fApplyCorrectionsInNorm ) {
         //std::cout << "Running the CorrectionsInNorm for showers" << std::endl;
-	      dQdx = Normalize( dQdx,
+	      dQdxNorm = Normalize( dQdx,
 			    Event,
 			    *hit,
 			    InitialTrack.LocationAtPoint(index),
@@ -356,8 +357,10 @@ namespace ShowerRecoTools {
 			    pfpT0Time );
       }
 
+      std::cout << "Traj Point: dQdx: " << dQdx << " dQdxNorm: " << dQdxNorm << std::endl;
+
       double dEdx = fCalorimetryAlg.dEdx_AREA(
-        clockData, detProp, dQdx, hit->PeakTime(), planeid.Plane, pfpT0Time, localEField);
+        clockData, detProp, dQdxNorm, hit->PeakTime(), planeid.Plane, pfpT0Time, localEField);
 
       //Add the value to the dEdx
       dEdx_vec[planeid.Plane].push_back(dEdx);
@@ -433,10 +436,10 @@ namespace ShowerRecoTools {
     }
 
     // BH - test
-    std::cout << "--------------------------------------------------------------------" << std::endl;
-    std::cout << "  Init trk start (" << InitialTrack.Start().X() << ", " << InitialTrack.Start().Y() << ", " << InitialTrack.Start().Z() << ")" << std::endl;
-    std::cout << "  dE/dx on plane2: " << dEdx_val[2] << " MeV/cm" << std::endl;
-    std::cout << "--------------------------------------------------------------------" << std::endl;
+    // std::cout << "--------------------------------------------------------------------" << std::endl;
+    // std::cout << "  Init trk start (" << InitialTrack.Start().X() << ", " << InitialTrack.Start().Y() << ", " << InitialTrack.Start().Z() << ")" << std::endl;
+    // std::cout << "  dE/dx on plane2: " << dEdx_val[2] << " MeV/cm" << std::endl;
+    // std::cout << "--------------------------------------------------------------------" << std::endl;
     
     //Need to sort out errors sensibly.
     ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
@@ -541,16 +544,17 @@ namespace ShowerRecoTools {
     return;
   }
   
-  double ShowerTrajPointdEdx::Normalize(double dQdx,
+  const double ShowerTrajPointdEdx::Normalize(const double dQdx,
 					const art::Event& e,
 					const recob::Hit& h,
 					const geo::Point_t& location,
 					const geo::Vector_t& direction,
-					double t0)
+					const double t0)
   {
     double ret = dQdx;
     for (auto const& nt : fNormalizationTools) {
       ret = nt->Normalize(ret, e, h, location, direction, t0);
+      std::cout << "\t norm: dQdx = " << ret << std::endl;
     }
     
     return ret;
