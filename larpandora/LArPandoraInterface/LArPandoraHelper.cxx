@@ -848,8 +848,7 @@ namespace lar_pandora {
       throw cet::exception("LArPandora") << " PandoraCollector::CollectGeneratorMCParticles --- "
                                             "Unexpected number of MC truth blocks ";
 
-    for (size_t b = 0; b < mcTruthBlocks->size(); ++b)
-    {
+    for (size_t b = 0; b < mcTruthBlocks->size(); ++b) {
       const art::Ptr<simb::MCTruth> mcTruth(mcTruthBlocks, b);
       for (int i = 0; i < mcTruth->NParticles(); ++i) {
         particleVector.push_back(mcTruth->GetParticle(i));

@@ -26,7 +26,7 @@ namespace pandora {
 namespace lar_pandora {
 
   struct MCParticleCompare {
-    bool operator()(const simb::MCParticle &lhs, const simb::MCParticle &rhs) const
+    bool operator()(const simb::MCParticle& lhs, const simb::MCParticle& rhs) const
     {
       const int lhsId{lhs.TrackId()}, rhsId{rhs.TrackId()};
       const int lhsPdg{lhs.PdgCode()}, rhsPdg{rhs.PdgCode()};
@@ -38,9 +38,9 @@ namespace lar_pandora {
       const double lhsPy{lhs.Py()}, rhsPy{rhs.Py()};
       const double lhsPz{lhs.Pz()}, rhsPz{rhs.Pz()};
       return std::tie(lhsId, lhsPdg, lhsE, lhsVx, lhsVy, lhsVz, lhsPx, lhsPy, lhsPz) <
-        std::tie(rhsId, rhsPdg, rhsE, rhsVx, rhsVy, rhsVz, rhsPx, rhsPy, rhsPz);
+             std::tie(rhsId, rhsPdg, rhsE, rhsVx, rhsVy, rhsVz, rhsPx, rhsPy, rhsPz);
     }
- };
+  };
 
   /**
  *  @brief  LArPandoraInput class
@@ -135,8 +135,9 @@ namespace lar_pandora {
      *  @param mcParticleVector vector of all MCParticles to consider
      *  @param primaryMCParticleMap map containing primary MCParticles and bool indicating whether particle has been accounted for
      */
-    static void FindPrimaryParticles(const RawMCParticleVector& mcParticleVector,
-                                     std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap);
+    static void FindPrimaryParticles(
+      const RawMCParticleVector& mcParticleVector,
+      std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap);
 
     /**
      *  @brief Check whether an MCParticle can be found in a given map
@@ -144,8 +145,9 @@ namespace lar_pandora {
      *  @param mcParticle target MCParticle
      *  @param primaryMCParticleMap map containing primary MCParticles and bool indicating whether particle has been accounted for
      */
-    static bool IsPrimaryMCParticle(const art::Ptr<simb::MCParticle>& mcParticle,
-                                    std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap);
+    static bool IsPrimaryMCParticle(
+      const art::Ptr<simb::MCParticle>& mcParticle,
+      std::map<const simb::MCParticle, bool, MCParticleCompare>& primaryMCParticleMap);
 
     /**
      *  @brief  Create links between the 2D hits and Pandora MC particles
