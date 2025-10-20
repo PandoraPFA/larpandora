@@ -62,14 +62,16 @@ namespace lar_pandora {
      *  @param  settings the settings
      *  @param  driftVolumeMap the mapping from volume id to drift volume
      *  @param  hits the input list of ART hits for this event
-     *  @param  hitToPred to receive the mapping between Pandora hits and their predictions, if available
+     *  @param  hitToScores to receive the mapping between a hit and its predicted scores, if available
+     *  @param  hitToScoreLabels to receive the mapping between a hit and its predicted score labels, if available
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
      */
     static void CreatePandoraHits2D(const art::Event& evt,
                                     const Settings& settings,
                                     const LArDriftVolumeMap& driftVolumeMap,
                                     const HitVector& hitVector,
-                                    HitToPred& hitToPred,
+                                    const HitToScores& hitToScores,
+                                    const HitToScoreLabels& hitToScoreLabels,
                                     IdToHitMap& idToHitMap);
 
     /**

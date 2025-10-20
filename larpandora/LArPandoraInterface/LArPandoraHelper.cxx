@@ -93,7 +93,8 @@ namespace lar_pandora {
 
   void LArPandoraHelper::CollectNuGraphHitLabels(const art::Event& evt,
                                                  const std::string& label,
-                                                 HitToPred& hitToPred)
+                                                 HitToScores& hitToScores,
+                                                 HitToScoreLabels& hitToScoreLabels)
   {
 
     art::Handle<std::vector<recob::Hit>> theHits;
@@ -126,32 +127,16 @@ namespace lar_pandora {
     for (unsigned int i = 0; i < theHits->size(); ++i) {
       const art::Ptr<recob::Hit> hit(theHits, i);
 
-      // Filter 
-      const float pFilter = filterHandle->at(i).at(0);
+      const float filterScore = filterHandle->at(i).at(0);
+      const auto &semanticScores  = semanticHandle->at(i);
 
-      // Semantic 
-      const auto &scores = semanticHandle->at(i);
+      std::vector<float> hitScores = {filterScore};
+      for (unsigned int j = 0; j < semanticScores.size(); ++j) 
+        hitScores.push_back(semanticScores[j]);
+      std::vector<std::string> hitScoreLabels = {"filter", "mip", "hip", "shower", "michel", "diffuse"};
 
-      // Indices for semantic labels, ordered by best predictions
-      std::vector<int> pSemanticIdx(scores.size());
-      std::iota(pSemanticIdx.begin(), pSemanticIdx.end(), 0);
-      std::sort(pSemanticIdx.begin(), pSemanticIdx.end(), 
-                [&](int a, int b){ return scores[a] > scores[b]; });
-
-      const float pSemanticFirst = pSemanticIdx[0];   ///< Best category
-      const float pSemanticSecond = pSemanticIdx[1];  ///< Next-to-best category
-
-      // Encoding: <first_semantic_category><second_semantic_category>.<second_score.2><first_score.2>
-      const float pSemantic = static_cast<float>((pSemanticFirst) * 10 + (pSemanticSecond))
-                              + 1.e-2f * std::clamp(static_cast<int>(std::floor(scores[pSemanticSecond] * 1e2)), 0, 99)
-                              + 1.e-4f * std::clamp(static_cast<int>(std::floor(scores[pSemanticFirst] * 1e2)), 0, 99);
-
-      // std::cout << semanticHandle->at(i).at(0) << "\t" << semanticHandle->at(i).at(1) 
-      //           << "\t" << semanticHandle->at(i).at(2) << "\t" << semanticHandle->at(i).at(3) 
-      //           << "\t" << semanticHandle->at(i).at(4) << std::endl;
-      // std::cout << pSemanticFirst << "\t" << pSemanticSecond << "\t" << std::fixed << std::setprecision(6) << pSemantic << std::endl;
-
-      hitToPred[hit] = std::make_pair(pFilter, pSemantic);
+      hitToScores[hit] = hitScores;
+      hitToScoreLabels[hit] = hitScoreLabels;
     }
 
   }

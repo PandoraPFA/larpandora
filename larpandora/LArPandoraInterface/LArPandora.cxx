@@ -184,7 +184,8 @@ namespace lar_pandora {
     }
 
     HitVector artHits;
-    std::map<art::Ptr<recob::Hit>, std::pair<float, float>> hitToPred;
+    HitToScores hitToScores;
+    HitToScoreLabels hitToScoreLabels;
     SimChannelVector artSimChannels;
     HitsToTrackIDEs artHitsToTrackIDEs;
     MCParticleVector artMCParticleVector;
@@ -197,7 +198,7 @@ namespace lar_pandora {
     m_collectHitsTool->CollectHits(evt, m_hitfinderModuleLabel, artHits);
 
     if (m_shouldCollectHitPredictions) {
-      LArPandoraHelper::CollectNuGraphHitLabels(evt, m_hitfinderModuleLabel, hitToPred);
+      LArPandoraHelper::CollectNuGraphHitLabels(evt, m_hitfinderModuleLabel, hitToScores, hitToScoreLabels);
     }
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {
@@ -232,7 +233,7 @@ namespace lar_pandora {
     }
 
     LArPandoraInput::CreatePandoraHits2D(
-      evt, m_inputSettings, m_driftVolumeMap, artHits, hitToPred, idToHitMap);
+      evt, m_inputSettings, m_driftVolumeMap, artHits, hitToScores, hitToScoreLabels, idToHitMap);
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {
       LArPandoraInput::CreatePandoraMCParticles(m_inputSettings,
