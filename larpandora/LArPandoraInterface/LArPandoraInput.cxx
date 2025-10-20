@@ -565,7 +565,8 @@ namespace lar_pandora {
         else {
           mcParticleParameters.m_process = lar_content::MC_PROC_UNKNOWN;
           mf::LogWarning("LArPandora")
-            << "CreatePandoraMCParticles - found an unknown process: " << particle->Process() << std::endl;
+            << "CreatePandoraMCParticles - found an unknown process: " << particle->Process()
+            << std::endl;
         }
         mcParticleParameters.m_energy = E;
         mcParticleParameters.m_particleId = particle->PdgCode();
