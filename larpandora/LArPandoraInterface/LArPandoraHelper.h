@@ -76,6 +76,8 @@ namespace lar_pandora {
 
   typedef std::unordered_set<art::Ptr<recob::Hit>> HitSet;
 
+  typedef std::map<art::Ptr<recob::Hit>, std::vector<float>> HitToScores;
+  typedef std::map<art::Ptr<recob::Hit>, std::vector<std::string>> HitToScoreLabels;
   typedef std::map<art::Ptr<recob::PFParticle>, TrackVector> PFParticlesToTracks;
   typedef std::map<art::Ptr<recob::PFParticle>, ShowerVector> PFParticlesToShowers;
   typedef std::map<art::Ptr<recob::PFParticle>, ClusterVector> PFParticlesToClusters;
@@ -149,6 +151,19 @@ namespace lar_pandora {
      */
     static void CollectHits(const art::Event& evt, const std::string& label, HitVector& hitVector);
 
+    /**
+     *  @brief Collect predicted hit labels from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the Hit list in the event
+     *  @param hitToScores the output map between a hit and its predicted scores
+     *  @param hitToScoreLabels the output map between a hit and its predicted score labels
+     */
+    static void CollectNuGraphHitLabels(const art::Event& evt, 
+                                        const std::string& label, 
+                                        HitToScores& hitToScores,
+                                        HitToScoreLabels& hitToScoreLabels);
+                                          
     /**
      *  @brief Collect the reconstructed PFParticles from the ART event record
      *
