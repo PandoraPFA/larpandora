@@ -69,6 +69,7 @@ cet_build_plugin(ShowerNumElectronsEnergy larpandora::ShowerTool
   larreco::Calorimetry
   lardataobj::RecoBase
   larcoreobj::headers
+  larpandora::LArPandoraInterface
 )
 
 cet_build_plugin(ShowerPCADirection larpandora::ShowerTool

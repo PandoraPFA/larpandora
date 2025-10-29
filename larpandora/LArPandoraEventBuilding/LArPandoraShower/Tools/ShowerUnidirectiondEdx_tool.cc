@@ -135,6 +135,10 @@ namespace ShowerRecoTools {
       return 1;
     }
 
+    // Setup normalization tools
+    for (auto const& nt : fNormalizationTools)
+      nt->setup(Event);
+
     // auto const pfpHandle = Event.getValidHandle<std::vector<recob::PFParticle>>(fPFParticleLabel);
     // const art::FindManyP<recob::SpacePoint>& fmspp =
     //  ShowerEleHolder.GetFindManyP<recob::SpacePoint>(pfpHandle, Event, fPFParticleLabel);
@@ -287,24 +291,27 @@ namespace ShowerRecoTools {
             }
 
             //Get the median and calculate the dEdx using the algorithm.
-            double dQdx = TMath::Median(vQ.size(), &vQ[0]) / pitch;
-            const auto& hit = trackPlaneHits.at(0);
-            double dQdxNorm = dQdx;
-            // Attempt the normalization //Mike 
-            if ( fApplyCorrectionsInNorm ) {
-              geo::Vector_t displacement(0, 0, 0);
-              //std::cout << "Running the CorrectionsInNorm for showers" << std::endl;
-              dQdxNorm = Normalize( dQdx,
-                Event,
-                *hit,
-                chargeWeightedPosition,
-                displacement,
-                0 );
-            }
-            std::cout << "Unidirection: dQdx: " << dQdx << " dQdxNorm: " << dQdxNorm << std::endl;
 
-            dEdx = fCalorimetryAlg.dEdx_AREA(
-              clockData, detProp, dQdxNorm, avgT / nhits, trackPlaneHits.at(0)->WireID().Plane);
+            if (vQ.size() > 0) {
+              double dQdx = TMath::Median(vQ.size(), &vQ[0]) / pitch;
+              const auto& hit = trackPlaneHits.at(0);
+              double dQdxNorm = dQdx;
+              // Attempt the normalization //Mike 
+              if ( fApplyCorrectionsInNorm ) {
+                //geo::Vector_t displacement(0, 0, 0);
+                //std::cout << "Running the CorrectionsInNorm for showers" << std::endl;
+                dQdxNorm = Normalize( dQdx,
+                  Event,
+                  *hit,
+                  chargeWeightedPosition,
+                  showerPCADir,
+                  0 );
+              }
+              //std::cout << "Unidirection: dQdx: " << dQdx << " dQdxNorm: " << dQdxNorm << std::endl;
+
+              dEdx = fCalorimetryAlg.dEdx_AREA(
+                clockData, detProp, dQdxNorm, avgT / nhits, trackPlaneHits.at(0)->WireID().Plane);
+            }
 
             if (isinf(dEdx)) { dEdx = -999; };
 
@@ -361,7 +368,7 @@ namespace ShowerRecoTools {
     double ret = dQdx;
     for (auto const& nt : fNormalizationTools) {
       ret = nt->Normalize(ret, e, h, location, direction, t0);
-      std::cout << "\t norm: dQdx = " << ret << std::endl;
+      //std::cout << "\t norm: dQdx = " << ret << std::endl;
     }
     
     return ret;

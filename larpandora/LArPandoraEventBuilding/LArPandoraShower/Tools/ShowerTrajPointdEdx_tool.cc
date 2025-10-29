@@ -139,7 +139,7 @@ namespace ShowerRecoTools {
 
       int tCounter = 0;
       for ( auto const& tool_pset : tool_psets ) {
-        std::cout << "pushing back tools..." << tCounter << std::endl;
+        //std::cout << "pushing back tools..." << tCounter << std::endl;
         tCounter++;
 	      fNormalizationTools.push_back( art::make_tool<INormalizeCharge>(tool_pset) );
       }
@@ -183,6 +183,10 @@ namespace ShowerRecoTools {
 
     // Get the spacepoints
     auto const spHandle = Event.getValidHandle<std::vector<recob::SpacePoint>>(fPFParticleLabel);
+
+    // Setup normalization tools
+    for (auto const& nt : fNormalizationTools)
+      nt->setup(Event);
 
     // Get the hits associated with the space points
     const art::FindManyP<recob::Hit>& fmsp =
@@ -357,7 +361,7 @@ namespace ShowerRecoTools {
 			    pfpT0Time );
       }
 
-      std::cout << "Traj Point: dQdx: " << dQdx << " dQdxNorm: " << dQdxNorm << std::endl;
+      //std::cout << "Traj Point: dQdx: " << dQdx << " dQdxNorm: " << dQdxNorm << std::endl;
 
       double dEdx = fCalorimetryAlg.dEdx_AREA(
         clockData, detProp, dQdxNorm, hit->PeakTime(), planeid.Plane, pfpT0Time, localEField);
@@ -554,7 +558,7 @@ namespace ShowerRecoTools {
     double ret = dQdx;
     for (auto const& nt : fNormalizationTools) {
       ret = nt->Normalize(ret, e, h, location, direction, t0);
-      std::cout << "\t norm: dQdx = " << ret << std::endl;
+      //std::cout << "\t norm: dQdx = " << ret << std::endl;
     }
     
     return ret;
