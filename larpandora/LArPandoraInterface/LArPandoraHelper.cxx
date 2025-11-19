@@ -18,6 +18,7 @@
 #include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/MVAOutput.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -86,6 +87,58 @@ namespace lar_pandora {
       const art::Ptr<recob::Hit> hit(theHits, i);
       hitVector.push_back(hit);
     }
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  void LArPandoraHelper::CollectNuGraphHitLabels(const art::Event& evt,
+                                                 const std::string& label,
+                                                 HitToScores& hitToScores,
+                                                 HitToScoreLabels& hitToScoreLabels)
+  {
+
+    art::Handle<std::vector<recob::Hit>> theHits;
+    evt.getByLabel(label, theHits);    
+
+    if (!theHits.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
+      return;
+    }
+    else {
+      mf::LogDebug("LArPandora") << "  Found: " << theHits->size() << " Hits " << std::endl;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<1>>> filterHandle;
+    evt.getByLabel(label, filterHandle);
+
+    if (!filterHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph filter label... " << std::endl;
+      return;
+    }
+
+    art::Handle<std::vector<anab::FeatureVector<5>>> semanticHandle;
+    evt.getByLabel(label, semanticHandle);
+
+    if (!semanticHandle.isValid()) {
+      mf::LogDebug("LArPandora") << "  Failed to find the NuGraph semantic label... " << std::endl;
+      return;
+    }
+
+    for (unsigned int i = 0; i < theHits->size(); ++i) {
+      const art::Ptr<recob::Hit> hit(theHits, i);
+
+      const float filterScore = filterHandle->at(i).at(0);
+      const auto &semanticScores  = semanticHandle->at(i);
+
+      std::vector<float> hitScores = {filterScore};
+      for (unsigned int j = 0; j < semanticScores.size(); ++j) 
+        hitScores.push_back(semanticScores[j]);
+      std::vector<std::string> hitScoreLabels = {"filter", "mip", "hip", "shower", "michel", "diffuse"};
+
+      hitToScores[hit] = hitScores;
+      hitToScoreLabels[hit] = hitScoreLabels;
+    }
+
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
