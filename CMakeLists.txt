@@ -9,7 +9,7 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 find_package(cetmodules REQUIRED)
-project(larpandora VERSION 10.01.06 LANGUAGES CXX)
+project(larpandora VERSION 10.01.07 LANGUAGES CXX)
 
 include(CetCMakeEnv)
 cet_cmake_env()
