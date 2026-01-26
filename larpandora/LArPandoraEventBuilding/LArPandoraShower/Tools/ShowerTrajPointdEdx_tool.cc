@@ -80,15 +80,21 @@ namespace ShowerRecoTools {
     bool fUseMedian;        //Use the median value as the dEdx rather than the mean.
     bool fCutStartPosition; //Remove hits using MinDistCutOff from the vertex as well.
 
-    bool fT0Correct;       // Whether to look for a T0 associated to the PFP
-    bool fSCECorrectPitch; // Whether to correct the "squeezing" of pitch, requires corrected input
+    bool fT0Correct;       //Whether to look for a T0 associated to the PFP
+    bool fSCECorrectPitch; //Whether to correct the "squeezing" of pitch, requires corrected input
     bool
-      fSCECorrectEField; // Whether to use the local electric field, from SpaceChargeService, in recombination calc.
+      fSCECorrectEField; //Whether to use the local electric field, from SpaceChargeService, in recombination calc.
     bool
-      fSCEInputCorrected; // Whether the input has already been corrected for spatial SCE distortions
+      fSCEInputCorrected; //Whether the input has already been corrected for spatial SCE distortions
 
-    bool fSumHitSnippets; // Whether to treat hits individually or only one hit per snippet
     bool fApplyCorrectionsInNorm; // Whether to instead apply calorimetry corrections in norm.
+    
+    bool fSumHitSnippets; //Whether to treat hits individually or only one hit per snippet
+    int
+      fResultsOverrideMode; //How results from a previous tool writing on the same tool are overridden
+    //0: always override previous results
+    //1: override plane-by-plane
+    //2: override only if all three planes are well-defined
 
     art::InputTag fPFParticleLabel;
     int fVerbose;
@@ -119,6 +125,7 @@ namespace ShowerRecoTools {
     , fSCEInputCorrected(pset.get<bool>("SCEInputCorrected"))
     , fSumHitSnippets(pset.get<bool>("SumHitSnippets"))
     , fApplyCorrectionsInNorm(pset.get<bool>("ApplyCorrectionsInNorm"))
+    , fResultsOverrideMode(pset.get<int>("ResultsOverrideMode"))
     , fPFParticleLabel(pset.get<art::InputTag>("PFParticleLabel"))
     , fVerbose(pset.get<int>("Verbose"))
     , fShowerStartPositionInputLabel(pset.get<std::string>("ShowerStartPositionInputLabel"))
@@ -439,16 +446,98 @@ namespace ShowerRecoTools {
       }
     }
 
-    // BH - test
-    // std::cout << "--------------------------------------------------------------------" << std::endl;
-    // std::cout << "  Init trk start (" << InitialTrack.Start().X() << ", " << InitialTrack.Start().Y() << ", " << InitialTrack.Start().Z() << ")" << std::endl;
-    // std::cout << "  dE/dx on plane2: " << dEdx_val[2] << " MeV/cm" << std::endl;
-    // std::cout << "--------------------------------------------------------------------" << std::endl;
-    
-    //Need to sort out errors sensibly.
-    ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
-    ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
-    ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+
+    //Get results from the same label, if set by a previous tool of the same type
+    std::vector<double> dEdx_val_previousTool;
+
+    if (ShowerEleHolder.CheckElement(fShowerdEdxOutputLabel)) {
+      ShowerEleHolder.GetElement(fShowerdEdxOutputLabel, dEdx_val_previousTool);
+      if (fVerbose > 2) {
+        std::cout << "Result from previous dEdx tool..." << std::endl;
+        for (unsigned int plane = 0; plane < dEdx_val_previousTool.size(); plane++) {
+          std::cout << "Plane: " << plane << " with dEdx: " << dEdx_val_previousTool[plane]
+                    << std::endl;
+        }
+      }
+    }
+    else {
+      //If the previous tool didn't run at all, just use this one
+      if (fVerbose > 1) { std::cout << "No previous tool to be overridden" << std::endl; }
+      ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
+      ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+      ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+
+      return 0;
+    }
+
+    //Choose how to override results from the previous tool
+    switch (fResultsOverrideMode) {
+
+    //Always override previous results
+    //This will keep the previous result only if the current tool fails on all planes
+    case 0: {
+
+      if (fVerbose > 1) { std::cout << "Always overriding the previous result" << std::endl; }
+
+      ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
+      ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+      ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+
+      break;
+    }
+
+    //Override plane-by-plane
+    case 1: {
+
+      if (fVerbose > 1) {
+        std::cout << "Overriding the previous result plane-by-plane" << std::endl;
+      }
+
+      std::vector<double> dEdx_val_overriddenPerPlane(dEdx_val);
+      for (unsigned int plane = 0; plane < dEdx_val.size(); plane++) {
+        //If the current tool fails, just retain plane-by-plane the result from the previous tool
+        if (dEdx_val[plane] < 0.) {
+          dEdx_val_overriddenPerPlane[plane] = dEdx_val_previousTool[plane];
+          if (fVerbose > 2) {
+            std::cout << "This tool failed in plane " << plane
+                      << " and I am keeping the previous value" << std::endl;
+            std::cout << "Current value: " << dEdx_val[plane] << std::endl;
+            std::cout << "Chosen value:  " << dEdx_val_overriddenPerPlane[plane] << std::endl;
+          }
+        }
+        else {
+          dEdx_val_overriddenPerPlane[plane] = dEdx_val[plane];
+        }
+      }
+
+      ShowerEleHolder.SetElement(dEdx_val_overriddenPerPlane, dEdx_valErr, fShowerdEdxOutputLabel);
+      ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+      ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+      break;
+    }
+
+    //Override only if all three planes are well-defined
+    case 2: {
+
+      if (fVerbose > 1) {
+        std::cout << "Only overriding if all three planes are well-defined" << std::endl;
+      }
+
+      if (dEdx_val[0] > 0. && dEdx_val[1] > 0. && dEdx_val[2] > 0.) {
+        ShowerEleHolder.SetElement(dEdx_val, dEdx_valErr, fShowerdEdxOutputLabel);
+        ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+        ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+      }
+      else {
+        ShowerEleHolder.SetElement(dEdx_val_previousTool, dEdx_valErr, fShowerdEdxOutputLabel);
+        ShowerEleHolder.SetElement(best_plane, fShowerBestPlaneOutputLabel);
+        ShowerEleHolder.SetElement(dEdx_vec_cut, fShowerdEdxVecOutputLabel);
+      }
+
+      break;
+    }
+    }
+
     return 0;
   }
 

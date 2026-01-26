@@ -164,11 +164,19 @@ namespace lar_pandora {
 
   void LArPandora::produce(art::Event& evt)
   {
+    this->SetPandoraEventInformation(evt);
     IdToHitMap idToHitMap;
     this->CreatePandoraInput(evt, idToHitMap);
     this->RunPandoraInstances();
     this->ProcessPandoraOutput(evt, idToHitMap);
     this->ResetPandoraInstances();
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  void LArPandora::SetPandoraEventInformation(art::Event const& evt)
+  {
+    PandoraApi::SetEventInformation(*m_pPrimaryPandora, evt.run(), evt.subRun(), evt.event());
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------

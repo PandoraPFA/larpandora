@@ -34,6 +34,7 @@ namespace lar_pandora {
     void produce(art::Event& evt);
 
   protected:
+    void SetPandoraEventInformation(art::Event const& evt);
     void CreatePandoraInput(art::Event& evt, IdToHitMap& idToHitMap);
     void ProcessPandoraOutput(art::Event& evt, const IdToHitMap& idToHitMap);
 

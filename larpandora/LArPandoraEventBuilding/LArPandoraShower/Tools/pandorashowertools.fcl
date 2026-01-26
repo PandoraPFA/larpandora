@@ -292,7 +292,8 @@ showertrajpointdedx:{
     SCECorrectPitch:      false
     SCECorrectEField:     false
     SCEInputCorrected:    false
-    SumHitSnippets: false
+    SumHitSnippets:       false
+    ResultsOverrideMode:  0
     # PFParticleLabel: "pandora"
     ShowerStartPositionInputLabel: "ShowerStartPosition"
     InitialTrackSpacePointsInputLabel: "InitialTrackSpacePoints"

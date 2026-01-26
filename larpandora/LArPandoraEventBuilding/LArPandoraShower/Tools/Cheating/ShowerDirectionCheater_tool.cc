@@ -79,7 +79,7 @@ namespace ShowerRecoTools {
                                                reco::shower::ShowerElementHolder& ShowerEleHolder)
   {
 
-    const simb::MCParticle* trueParticle;
+    const simb::MCParticle* trueParticle{nullptr};
 
     //Get the hits from the shower:
     auto const pfpHandle = Event.getValidHandle<std::vector<recob::PFParticle>>(fPFParticleLabel);
