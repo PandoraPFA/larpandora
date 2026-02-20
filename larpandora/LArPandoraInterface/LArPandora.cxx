@@ -206,7 +206,8 @@ namespace lar_pandora {
     m_collectHitsTool->CollectHits(evt, m_hitfinderModuleLabel, artHits);
 
     if (m_shouldCollectHitPredictions) {
-      LArPandoraHelper::CollectNuGraphHitLabels(evt, m_hitfinderModuleLabel, hitToScores, hitToScoreLabels);
+      LArPandoraHelper::CollectNuGraphHitLabels(
+        evt, m_hitfinderModuleLabel, hitToScores, hitToScoreLabels);
     }
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {

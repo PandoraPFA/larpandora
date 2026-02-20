@@ -159,11 +159,11 @@ namespace lar_pandora {
      *  @param hitToScores the output map between a hit and its predicted scores
      *  @param hitToScoreLabels the output map between a hit and its predicted score labels
      */
-    static void CollectNuGraphHitLabels(const art::Event& evt, 
-                                        const std::string& label, 
+    static void CollectNuGraphHitLabels(const art::Event& evt,
+                                        const std::string& label,
                                         HitToScores& hitToScores,
                                         HitToScoreLabels& hitToScoreLabels);
-                                          
+
     /**
      *  @brief Collect the reconstructed PFParticles from the ART event record
      *

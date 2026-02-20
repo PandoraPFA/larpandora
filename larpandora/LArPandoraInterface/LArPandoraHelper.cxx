@@ -17,8 +17,8 @@
 
 #include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
-#include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/AnalysisBase/MVAOutput.h"
+#include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -98,7 +98,7 @@ namespace lar_pandora {
   {
 
     art::Handle<std::vector<recob::Hit>> theHits;
-    evt.getByLabel(label, theHits);    
+    evt.getByLabel(label, theHits);
 
     if (!theHits.isValid()) {
       mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
@@ -128,17 +128,17 @@ namespace lar_pandora {
       const art::Ptr<recob::Hit> hit(theHits, i);
 
       const float filterScore = filterHandle->at(i).at(0);
-      const auto &semanticScores  = semanticHandle->at(i);
+      const auto& semanticScores = semanticHandle->at(i);
 
       std::vector<float> hitScores = {filterScore};
-      for (unsigned int j = 0; j < semanticScores.size(); ++j) 
+      for (unsigned int j = 0; j < semanticScores.size(); ++j)
         hitScores.push_back(semanticScores[j]);
-      std::vector<std::string> hitScoreLabels = {"filter", "mip", "hip", "shower", "michel", "diffuse"};
+      std::vector<std::string> hitScoreLabels = {
+        "filter", "mip", "hip", "shower", "michel", "diffuse"};
 
       hitToScores[hit] = hitScores;
       hitToScoreLabels[hit] = hitScoreLabels;
     }
-
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------

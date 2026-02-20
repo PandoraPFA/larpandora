@@ -156,11 +156,10 @@ namespace lar_pandora {
       if (settings.m_useHitPredictions) {
         auto itScorePred = hitToScores.find(hit);
         auto itLabelPred = hitToScoreLabels.find(hit);
-        if ((itScorePred != hitToScores.end()) && 
-            (itLabelPred != hitToScoreLabels.end())) {
+        if ((itScorePred != hitToScores.end()) && (itLabelPred != hitToScoreLabels.end())) {
           caloHitParameters.m_hitScores = itScorePred->second;
           caloHitParameters.m_hitScoreLabels = itLabelPred->second;
-        } 
+        }
       }
 
       // Store the hit address
