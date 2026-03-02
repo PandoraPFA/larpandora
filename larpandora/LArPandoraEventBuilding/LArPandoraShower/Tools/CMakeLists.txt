@@ -69,6 +69,7 @@ cet_build_plugin(ShowerNumElectronsEnergy larpandora::ShowerTool
   larreco::Calorimetry
   lardataobj::RecoBase
   larcoreobj::headers
+  larpandora::LArPandoraInterface
 )
 
 cet_build_plugin(ShowerPCADirection larpandora::ShowerTool
@@ -167,6 +168,8 @@ cet_build_plugin(ShowerUnidirectiondEdx larpandora::ShowerTool
   larreco::Calorimetry
   lardata::DetectorClocksService
   lardata::DetectorPropertiesService
+  larpandora::LArPandoraInterface
+
 )
 
 add_subdirectory(Cheating)
