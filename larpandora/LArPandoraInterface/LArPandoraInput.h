@@ -128,11 +128,13 @@ namespace lar_pandora {
      *  @param  settings the settings
      *  @param  truthToParticles  mapping from MC truth to MC particles
      *  @param  particlesToTruth  mapping from MC particles to MC truth
+     *  @param  trackIDToEDepSims mapping from trackID to SimEnergyDeposits
      */
     static void CreatePandoraMCParticles(const Settings& settings,
                                          const MCTruthToMCParticles& truthToParticles,
                                          const MCParticlesToMCTruth& particlesToTruth,
-                                         const RawMCParticleVector& generatorMCParticleVector);
+                                         const RawMCParticleVector& generatorMCParticleVector,
+                                         const TrackIDToEDepSims& trackIDToEDepSims);
 
     /**
      *  @brief Find all primary MCParticles in a given vector of MCParticles

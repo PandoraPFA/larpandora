@@ -44,6 +44,7 @@ namespace larpandoraobj {
 }
 
 #include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimEnergyDeposit.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 
 namespace simb {
@@ -58,6 +59,7 @@ namespace lar_pandora {
 
   typedef std::vector<art::Ptr<recob::Wire>> WireVector;
   typedef std::vector<art::Ptr<recob::Hit>> HitVector;
+  typedef std::vector<art::Ptr<sim::SimEnergyDeposit>> EDepSimVector;
   typedef std::vector<art::Ptr<recob::SpacePoint>> SpacePointVector;
   typedef std::vector<art::Ptr<recob::Cluster>> ClusterVector;
   typedef std::vector<art::Ptr<recob::Seed>> SeedVector;
@@ -96,6 +98,7 @@ namespace lar_pandora {
   typedef std::map<art::Ptr<simb::MCTruth>, art::Ptr<recob::PFParticle>> MCTruthToPFParticles;
   typedef std::map<art::Ptr<simb::MCParticle>, art::Ptr<simb::MCTruth>> MCParticlesToMCTruth;
   typedef std::map<art::Ptr<simb::MCParticle>, HitVector> MCParticlesToHits;
+  typedef std::map<int, EDepSimVector> TrackIDToEDepSims;
   typedef std::map<art::Ptr<simb::MCParticle>, art::Ptr<recob::PFParticle>>
     MCParticlesToPFParticles;
   typedef std::map<art::Ptr<recob::Hit>, art::Ptr<recob::SpacePoint>> HitsToSpacePoints;
@@ -454,6 +457,17 @@ namespace lar_pandora {
                                    const std::string& label,
                                    SimChannelVector& simChannelVector,
                                    bool& areSimChannelsValid);
+
+    /**
+     *  @brief Collect the SimEnergyDeposits associated to each art MCParticle (identified by the TrackID)
+     *
+     *  @param evt the ART event record
+     *  @param label the label of the SimEnergyDeposits producer
+     *  @param trackIDToEDepSims the output trackID->SimEnergyDeposits map
+     */
+    static void CollectEDepSims(const art::Event& evt, 
+                                const std::string& label,
+                                TrackIDToEDepSims &trackIDToEDepSims);
 
     /**
      *  @brief Collect a vector of MCParticle objects from the ART event record
