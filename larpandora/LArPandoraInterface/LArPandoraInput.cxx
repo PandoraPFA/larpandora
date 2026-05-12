@@ -469,6 +469,7 @@ namespace lar_pandora {
           else
             mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
           mcParticleParameters.m_process = lar_content::MC_PROC_INCIDENT_NU;
+          mcParticleParameters.m_isCC = (neutrino.CCNC() == 0);
           mcParticleParameters.m_energy = neutrino.Nu().E();
           mcParticleParameters.m_visibleEnergy = mcTruthVisibleEnergy;
           mcParticleParameters.m_endDirection = nuDir;
@@ -663,6 +664,7 @@ namespace lar_pandora {
       try {
         MCProcessMap processMap;
         FillMCProcessMap(processMap);
+        mcParticleParameters.m_isCC = false;
         mcParticleParameters.m_nuanceCode = nuanceCode;
         mcParticleParameters.m_visibleEnergy = mcParticleVisEnergy;
         mcParticleParameters.m_endDirection = partEndDir;
