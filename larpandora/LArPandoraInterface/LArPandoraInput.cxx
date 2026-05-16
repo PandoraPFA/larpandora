@@ -469,14 +469,12 @@ namespace lar_pandora {
           else
             mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
           mcParticleParameters.m_process = lar_content::MC_PROC_INCIDENT_NU;
-          mcParticleParameters.m_isCC = (neutrino.CCNC() == 0);
+          mcParticleParameters.m_isCC = (neutrino.CCNC() == simb::kCC);
           mcParticleParameters.m_energy = neutrino.Nu().E();
           mcParticleParameters.m_visibleEnergy = mcTruthVisibleEnergy;
           mcParticleParameters.m_endDirection = nuDir;
           mcParticleParameters.m_nTrajPoints = 0;
-          mcParticleParameters.m_trajPointsX = std::vector<float>();
-          mcParticleParameters.m_trajPointsY = std::vector<float>();
-          mcParticleParameters.m_trajPointsZ = std::vector<float>();
+          mcParticleParameters.m_trajPoints = pandora::CartesianPointVector();
           mcParticleParameters.m_momentum =
             pandora::CartesianVector(neutrino.Nu().Px(), neutrino.Nu().Py(), neutrino.Nu().Pz());
           mcParticleParameters.m_vertex =
@@ -642,7 +640,7 @@ namespace lar_pandora {
       }
 
       // Get trajectory points
-      std::vector<float> trajX, trajY, trajZ;
+      pandora::CartesianPointVector trajPoints;
       for (int iTraj = 0; iTraj < nTrajPoints; ++iTraj)
       {
           const geo::Point_t point_t(particle->Vx(iTraj),
@@ -653,9 +651,7 @@ namespace lar_pandora {
 
           if (!tpcID.isValid) { continue; }
 
-          trajX.push_back(point_t.X());
-          trajY.push_back(point_t.Y());
-          trajZ.push_back(point_t.Z());
+          trajPoints.push_back(pandora::CartesianVector(point_t.X(), point_t.Y(), point_t.Z()));
       }
 
       // Create 3D Pandora MC Particle
@@ -668,10 +664,8 @@ namespace lar_pandora {
         mcParticleParameters.m_nuanceCode = nuanceCode;
         mcParticleParameters.m_visibleEnergy = mcParticleVisEnergy;
         mcParticleParameters.m_endDirection = partEndDir;
-        mcParticleParameters.m_nTrajPoints = trajX.size();
-        mcParticleParameters.m_trajPointsX = trajX;
-        mcParticleParameters.m_trajPointsY = trajY;
-        mcParticleParameters.m_trajPointsZ = trajZ;
+        mcParticleParameters.m_nTrajPoints = trajPoints.size();
+        mcParticleParameters.m_trajPoints = trajPoints;
         if (processMap.find(particle->Process()) != processMap.end()) {
           mcParticleParameters.m_process = processMap[particle->Process()];
         }
