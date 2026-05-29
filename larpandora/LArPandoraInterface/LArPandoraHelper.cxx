@@ -856,21 +856,19 @@ namespace lar_pandora {
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
-  void LArPandoraHelper::CollectEDepSims(const art::Event& evt, 
+  void LArPandoraHelper::CollectEDepSims(const art::Event& evt,
                                          const std::string& label,
-                                         TrackIDToEDepSims &trackIDToEDepSims)
+                                         TrackIDToEDepSims& trackIDToEDepSims)
   {
     art::Handle<std::vector<sim::SimEnergyDeposit>> simEDepHandle;
     std::vector<art::Ptr<sim::SimEnergyDeposit>> simEDepVector;
 
-    if (evt.getByLabel(label, simEDepHandle))
-        art::fill_ptr_vector(simEDepVector, simEDepHandle);
+    if (evt.getByLabel(label, simEDepHandle)) art::fill_ptr_vector(simEDepVector, simEDepHandle);
 
     std::unordered_map<int, float> trackIDToEDep;
-    for (const art::Ptr<sim::SimEnergyDeposit> &simEDep : simEDepVector)
-    {
-        const int trackID = abs(simEDep->TrackID());
-        trackIDToEDepSims[trackID].push_back(simEDep);
+    for (const art::Ptr<sim::SimEnergyDeposit>& simEDep : simEDepVector) {
+      const int trackID = abs(simEDep->TrackID());
+      trackIDToEDepSims[trackID].push_back(simEDep);
     }
   }
 

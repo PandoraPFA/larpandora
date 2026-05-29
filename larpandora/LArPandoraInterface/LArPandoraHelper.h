@@ -465,9 +465,9 @@ namespace lar_pandora {
      *  @param label the label of the SimEnergyDeposits producer
      *  @param trackIDToEDepSims the output trackID->SimEnergyDeposits map
      */
-    static void CollectEDepSims(const art::Event& evt, 
+    static void CollectEDepSims(const art::Event& evt,
                                 const std::string& label,
-                                TrackIDToEDepSims &trackIDToEDepSims);
+                                TrackIDToEDepSims& trackIDToEDepSims);
 
     /**
      *  @brief Collect a vector of MCParticle objects from the ART event record

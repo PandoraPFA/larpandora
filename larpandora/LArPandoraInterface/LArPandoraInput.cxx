@@ -408,14 +408,13 @@ namespace lar_pandora {
 
     // First extract visible energy
     std::map<int, float> trackIDToEDep;
-    for (const auto &entry : trackIDToEDepSims)
-    {
-        float visibleEnergy(0.f);
+    for (const auto& entry : trackIDToEDepSims) {
+      float visibleEnergy(0.f);
 
-        for (const art::Ptr<sim::SimEnergyDeposit> &simEDep : entry.second)
-            visibleEnergy += (simEDep->Energy() * (1e-3));
+      for (const art::Ptr<sim::SimEnergyDeposit>& simEDep : entry.second)
+        visibleEnergy += (simEDep->Energy() * (1e-3));
 
-        trackIDToEDep[entry.first] = visibleEnergy;
+      trackIDToEDep[entry.first] = visibleEnergy;
     }
 
     // Loop over MC truth objects
@@ -432,12 +431,10 @@ namespace lar_pandora {
 
       // First sum visible energy for MCTruth
       float mcTruthVisibleEnergy(0.f);
-      for (const art::Ptr<simb::MCParticle> &particle : particleVector)
-      {
-          if (trackIDToEDep.find(particle->TrackId()) == trackIDToEDep.end())
-              continue;
+      for (const art::Ptr<simb::MCParticle>& particle : particleVector) {
+        if (trackIDToEDep.find(particle->TrackId()) == trackIDToEDep.end()) continue;
 
-          mcTruthVisibleEnergy += trackIDToEDep.at(particle->TrackId());
+        mcTruthVisibleEnergy += trackIDToEDep.at(particle->TrackId());
       }
 
       if (truth->NeutrinoSet()) {
@@ -452,12 +449,12 @@ namespace lar_pandora {
         const int neutrinoID(neutrinoCounter + 9 * settings.m_uidOffset);
 
         // get nu start/end direction
-        pandora::CartesianVector nuDir = pandora::CartesianVector(neutrino.Nu().Px(), neutrino.Nu().Py(), neutrino.Nu().Pz());
+        pandora::CartesianVector nuDir =
+          pandora::CartesianVector(neutrino.Nu().Px(), neutrino.Nu().Py(), neutrino.Nu().Pz());
         if ((std::fabs(nuDir.GetX()) > std::numeric_limits<float>::epsilon()) ||
             (std::fabs(nuDir.GetY()) > std::numeric_limits<float>::epsilon()) ||
-            (std::fabs(nuDir.GetZ()) > std::numeric_limits<float>::epsilon()))
-        { 
-            nuDir = nuDir.GetUnitVector();
+            (std::fabs(nuDir.GetZ()) > std::numeric_limits<float>::epsilon())) {
+          nuDir = nuDir.GetUnitVector();
         }
 
         // Create Pandora 3D MC Particle
@@ -605,53 +602,47 @@ namespace lar_pandora {
       // Get visible energy
       float mcParticleVisEnergy(0.f);
       if (trackIDToEDep.find(trackID) != trackIDToEDep.end())
-          mcParticleVisEnergy = trackIDToEDep.at(trackID);
+        mcParticleVisEnergy = trackIDToEDep.at(trackID);
 
       // Get MCParticle end direction
       int nTrajPoints = particle->NumberTrajectoryPoints();
       art::ServiceHandle<geo::Geometry const> theGeometry;
       pandora::CartesianVector partEndDir(0.f, 0.f, 0.f);
 
-      if (nTrajPoints > 1)
-      {
-          int index(0);
+      if (nTrajPoints > 1) {
+        int index(0);
 
-          while (partEndDir.GetMagnitude() < std::numeric_limits<float>::epsilon())
-          {
-              if (index == nTrajPoints)
-                  break;
+        while (partEndDir.GetMagnitude() < std::numeric_limits<float>::epsilon()) {
+          if (index == nTrajPoints) break;
 
-              ++index;
+          ++index;
 
-              const geo::Point_t point_t(particle->Vx(nTrajPoints - index), 
-                                         particle->Vy(nTrajPoints - index), 
-                                         particle->Vz(nTrajPoints - index));
-              const auto pos(particle->Position(nTrajPoints - index).Vect());
-              geo::TPCID tpcID = theGeometry->FindTPCAtPosition(point_t);
-
-              if (!tpcID.isValid) { continue; }
-
-              const auto momentum(particle->Momentum(nTrajPoints - index).Vect()); 
-              partEndDir = pandora::CartesianVector(momentum.X(), momentum.Y(), momentum.Z());
-          }
-
-          if (partEndDir.GetMagnitude() > std::numeric_limits<float>::epsilon())
-              partEndDir = partEndDir.GetUnitVector();
-      }
-
-      // Get trajectory points
-      pandora::CartesianPointVector trajPoints;
-      for (int iTraj = 0; iTraj < nTrajPoints; ++iTraj)
-      {
-          const geo::Point_t point_t(particle->Vx(iTraj),
-                                     particle->Vy(iTraj),
-                                     particle->Vz(iTraj));
-          const auto pos(particle->Position(iTraj).Vect());
+          const geo::Point_t point_t(particle->Vx(nTrajPoints - index),
+                                     particle->Vy(nTrajPoints - index),
+                                     particle->Vz(nTrajPoints - index));
+          const auto pos(particle->Position(nTrajPoints - index).Vect());
           geo::TPCID tpcID = theGeometry->FindTPCAtPosition(point_t);
 
           if (!tpcID.isValid) { continue; }
 
-          trajPoints.push_back(pandora::CartesianVector(point_t.X(), point_t.Y(), point_t.Z()));
+          const auto momentum(particle->Momentum(nTrajPoints - index).Vect());
+          partEndDir = pandora::CartesianVector(momentum.X(), momentum.Y(), momentum.Z());
+        }
+
+        if (partEndDir.GetMagnitude() > std::numeric_limits<float>::epsilon())
+          partEndDir = partEndDir.GetUnitVector();
+      }
+
+      // Get trajectory points
+      pandora::CartesianPointVector trajPoints;
+      for (int iTraj = 0; iTraj < nTrajPoints; ++iTraj) {
+        const geo::Point_t point_t(particle->Vx(iTraj), particle->Vy(iTraj), particle->Vz(iTraj));
+        const auto pos(particle->Position(iTraj).Vect());
+        geo::TPCID tpcID = theGeometry->FindTPCAtPosition(point_t);
+
+        if (!tpcID.isValid) { continue; }
+
+        trajPoints.push_back(pandora::CartesianVector(point_t.X(), point_t.Y(), point_t.Z()));
       }
 
       // Create 3D Pandora MC Particle
