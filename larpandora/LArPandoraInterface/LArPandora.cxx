@@ -56,6 +56,7 @@ namespace lar_pandora {
     , m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", ""))
     , m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant"))
     , m_simChannelModuleLabel(pset.get<std::string>("SimChannelModuleLabel", m_geantModuleLabel))
+    , m_eDepSimModuleLabel(pset.get<std::string>("EDepSimModuleLabel", ""))
     , m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel"))
     , m_backtrackerModuleLabel(pset.get<std::string>("BackTrackerModuleLabel", ""))
     , m_allOutcomesInstanceLabel(pset.get<std::string>("AllOutcomesInstanceLabel", "allOutcomes"))
@@ -200,6 +201,7 @@ namespace lar_pandora {
     RawMCParticleVector generatorArtMCParticleVector;
     MCTruthToMCParticles artMCTruthToMCParticles;
     MCParticlesToMCTruth artMCParticlesToMCTruth;
+    TrackIDToEDepSims artTrackIDToEDepSims;
 
     bool areSimChannelsValid(false);
 
@@ -241,6 +243,9 @@ namespace lar_pandora {
       }
     }
 
+    if (m_eDepSimModuleLabel != "")
+      LArPandoraHelper::CollectEDepSims(evt, m_eDepSimModuleLabel, artTrackIDToEDepSims);
+
     LArPandoraInput::CreatePandoraHits2D(
       evt, m_inputSettings, m_driftVolumeMap, artHits, hitToScores, hitToScoreLabels, idToHitMap);
 
@@ -248,7 +253,8 @@ namespace lar_pandora {
       LArPandoraInput::CreatePandoraMCParticles(m_inputSettings,
                                                 artMCTruthToMCParticles,
                                                 artMCParticlesToMCTruth,
-                                                generatorArtMCParticleVector);
+                                                generatorArtMCParticleVector,
+                                                artTrackIDToEDepSims);
       LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, idToHitMap, artHitsToTrackIDEs);
     }
   }
