@@ -1,0 +1,52 @@
+#include "ivysaurustrainingfiles.fcl"
+#include "services_dune.fcl"
+#include "deepan_reco2_workflow.fcl"
+#include "tools_dune.fcl"
+
+process_name: IvysaurusTrainingFiles
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "IvysaurusTrainingFiles_hist.root"
+                  closeFileFast: false }
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  RandomNumberGenerator: {} #ART native random number generator
+                        @table::dunefd_1x2x6_services
+}
+
+# Input source is a ROOT file 
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1        # Number of events to create
+
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+  producers:
+  {
+     @table::pandora_horizdrift_producers
+  }
+
+  # Declare the modules
+  analyzers:
+  { 
+    ivyTrain:     @local::ivysaurus_training_files
+  }
+
+  reco: [ @sequence::deepan_workflow_reco2 ]
+  trigger_paths: [ reco ]
+
+  stream1: [ivyTrain]
+  end_paths: [ stream1 ]
+}
+
+physics.producers.pandora.ConfigFile: "PandoraSettings_Master_DUNEFD_DizzleSelection.xml"
+
+########################################################################
+

@@ -31,6 +31,7 @@ cet_make_library(SOURCE
   nusimdata::SimulationBase
 )
 
+add_subdirectory(LArPandoraPID)
 add_subdirectory(LArPandoraShower)
 add_subdirectory(SliceIdTools)
 

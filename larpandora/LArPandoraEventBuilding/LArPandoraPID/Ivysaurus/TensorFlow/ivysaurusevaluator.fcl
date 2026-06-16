@@ -1,0 +1,18 @@
+#include "gridmanager.fcl"
+#include "trackvarmanager.fcl"
+#include "showervarmanager.fcl"
+
+BEGIN_PROLOG
+
+ivysaurus_evaluator:
+{
+  GridManager:            @local::grid_manager
+  TrackVarManager:        @local::trackvar_manager
+  ShowerVarManager:       @local::showervar_manager
+  NetworkDirectory:       "my_model_calo_VGG_BN_VARS/"
+  NTrackVars:              10
+  NShowerVars:             16
+  RecoModuleLabel:        "pandora"
+}
+
+END_PROLOG

@@ -1,0 +1,23 @@
+#include "gridmanager.fcl"
+#include "trackvarmanager.fcl"
+#include "showervarmanager.fcl"
+
+BEGIN_PROLOG
+
+ivysaurus_training_files:
+{
+  module_type: IvysaurusTrainingFiles
+
+  GridManager:            @local::grid_manager
+  TrackVarManager:        @local::trackvar_manager
+  ShowerVarManager:       @local::showervar_manager
+  HitModuleLabel:         'hitfd'
+  RecoModuleLabel:        'pandora'
+  TrackModuleLabel:       'pandoraTrack'  
+  CompletenessThreshold:   0.5
+  PurityThreshold:         0.5
+  NSpacepointThreshold:    50
+  WriteVisualisationInfo:  false
+}
+
+END_PROLOG

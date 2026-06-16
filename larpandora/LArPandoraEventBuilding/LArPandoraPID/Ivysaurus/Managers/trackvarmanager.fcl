@@ -1,0 +1,30 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+trackvar_manager:
+{
+  RecoModuleLabel:    "pandora"
+  TrackModuleLabel:   "pandoraTrack"
+  RecombFactor:        0.63
+  CalorimetryAlg:      @local::dune10kt_calorimetryalgmc
+  ChildSeparation:     5.0
+  MinTrackLengthMCS:   100.0
+  MaxTrackLengthMCS:   1350.0
+  IntTrkMomRange:      0.0
+  GradTrkMomRange:     1.0
+  IntTrkMomMCS:        0.0
+  GradTrkMomMCS:       1.0                 #uncalibrated? welp.
+
+  NTrackChildrenLimit:     5.0
+  NShowerChildrenLimit:    3.0
+  NGrandChildrenLimit:     3.0
+  NChildHitsLimit:         100.0
+  ChildEnergyLimit:        1.0
+  ChildTrackScoreLimit:    1.0
+  TrackLengthLimit:        500.0
+  WobbleLimit:             15.0
+  MomentumComparisonLimit: 10.0
+}
+
+END_PROLOG

@@ -1,0 +1,32 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+showervar_manager:
+{
+  RecoModuleLabel:   "pandora"
+  ShowerModuleLabel: "pandoraShower"
+  HitModuleLabel:    "hitfd"
+
+  DisplacementLimit:                             150.0
+  DCALimit:                                      150.0
+  TrackStubLengthLimit:                          100
+  NuVertexAvSeparationLimit:                     300.0
+  NuVertexChargeAsymmetryLimit:                  1.0
+  InitialGapSizeLimit:                           4.0
+  LargestGapSizeLimit:                           2.0
+  PathwayLengthLimit:                            30.0
+  PathwayScatteringAngle2DLimit:                 10.0
+  NShowerHitsLimit:                              2000.0
+  FoundHitRatioLimit:                            1.5
+  ScatterAngleLimit:                             40.0
+  OpeningAngleLimit:                             20.0
+  NuVertexEnergyAsymmetryLimit:                  1.0
+  NuVertexEnergyWeightedMeanRadialDistanceLimit: 20.0
+  ShowerStartEnergyAsymmetryLimit:               1.0
+  ShowerStartMoliereRadiusLimit:                 20.0
+  NAmbiguousViewsLimit:                          3.0
+  UnaccountedEnergyLimit:                        10.0
+}
+
+END_PROLOG
