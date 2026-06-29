@@ -161,6 +161,8 @@ public:
     */
     static art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
+    static bool HasVertex(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &particleLabel);
+    
     /**
     * @brief Check if this particle has an associated track object
     *

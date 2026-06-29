@@ -5,28 +5,20 @@ BEGIN_PROLOG
 showervar_manager:
 {
   RecoModuleLabel:   "pandora"
+  TrackModuleLabel: "pandoraTrack"  
   ShowerModuleLabel: "pandoraShower"
   HitModuleLabel:    "hitfd"
 
-  DisplacementLimit:                             150.0
-  DCALimit:                                      150.0
-  TrackStubLengthLimit:                          100
-  NuVertexAvSeparationLimit:                     300.0
-  NuVertexChargeAsymmetryLimit:                  1.0
-  InitialGapSizeLimit:                           4.0
-  LargestGapSizeLimit:                           2.0
-  PathwayLengthLimit:                            30.0
-  PathwayScatteringAngle2DLimit:                 10.0
-  NShowerHitsLimit:                              2000.0
-  FoundHitRatioLimit:                            1.5
-  ScatterAngleLimit:                             40.0
-  OpeningAngleLimit:                             20.0
-  NuVertexEnergyAsymmetryLimit:                  1.0
-  NuVertexEnergyWeightedMeanRadialDistanceLimit: 20.0
-  ShowerStartEnergyAsymmetryLimit:               1.0
-  ShowerStartMoliereRadiusLimit:                 20.0
-  NAmbiguousViewsLimit:                          3.0
-  UnaccountedEnergyLimit:                        10.0
+  DisplacementMean:    35.9138
+  DisplacementStd:     78.6049
+  DCAMean:             19.5538
+  DCAStd:              53.3346
+  TrackStubLengthMean: 47.3008
+  TrackStubLengthStd:  63.3723
+  NuVertexAvSeparationMean:    27.9846
+  NuVertexAvSeparationStd:     54.631
+  NuVertexChargeAsymmetryMean: 0.8874
+  NuVertexChargeAsymmetryStd:  0.1908
 }
 
 END_PROLOG

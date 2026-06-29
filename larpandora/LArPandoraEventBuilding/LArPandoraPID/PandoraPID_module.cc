@@ -82,17 +82,13 @@ void pandorapid::PandoraPID::produce(art::Event& evt)
         ivysaurus::IvysaurusEvaluator::IvysaurusScores ivyScores = m_ivysaurusEvaluator.IvysaurusUseEvaluate(evt, pfp);
 
         PandoraPIDResult pandoraPIDResult;
-        pandoraPIDResult.m_ivysaurusMuonScore = ivyScores.m_muonScore;
-        pandoraPIDResult.m_ivysaurusProtonScore = ivyScores.m_protonScore;
-        pandoraPIDResult.m_ivysaurusPionScore = ivyScores.m_pionScore;
-        pandoraPIDResult.m_ivysaurusElectronScore = ivyScores.m_electronScore;
-        pandoraPIDResult.m_ivysaurusPhotonScore = ivyScores.m_photonScore;
-        pandoraPIDResult.m_ivysaurusParticleType = ivyScores.m_particleType;
+        pandoraPIDResult.m_ivysaurusScores[ParticleType::MUON] = ivyScores.m_muonScore;
+        pandoraPIDResult.m_ivysaurusScores[ParticleType::PROTON] = ivyScores.m_protonScore;
+        pandoraPIDResult.m_ivysaurusScores[ParticleType::PION] = ivyScores.m_pionScore;
+        pandoraPIDResult.m_ivysaurusScores[ParticleType::ELECTRON] = ivyScores.m_electronScore;
+        pandoraPIDResult.m_ivysaurusScores[ParticleType::PHOTON] = ivyScores.m_photonScore;
+        //pandoraPIDResult.m_ivysaurusParticleType = ivyScores.m_particleType;
 
-        std::cout << "muon: " << ivyScores.m_muonScore;
-
-
-        
         pandoraPIDResults->push_back(pandoraPIDResult);
         util::CreateAssn(evt, *pandoraPIDResults, pfp, *pfpAssns);
     }

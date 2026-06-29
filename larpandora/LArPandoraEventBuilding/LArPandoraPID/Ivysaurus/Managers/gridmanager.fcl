@@ -8,12 +8,10 @@ grid_manager:
   RecoModuleLabel:    "pandora"
   TrackModuleLabel:   "pandoraTrack"
   ShowerModuleLabel:  "pandoraShower"
-  #GridSize3D:          125.0
-  #GridDimensions:      256
   GridSize3D:          25.0
   GridDimensions:      24
-  AddChildrenToGrid:   true
-  MaxGridEntry:        0.01
+  GridMean:            0.0021
+  GridStd:             0.0027
   NSigmaConsidered:    2
   IntegralStep:        0.1
   RecombFactor:        0.63

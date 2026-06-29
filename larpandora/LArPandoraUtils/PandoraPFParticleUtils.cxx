@@ -163,6 +163,15 @@ art::Ptr<larpandoraobj::PFParticleMetadata> PandoraPFParticleUtils::GetMetadata(
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
+bool PandoraPFParticleUtils::HasVertex(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &particleLabel)
+{
+    const std::vector<art::Ptr<recob::Vertex>> theseVertices = PandoraPFParticleUtils::GetAssocProductVector<recob::Vertex>(pParticle,evt,particleLabel,particleLabel);
+
+    return !theseVertices.empty();
+}
+    
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 bool PandoraPFParticleUtils::HasTrack(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &particleLabel, const std::string &trackLabel)
 {
     // This function needs to fail if GetTrack would fail

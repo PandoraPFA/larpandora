@@ -1,4 +1,5 @@
 #include "gridmanager.fcl"
+#include "pfpvarmanager.fcl"
 #include "trackvarmanager.fcl"
 #include "showervarmanager.fcl"
 
@@ -7,12 +8,22 @@ BEGIN_PROLOG
 ivysaurus_evaluator:
 {
   GridManager:            @local::grid_manager
+  PFPVarManager:          @local::pfpvar_manager
   TrackVarManager:        @local::trackvar_manager
   ShowerVarManager:       @local::showervar_manager
-  NetworkDirectory:       "my_model_calo_VGG_BN_VARS/"
-  NTrackVars:              10
-  NShowerVars:             16
+  ContainedNetName:       "my_model_contained_VGG_BN_VARS.pt"
+  ExitingNetName:         "my_model_exiting_VGG_BN_VARS.pt"  
+  NTrackVars:              20
+  NShowerVars:             10
   RecoModuleLabel:        "pandora"
+  TrackModuleLabel:       "pandoraTrack"
+  ShowerModuleLabel:      "pandoraShower"  
+  FVMinX:                   -310.0    # FD HD
+  FVMaxX:                    310.0    # FD HD
+  FVMinY:                   -550.0    # FD HD
+  FVMaxY:                    550.0    # FD HD
+  FVMinZ:                    50.0     # FD HD
+  FVMaxZ:                    1244.0   # FD HD
 }
 
 END_PROLOG

@@ -183,7 +183,7 @@ bool GetInitialDirection(const art::Event &evt, const TVector3 &pfpVertex, const
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService>()->DataFor(evt);
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(evt);
 
-    TVector3 averageDirection(0.f, 0.f, 0.f);
+    std::map<geo::View_t, TVector3> avDirectionMap;
     
     for (const art::Ptr<recob::SpacePoint> &spacepoint : spacepoints)
     {
@@ -195,30 +195,69 @@ bool GetInitialDirection(const art::Event &evt, const TVector3 &pfpVertex, const
 
         // Only consider the collection view        
         const art::Ptr<recob::Hit> assocHit = assocHits.front();
-        const geo::WireID hitWireID = assocHit->WireID();
         const geo::View_t hitView(assocHit->View());
-        const geo::View_t thisPandoraView(lar_pandora::LArPandoraGeometry::GetGlobalView(hitWireID.Cryostat, hitWireID.TPC, hitView));
-        
-        if ((thisPandoraView != geo::kW) && (thisPandoraView != geo::kY))
-            continue;
 
         // 'initial region'
         const TVector3 spacepointPos = TVector3(spacepoint->position().X(), spacepoint->position().Y(), spacepoint->position().Z());
         const TVector3 displacement = spacepointPos - pfpVertex;
         const float mag = displacement.Mag();
 
-        if (mag < std::numeric_limits<float>::epsilon())
+        if (mag <std::numeric_limits<float>::epsilon())
             continue;
-        
-        const float spatialWeight = std::exp(-mag / 15.f);
+
+        const float spatialWeight = std::exp(-mag / 10.f);
         float hitEnergy = lar_pandora::PandoraHitUtils::LifetimeCorrectedTotalHitCharge(clockData, detProp, {assocHit});
-        averageDirection += (displacement.Unit() * hitEnergy * spatialWeight);
+        
+        if (avDirectionMap.find(hitView) == avDirectionMap.end())
+        {
+            avDirectionMap[hitView] = (displacement.Unit() * hitEnergy * spatialWeight);
+        }
+        else
+        {
+            avDirectionMap[hitView] += (displacement.Unit() * hitEnergy * spatialWeight);
+        }       
     }
 
-    if (averageDirection.Mag2() < std::numeric_limits<float>::epsilon())
+    if (avDirectionMap.size() < 2)
         return false;
     
-    direction = averageDirection.Unit();
+    TVector3 avDirection(0.f, 0.f, 0.f);
+    auto itDir = avDirectionMap.begin();
+    TVector3 avDirection1 = itDir->second.Unit();
+    ++itDir;
+    TVector3 avDirection2 = itDir->second.Unit();
+
+    if (avDirectionMap.size() < 3)
+    {
+        avDirection = (avDirection1 + avDirection2).Unit();
+    }
+    else
+    {
+        ++itDir;
+        TVector3 avDirection3 = itDir->second.Unit();
+
+        float angle12 = avDirection1.Angle(avDirection2);
+        float angle13 = avDirection1.Angle(avDirection3);
+        float angle23 = avDirection2.Angle(avDirection3);
+
+        if ((angle12 < angle13) && (angle12 < angle23))
+        {
+            avDirection = (avDirection1 + avDirection2).Unit();
+        }
+        else if ((angle13 < angle12) && (angle13 < angle23))
+        {
+            avDirection = (avDirection1 + avDirection3).Unit();
+        }
+        else
+        {
+            avDirection = (avDirection2 + avDirection3).Unit();
+        }   
+    }
+
+    if (avDirection.Mag2() < std::numeric_limits<float>::epsilon())
+        return false;
+    
+    direction = avDirection.Unit();
 
     return true;
 

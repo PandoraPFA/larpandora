@@ -1,0 +1,13 @@
+BEGIN_PROLOG
+
+pfpvar_manager:
+{
+  RecoModuleLabel:    "pandora"
+  
+  N2DHitsMean:            818.53
+  N2DHitsStd:             1406.8101
+  TrackShowerScoreMean:   0.5998
+  TrackShowerScoreStd:    0.1783
+}
+
+END_PROLOG

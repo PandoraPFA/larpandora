@@ -8,7 +8,6 @@ trackvar_manager:
   TrackModuleLabel:   "pandoraTrack"
   RecombFactor:        0.63
   CalorimetryAlg:      @local::dune10kt_calorimetryalgmc
-  ChildSeparation:     5.0
   MinTrackLengthMCS:   100.0
   MaxTrackLengthMCS:   1350.0
   IntTrkMomRange:      0.0
@@ -16,15 +15,26 @@ trackvar_manager:
   IntTrkMomMCS:        0.0
   GradTrkMomMCS:       1.0                 #uncalibrated? welp.
 
-  NTrackChildrenLimit:     5.0
-  NShowerChildrenLimit:    3.0
-  NGrandChildrenLimit:     3.0
-  NChildHitsLimit:         100.0
-  ChildEnergyLimit:        1.0
-  ChildTrackScoreLimit:    1.0
-  TrackLengthLimit:        500.0
-  WobbleLimit:             15.0
-  MomentumComparisonLimit: 10.0
+  NTrackChildrenMean:     0.1309
+  NTrackChildrenStd:      0.3938 
+  NShowerChildrenMean:    0.0466
+  NShowerChildrenStd:     0.2163  
+  NGrandChildrenMean:     0.023
+  NGrandChildrenStd:      0.1787  
+  NChildHitsMean:         205.8004
+  NChildHitsStd:          438.8792 
+  ChildEnergyMean:        0.32
+  ChildEnergyStd:         0.3568
+  ChildTrackScoreMean:    0.7307
+  ChildTrackScoreStd:     0.1003  
+  TrackLengthMean:        258.3441
+  TrackLengthStd:         1426.0234  
+  WobbleMean:             6.7975
+  WobbleStd:              4.4681
+  TrackShowerScoreMean:   0.5998
+  TrackShowerScoreStd:    0.1783
+  MomentumComparisonMean: 3.8436
+  MomentumComparisonStd:  3.1121
 }
 
 END_PROLOG

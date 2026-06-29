@@ -14,16 +14,13 @@
 #include <vector>
 #include <string>
 
-#include "tensorflow/cc/saved_model/loader.h"
-#include "tensorflow/cc/saved_model/tag_constants.h"
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/public/session_options.h"
-#include "tensorflow/core/framework/logging.h" 
+#include <torch/torch.h>
 
 #include "art/Framework/Principal/Event.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/GridManager.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/PFPVarManager.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/TrackVarManager.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/ShowerVarManager.h"
 
@@ -50,24 +47,38 @@ public:
     IvysaurusScores IvysaurusUseEvaluate(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
 
 private:
-    std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> ObtainInputGridTensorMap(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle, 
-        const bool isStart);
+    //void ObtainGridMask(const GridManager::Grid &grid, std::vector<std::vector<bool>> &mask) const;
+    
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> ObtainInputGridTensorMap(const std::map<IvysaurusUtils::PandoraView, GridManager::Grid> &gridMap);
+    
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> ObtainGridMaskMap(const std::map<IvysaurusUtils::PandoraView, GridManager::Grid> &gridMap);
 
-    tensorflow::Tensor ObtainInputTrackTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
+    torch::Tensor ObtainInputTrackTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
 
-    tensorflow::Tensor ObtainInputShowerTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
+    torch::Tensor ObtainInputShowerTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
 
-    double GetTrackShowerScore(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
-
-    std::string m_networkDirectory;
+    bool IsContained(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle);
+    
+    std::string m_containedNetName;
+    std::string m_exitingNetName;    
     GridManager m_gridManager;
+    PFPVarManager m_pfpVarManager;
     TrackVarManager m_trackVarManager;
     ShowerVarManager m_showerVarManager;
-    tensorflow::SavedModelBundleLite m_savedModelBundle;
     std::string m_recoModuleLabel;
+    std::string m_trackModuleLabel;
+    std::string m_showerModuleLabel;     
     int m_nTrackVars;
     int m_nShowerVars;
+    float m_fvMinX;
+    float m_fvMaxX;
+    float m_fvMinY;
+    float m_fvMaxY;
+    float m_fvMinZ;
+    float m_fvMaxZ;
 
+    torch::jit::script::Module m_containedModel;
+    torch::jit::script::Module m_exitingModel;    
 };
 
 } // namespace ivysaurus

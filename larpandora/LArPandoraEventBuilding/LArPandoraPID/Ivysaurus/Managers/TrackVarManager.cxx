@@ -38,15 +38,15 @@ namespace ivysaurus
 
 TrackVarManager::TrackVars::TrackVars() : 
         m_isNormalised(false),
-        m_nTrackChildren(-1),
-        m_nShowerChildren(-1),
-        m_nGrandChildren(-1),
-        m_nChildHits(-1),
-        m_childEnergy(-1.f),
-        m_childTrackScore(-1.f),
-        m_trackLength(-1.f),
-        m_wobble(-1.f),
-        m_momentumComparison(-1.f)
+        m_nTrackChildren(std::make_pair(-1.f, false)),
+        m_nShowerChildren(std::make_pair(-1.f, false)),
+        m_nGrandChildren(std::make_pair(-1.f, false)),
+        m_nChildHits(std::make_pair(-1.f, false)),
+        m_childEnergy(std::make_pair(-1.f, false)),
+        m_childTrackScore(std::make_pair(-1.f, false)),
+        m_trackLength(std::make_pair(-1.f, false)),
+        m_wobble(std::make_pair(-1.f, false)),
+        m_momentumComparison(std::make_pair(-1.f, false))
 {
 }
 
@@ -56,7 +56,6 @@ TrackVarManager::TrackVars::TrackVars() :
 TrackVarManager::TrackVarManager(const fhicl::ParameterSet& pset) :
     m_recoModuleLabel(pset.get<std::string>("RecoModuleLabel")),
     m_trackModuleLabel(pset.get<std::string>("TrackModuleLabel")),
-    m_childSeparation(pset.get<float>("ChildSeparation")),
     m_recombFactor(pset.get<float>("RecombFactor")),
     m_calorimetryAlg(pset.get<fhicl::ParameterSet>("CalorimetryAlg")),
     m_minTrackLengthMCS(pset.get<float>("MinTrackLengthMCS")),
@@ -65,15 +64,24 @@ TrackVarManager::TrackVarManager(const fhicl::ParameterSet& pset) :
     m_gradTrkMomRange(pset.get<float>("GradTrkMomRange")),
     m_intTrkMomMCS(pset.get<float>("IntTrkMomMCS")),
     m_gradTrkMomMCS(pset.get<float>("GradTrkMomMCS")),
-    m_nTrackChildrenLimit(pset.get<float>("NTrackChildrenLimit")),
-    m_nShowerChildrenLimit(pset.get<float>("NShowerChildrenLimit")),
-    m_nGrandChildrenLimit(pset.get<float>("NGrandChildrenLimit")),
-    m_nChildHitsLimit(pset.get<float>("NChildHitsLimit")),
-    m_childEnergyLimit(pset.get<float>("ChildEnergyLimit")),
-    m_childTrackScoreLimit(pset.get<float>("ChildTrackScoreLimit")),
-    m_trackLengthLimit(pset.get<float>("TrackLengthLimit")),
-    m_wobbleLimit(pset.get<float>("WobbleLimit")),
-    m_momentumComparisonLimit(pset.get<float>("MomentumComparisonLimit"))
+    m_nTrackChildrenMean(pset.get<float>("NTrackChildrenMean")),
+    m_nTrackChildrenStd(pset.get<float>("NTrackChildrenStd")),    
+    m_nShowerChildrenMean(pset.get<float>("NShowerChildrenMean")),
+    m_nShowerChildrenStd(pset.get<float>("NShowerChildrenStd")),    
+    m_nGrandChildrenMean(pset.get<float>("NGrandChildrenMean")),
+    m_nGrandChildrenStd(pset.get<float>("NGrandChildrenStd")),    
+    m_nChildHitsMean(pset.get<float>("NChildHitsMean")),
+    m_nChildHitsStd(pset.get<float>("NChildHitsStd")),    
+    m_childEnergyMean(pset.get<float>("ChildEnergyMean")),
+    m_childEnergyStd(pset.get<float>("ChildEnergyStd")),    
+    m_childTrackScoreMean(pset.get<float>("ChildTrackScoreMean")),
+    m_childTrackScoreStd(pset.get<float>("ChildTrackScoreStd")),    
+    m_trackLengthMean(pset.get<float>("TrackLengthMean")),
+    m_trackLengthStd(pset.get<float>("TrackLengthStd")),    
+    m_wobbleMean(pset.get<float>("WobbleMean")),
+    m_wobbleStd(pset.get<float>("WobbleStd")),
+    m_momentumComparisonMean(pset.get<float>("MomentumComparisonMean")),
+    m_momentumComparisonStd(pset.get<float>("MomentumComparisonStd"))
 {
 }
 
@@ -108,20 +116,15 @@ void TrackVarManager::FillHierarchyInfo(const art::Event &evt, const art::Ptr<re
 {
     if (!lar_pandora::PandoraPFParticleUtils::IsTrack(pfparticle, evt, m_recoModuleLabel, m_trackModuleLabel))
         return;
-
+    
     const art::Ptr<recob::Track> track = lar_pandora::PandoraPFParticleUtils::GetTrack(pfparticle, evt, m_recoModuleLabel, m_trackModuleLabel);
     const TVector3 trackEndpoint = TVector3(track->End().X(), track->End().Y(), track->End().Z());
     const std::vector<art::Ptr<recob::PFParticle>> childPFPs = lar_pandora::PandoraPFParticleUtils::GetChildParticles(pfparticle, evt, m_recoModuleLabel);
-
-    int nTracks = 0;
-    int nShowers = 0;
-    int nGrandChildren = 0;
-
+    
+    int nTracks = 0, nShowers = 0, nGrandChildren = 0;
     int highestHits = -1;
-    float highestHitEnergy = -1;
-    float highestHitTrackScore = -1; 
+    float highestHitEnergy = -1, highestHitTrackScore = -1; 
 
-    // Look at children near endpoint? 
     for (const art::Ptr<recob::PFParticle> &childPFP : childPFPs)
     {
         const std::vector<art::Ptr<recob::SpacePoint>> spacepoints = lar_pandora::PandoraPFParticleUtils::GetSpacePoints(childPFP, evt, m_recoModuleLabel);
@@ -129,45 +132,33 @@ void TrackVarManager::FillHierarchyInfo(const art::Event &evt, const art::Ptr<re
         if (spacepoints.empty())
             continue;
 
-        float closestSepSq = std::numeric_limits<float>::max();
-
-        for (const art::Ptr<recob::SpacePoint> &spacepoint : spacepoints)
-        {
-            const TVector3 spacepointPos = TVector3(spacepoint->position().X(), spacepoint->position().Y(), spacepoint->position().Z());
-            const float separationSq = (spacepointPos - trackEndpoint).Mag2();
-
-            if (separationSq < closestSepSq)
-                closestSepSq = separationSq;
-        }
-
-        if (closestSepSq > (m_childSeparation * m_childSeparation))
-            continue;
-
-        const std::vector<art::Ptr<recob::Hit>> hits = lar_pandora::PandoraPFParticleUtils::GetHits(childPFP, evt, m_recoModuleLabel);
-
-        if (static_cast<int>(hits.size()) > highestHits)
-        {
-            highestHits = hits.size();
-            highestHitEnergy = GetChildEnergy(evt, pfparticle);
-            highestHitTrackScore = GetChildTrackScore(evt, pfparticle);
-        }
-
         if (childPFP->PdgCode() == 13)
             ++nTracks;
         else if (childPFP->PdgCode() == 11)
             ++nShowers;
-
+        
         const std::vector<art::Ptr<recob::PFParticle>> grandChildPFPs = lar_pandora::PandoraPFParticleUtils::GetChildParticles(childPFP, evt, m_recoModuleLabel);
-
         nGrandChildren += grandChildPFPs.size();
-    }
 
+        const std::vector<art::Ptr<recob::Hit>> hits = lar_pandora::PandoraPFParticleUtils::GetHits(childPFP, evt, m_recoModuleLabel);
+        if (static_cast<int>(hits.size()) > highestHits)
+        {
+            highestHits = hits.size();
+            highestHitEnergy = GetChildEnergy(evt, pfparticle);
+            highestHitTrackScore = this->GetTrackScore(evt, pfparticle);
+        }
+    }
+    
     trackVars.SetNTrackChildren(nTracks);
     trackVars.SetNShowerChildren(nShowers);
     trackVars.SetNGrandChildren(nGrandChildren);
-    trackVars.SetNChildHits(highestHits);
-    trackVars.SetChildEnergy(highestHitEnergy);
-    trackVars.SetChildTrackScore(highestHitTrackScore);
+
+    if (highestHits != -1)
+    {
+        trackVars.SetNChildHits(highestHits);
+        trackVars.SetChildEnergy(highestHitEnergy);
+        trackVars.SetChildTrackScore(highestHitTrackScore);
+    }
 }
 
 /////////////////////////////////////////////////////////////
@@ -176,7 +167,6 @@ float TrackVarManager::GetChildEnergy(const art::Event &evt, const art::Ptr<reco
 {
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(evt, clockData);
-
     const std::vector<art::Ptr<recob::Hit>> &pfpHits = lar_pandora::PandoraPFParticleUtils::GetViewHits(pfparticle, evt, m_recoModuleLabel, 2);
     const double charge(lar_pandora::PandoraHitUtils::LifetimeCorrectedTotalHitCharge(clockData, detProp, pfpHits));
     const double energy = m_calorimetryAlg.ElectronsFromADCArea(charge, 2) / m_recombFactor / util::kGeVToElectrons;
@@ -186,13 +176,13 @@ float TrackVarManager::GetChildEnergy(const art::Event &evt, const art::Ptr<reco
 
 /////////////////////////////////////////////////////////////
 
-float TrackVarManager::GetChildTrackScore(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle) const
+float TrackVarManager::GetTrackScore(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle) const
 {
     const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata = lar_pandora::PandoraPFParticleUtils::GetMetadata(pfparticle, evt, m_recoModuleLabel);
     const auto metaMap = metadata->GetPropertiesMap();
 
     if (metaMap.find("TrackScore") == metaMap.end())
-        return -1;
+        return -1.f;
 
     const float trackScore = metaMap.at("TrackScore");
 
@@ -204,16 +194,14 @@ float TrackVarManager::GetChildTrackScore(const art::Event &evt, const art::Ptr<
 void TrackVarManager::FillTrackLength(const art::Ptr<recob::Track> &track, TrackVarManager::TrackVars &trackVars) const
 {
     const float trackLength = track->Length();
-
     trackVars.SetTrackLength(trackLength);
 }
 
 /////////////////////////////////////////////////////////////
 // This is copied from Dom's Pandizzle module
+// Follows the MicroBooNE method for MCS    
 void TrackVarManager::FillWobble(const art::Ptr<recob::Track> &track, TrackVarManager::TrackVars &trackVars) const
 {
-  // This follows the MicroBooNE method for MCS
-
   //Get the number of points
   size_t NPoints = track->NumberTrajectoryPoints();
   //Store the directions between adjacent points on a vector
@@ -277,7 +265,7 @@ void TrackVarManager::FillWobble(const art::Ptr<recob::Track> &track, TrackVarMa
   if (angle_var > 0.0)
       trackVars.SetWobble(sqrt(angle_var));
 }
-
+    
 /////////////////////////////////////////////////////////////
 
 void TrackVarManager::FillTrackMomentum(const art::Ptr<recob::Track> &track, 
@@ -302,106 +290,48 @@ void TrackVarManager::FillTrackMomentum(const art::Ptr<recob::Track> &track,
 void TrackVarManager::NormaliseTrackVars(TrackVarManager::TrackVars &trackVars) const
 {
     if (trackVars.GetIsNormalised())
-        return;
+        throw cet::exception("ivysaur::TrackVarManager::NormaliseTrackVars: ") << "track vars are already normalised!";        
 
-    // nTrackChildren
-    if (trackVars.GetNTrackChildren() > m_nTrackChildrenLimit)
-        trackVars.SetNTrackChildren(m_nTrackChildrenLimit);
+    if (trackVars.GetNTrackChildren().second)
+        trackVars.SetNTrackChildren(this->NormaliseTrackVar(trackVars.GetNTrackChildren(), m_nTrackChildrenMean, m_nTrackChildrenStd));
 
-    if (trackVars.GetNTrackChildren() < ((-1.0) * std::numeric_limits<float>::epsilon()))
-        trackVars.SetNTrackChildren((-1.0) * m_nTrackChildrenLimit);
+    if (trackVars.GetNShowerChildren().second)
+        trackVars.SetNShowerChildren(this->NormaliseTrackVar(trackVars.GetNShowerChildren(), m_nShowerChildrenMean, m_nShowerChildrenStd));
 
-    trackVars.SetNTrackChildren(trackVars.GetNTrackChildren() / m_nTrackChildrenLimit);
+    if (trackVars.GetNGrandChildren().second)
+        trackVars.SetNGrandChildren(this->NormaliseTrackVar(trackVars.GetNGrandChildren(), m_nGrandChildrenMean, m_nGrandChildrenStd));
 
-    // nShowerChildren
-    if (trackVars.GetNShowerChildren() > m_nShowerChildrenLimit)
-        trackVars.SetNShowerChildren(m_nShowerChildrenLimit);
+    if (trackVars.GetNChildHits().second)
+        trackVars.SetNChildHits(this->NormaliseTrackVar(trackVars.GetNChildHits(), m_nChildHitsMean, m_nChildHitsStd));
 
-    if (trackVars.GetNShowerChildren() < ((-1.0) * std::numeric_limits<float>::epsilon()))
-        trackVars.SetNShowerChildren((-1.0) * m_nShowerChildrenLimit);
+    if (trackVars.GetChildEnergy().second)
+        trackVars.SetChildEnergy(this->NormaliseTrackVar(trackVars.GetChildEnergy(), m_childEnergyMean, m_childEnergyStd));
 
-    trackVars.SetNShowerChildren(trackVars.GetNShowerChildren() / m_nShowerChildrenLimit);
+    if (trackVars.GetChildTrackScore().second)
+        trackVars.SetChildTrackScore(this->NormaliseTrackVar(trackVars.GetChildTrackScore(), m_childTrackScoreMean, m_childTrackScoreStd));
 
-    // nGrandChildren
-    if (trackVars.GetNGrandChildren() > m_nGrandChildrenLimit)
-        trackVars.SetNGrandChildren(m_nGrandChildrenLimit);
+    if (trackVars.GetTrackLength().second)
+        trackVars.SetTrackLength(this->NormaliseTrackVar(trackVars.GetTrackLength(), m_trackLengthMean, m_trackLengthStd));
 
-    if (trackVars.GetNGrandChildren() < ((-1.0) * std::numeric_limits<float>::epsilon()))
-        trackVars.SetNGrandChildren((-1.0) * m_nGrandChildrenLimit);
+    if (trackVars.GetWobble().second)
+        trackVars.SetWobble(this->NormaliseTrackVar(trackVars.GetWobble(), m_wobbleMean, m_wobbleStd));
 
-    trackVars.SetNGrandChildren(trackVars.GetNGrandChildren() / m_nGrandChildrenLimit);
-
-    // nChildHits
-    if (trackVars.GetNChildHits() > m_nChildHitsLimit)
-        trackVars.SetNChildHits(m_nChildHitsLimit);
-
-    if (trackVars.GetNChildHits() < std::numeric_limits<float>::epsilon())
-        trackVars.SetNChildHits((-1.0) * m_nChildHitsLimit);
-
-    trackVars.SetNChildHits(trackVars.GetNChildHits() / m_nChildHitsLimit);
-
-    // childEnergy
-    if (trackVars.GetChildEnergy() > m_childEnergyLimit)
-        trackVars.SetChildEnergy(m_childEnergyLimit);
-
-    if (trackVars.GetChildEnergy() < std::numeric_limits<float>::epsilon())
-        trackVars.SetChildEnergy((-1.0) * m_childEnergyLimit);
-
-    trackVars.SetChildEnergy(trackVars.GetChildEnergy() / m_childEnergyLimit);
-
-    // childTrackScore
-    if (trackVars.GetChildTrackScore() > m_childTrackScoreLimit)
-        trackVars.SetChildTrackScore(m_childTrackScoreLimit);
-
-    if (trackVars.GetChildTrackScore() < std::numeric_limits<float>::epsilon())
-        trackVars.SetChildTrackScore((-1.0) * m_childTrackScoreLimit);
-
-    trackVars.SetChildTrackScore(trackVars.GetChildTrackScore() / m_childTrackScoreLimit);
-
-    // trackLength
-    if (trackVars.GetTrackLength() > m_trackLengthLimit)
-        trackVars.SetTrackLength(m_trackLengthLimit);
-
-    if (trackVars.GetTrackLength() < std::numeric_limits<float>::epsilon())
-        trackVars.SetTrackLength((-1.0) * m_trackLengthLimit);
-
-    trackVars.SetTrackLength(trackVars.GetTrackLength() / m_trackLengthLimit);
-
-    // wobble
-    if (trackVars.GetWobble() > m_wobbleLimit)
-        trackVars.SetWobble(m_wobbleLimit);
-
-    if (trackVars.GetWobble() < std::numeric_limits<float>::epsilon())
-        trackVars.SetWobble((-1.0) * m_wobbleLimit);
-
-    trackVars.SetWobble(trackVars.GetWobble() / m_wobbleLimit);
-
-    // momentumComparison
-    if (trackVars.GetMomentumComparison() > m_momentumComparisonLimit)
-        trackVars.SetMomentumComparison(m_momentumComparisonLimit);
-
-    if (trackVars.GetMomentumComparison() < std::numeric_limits<float>::epsilon())
-        trackVars.SetMomentumComparison((-1.0) * m_momentumComparisonLimit);
-
-    trackVars.SetMomentumComparison(trackVars.GetMomentumComparison() / m_momentumComparisonLimit);
-
-    // Set normalised
+    if (trackVars.GetMomentumComparison().second)
+        trackVars.SetMomentumComparison(this->NormaliseTrackVar(trackVars.GetMomentumComparison(), m_momentumComparisonMean, m_momentumComparisonStd));
+    
     trackVars.SetIsNormalised(true);
 }
-
-/////////////////////////////////////////////////////////////
-
-void TrackVarManager::Reset(TrackVarManager::TrackVars &trackVars) const
+    
+/////////////////////////////////////////////////////////////    
+    
+float TrackVarManager::NormaliseTrackVar(const std::pair<float, bool> &inputTrackVar, const float mean, const float std) const
 {
-    trackVars.SetNTrackChildren(-1);
-    trackVars.SetNShowerChildren(-1);
-    trackVars.SetNGrandChildren(-1);
-    trackVars.SetNChildHits(-1);
-    trackVars.SetChildEnergy(-1);
-    trackVars.SetChildTrackScore(-1);
-    trackVars.SetTrackLength(-1.f);
-    trackVars.SetWobble(-1.f);
-    trackVars.SetMomentumComparison(-1.f);
+    // Is still on default value...
+    if (!inputTrackVar.second)
+        throw cet::exception("ivysaur::TrackVarManager::NormaliseTrackVar: ") << "can't normalise a variables that wasn't set";  
+    
+    const float normalised((inputTrackVar.first - mean) / std);
+    return normalised;
 }
 
 /////////////////////////////////////////////////////////////

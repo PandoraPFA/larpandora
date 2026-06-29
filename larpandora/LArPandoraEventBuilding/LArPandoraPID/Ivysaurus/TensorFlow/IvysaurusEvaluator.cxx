@@ -9,17 +9,15 @@
 
 #include "art/Framework/Principal/Event.h"
 
-#include "tensorflow/cc/saved_model/loader.h"
-#include "tensorflow/cc/saved_model/tag_constants.h"
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/public/session_options.h"
-#include "tensorflow/core/framework/logging.h" 
+#include <torch/script.h>
+#include <torch/torch.h>
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 #include "larpandora/LArPandoraUtils/PandoraPFParticleUtils.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/GridManager.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/PFPVarManager.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/TrackVarManager.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Managers/ShowerVarManager.h"
 #include "larpandora/LArPandoraEventBuilding/LArPandoraPID/Ivysaurus/Utils/IvysaurusUtils.h"
@@ -27,31 +25,49 @@
 
 /////////////////////////////////////////////////////////////
 
-ivysaurus::IvysaurusEvaluator::IvysaurusEvaluator(fhicl::ParameterSet const &pset) :
-    m_networkDirectory(pset.get<std::string>("NetworkDirectory")), 
+namespace ivysaurus
+{
+
+IvysaurusEvaluator::IvysaurusEvaluator(fhicl::ParameterSet const &pset) :
+    m_containedNetName(pset.get<std::string>("ContainedNetName")),
+    m_exitingNetName(pset.get<std::string>("ExitingNetName")),     
     m_gridManager(pset.get<fhicl::ParameterSet>("GridManager")),
+    m_pfpVarManager(pset.get<fhicl::ParameterSet>("PFPVarManager")),
     m_trackVarManager(pset.get<fhicl::ParameterSet>("TrackVarManager")),
     m_showerVarManager(pset.get<fhicl::ParameterSet>("ShowerVarManager")),
     m_recoModuleLabel(pset.get<std::string>("RecoModuleLabel")),
+    m_trackModuleLabel(pset.get<std::string>("TrackModuleLabel")),
+    m_showerModuleLabel(pset.get<std::string>("ShowerModuleLabel")),        
     m_nTrackVars(pset.get<int>("NTrackVars")),
-    m_nShowerVars(pset.get<int>("NShowerVars"))
-{
-    // Create dummy options.
-    tensorflow::SessionOptions sessionOptions;
-    tensorflow::RunOptions runOptions;
+    m_nShowerVars(pset.get<int>("NShowerVars")),
+    m_fvMinX(pset.get<float>("FVMinX")),
+    m_fvMaxX(pset.get<float>("FVMaxX")),
+    m_fvMinY(pset.get<float>("FVMinY")),
+    m_fvMaxY(pset.get<float>("FVMaxY")),
+    m_fvMinZ(pset.get<float>("FVMinZ")),
+    m_fvMaxZ(pset.get<float>("FVMaxZ"))
+{  
+    try
+    {
+        std::string containedNetPath, exitingNetPath;
+        cet::search_path sP("FW_SEARCH_PATH");
+        sP.find_file(m_containedNetName, containedNetPath);
+        sP.find_file(m_exitingNetName, exitingNetPath);        
+        
+        m_containedModel = torch::jit::load(containedNetPath);
+        m_exitingModel = torch::jit::load(exitingNetPath);        
 
-    std::string directoryPath;
-    cet::search_path sP("FW_SEARCH_PATH");
-    sP.find_file(m_networkDirectory, directoryPath);
-
-    //std::cout << "Directory path: " << directoryPath << std::endl;
-
-    // Load the model bundle. (this returns a status code)
-    const auto loadResult = tensorflow::LoadSavedModel(sessionOptions, runOptions, directoryPath, 
-        {tensorflow::kSavedModelTagServe}, &m_savedModelBundle);
-
-    // Check if loading was okay.
-    TF_CHECK_OK(loadResult);
+        // Set the model to evaluation mode.
+        // This should have been done during the model export, but we do it here just in case.
+        // This ensures that layers like dropout and batch normalization behave correctly during inference.
+        m_containedModel.eval();
+        m_exitingModel.eval();        
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "Error loading the TorchScript model \'"  << "\':\n" << e.what() << std::endl;
+        return;
+    }    
 }
 
 /////////////////////////////////////////////////////////////
@@ -60,59 +76,63 @@ ivysaurus::IvysaurusEvaluator::IvysaurusScores ivysaurus::IvysaurusEvaluator::Iv
     const art::Ptr<recob::PFParticle> &pfparticle)
 {
     IvysaurusScores ivysaurusScores;
+
+    // Make some checks first
+    if (!lar_pandora::PandoraPFParticleUtils::HasTrack(pfparticle, evt, m_recoModuleLabel, m_trackModuleLabel) &&
+        !lar_pandora::PandoraPFParticleUtils::HasShower(pfparticle, evt, m_recoModuleLabel, m_showerModuleLabel))
+    {
+        return ivysaurusScores;
+    }
+    const std::vector<art::Ptr<recob::SpacePoint>> spacepoints = lar_pandora::PandoraPFParticleUtils::GetSpacePoints(pfparticle, evt, m_recoModuleLabel);
+    if (spacepoints.empty()) { return ivysaurusScores; }
+
+    // Get grid maps
+    GridManager::GridMap startGridMap = m_gridManager.ObtainGridMap(evt, pfparticle, true);
+    if (startGridMap.size() != 3) { return ivysaurusScores; }
+    GridManager::GridMap endGridMap = m_gridManager.ObtainGridMap(evt, pfparticle, false);
+    if (endGridMap.size() != 3) { return ivysaurusScores; }    
     
-    // Obtain the input grid tensors
-    //std::cout << "Making the grid tensors..." << std::endl;
-    std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> startGridTensorMap = ObtainInputGridTensorMap(evt, pfparticle, true);
-    if (startGridTensorMap.size() != 3) { return ivysaurusScores; }
-    std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> endGridTensorMap = ObtainInputGridTensorMap(evt, pfparticle, false);
-    if (endGridTensorMap.size() != 3) { return ivysaurusScores; }
-
-    // Obtain the input track variable tensors
-    //std::cout << "Making the track variable tensors..." << std::endl;
-    tensorflow::Tensor trackVarTensor = ObtainInputTrackTensor(evt, pfparticle);
-
-    // auto trackVarTensorMap = trackVarTensor.tensor<float, 2>();
-    // for (int i = 0; i < m_nTrackVars; ++i)
-    //     std::cout << "trackVarTensorMap(0, i): " << trackVarTensorMap(0, i) << std::endl;
+    // Normalise grids
+    for (IvysaurusUtils::PandoraView pandoraView : {IvysaurusUtils::PandoraView::TPC_VIEW_U, 
+         IvysaurusUtils::PandoraView::TPC_VIEW_V, IvysaurusUtils::PandoraView::TPC_VIEW_W})
+    {
+        GridManager::Grid &startGrid = startGridMap.at(pandoraView);
+        GridManager::Grid &endGrid = endGridMap.at(pandoraView);        
+        m_gridManager.NormaliseGrid(startGrid);
+        m_gridManager.NormaliseGrid(endGrid);        
+    }
+    
+    // Convert to torch tensors...
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> startGridTensorMap = ObtainInputGridTensorMap(startGridMap);
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> endGridTensorMap = ObtainInputGridTensorMap(endGridMap);
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> startMaskMap = this->ObtainGridMaskMap(startGridMap);
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> endMaskMap = this->ObtainGridMaskMap(endGridMap); 
+    
+    // Obtain the input track variable tensors (PFPVars included in track)
+    torch::Tensor trackVarTensor = ObtainInputTrackTensor(evt, pfparticle);
 
     // Obtain the input shower variable tensors
-    //std::cout << "Making the shower variable tensors..." << std::endl;
-    tensorflow::Tensor showerVarTensor = ObtainInputShowerTensor(evt, pfparticle);
+    torch::Tensor showerVarTensor = ObtainInputShowerTensor(evt, pfparticle);
 
-    // auto showerVarTensorMap = showerVarTensor.tensor<float, 2>();
-    // for (int i = 0; i < m_nShowerVars; ++i)
-    //     std::cout << "showerVarTensorMap(0, i): " << showerVarTensorMap(0, i) << std::endl;
-
-    // Link the data with some tags so tensorflow know where to put those data entries.
-    //std::cout << "Hooking up input/output layers..." << std::endl;
-    std::vector<std::pair<std::string, tensorflow::Tensor>> feedInputs = {{"serve_input_1:0", startGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_U)}, 
-                                                                          {"serve_input_2:0", endGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_U)},
-                                                                          {"serve_input_3:0", startGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_V)}, 
-                                                                          {"serve_input_4:0", endGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_V)},
-                                                                          {"serve_input_5:0", startGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_W)},
-                                                                          {"serve_input_6:0", endGridTensorMap.at(IvysaurusUtils::PandoraView::TPC_VIEW_W)},
-                                                                          {"serve_input_7:0", trackVarTensor},
-                                                                          {"serve_input_8:0", showerVarTensor}};
-    std::vector<std::string> fetches = { "StatefulPartitionedCall:0" };
-
-    // We need to store the results somewhere.
-    std::vector<tensorflow::Tensor> outputs;
-
-    // Let's run the model...
-    //std::cout << "Running the model..." << std::endl;
-    auto status = m_savedModelBundle.GetSession()->Run(feedInputs, fetches, {}, &outputs);
-
-    // ... and print out it's predictions.
-    //std::cout << "What does the model predict?..." << std::endl;
-    if (!status.ok()) { return ivysaurusScores; }
-
-    auto output_map = outputs[0].tensor<float, 2>();
-    ivysaurusScores.m_muonScore = output_map(0, 0);
-    ivysaurusScores.m_protonScore = output_map(0, 1);
-    ivysaurusScores.m_pionScore = output_map(0, 2);
-    ivysaurusScores.m_electronScore = output_map(0, 3);
-    ivysaurusScores.m_photonScore = output_map(0, 4);
+    // Run the model
+    const bool isContained = this->IsContained(evt, pfparticle);
+    torch::jit::script::Module &ivysaurus = isContained ? m_containedModel : m_exitingModel;
+    torch::NoGradGuard guard;
+    torch::Tensor output = ivysaurus.forward({startGridTensorMap.at(IvysaurusUtils::TPC_VIEW_U), startMaskMap.at(IvysaurusUtils::TPC_VIEW_U),
+            endGridTensorMap.at(IvysaurusUtils::TPC_VIEW_U), endMaskMap.at(IvysaurusUtils::TPC_VIEW_U),
+            startGridTensorMap.at(IvysaurusUtils::TPC_VIEW_V), startMaskMap.at(IvysaurusUtils::TPC_VIEW_V),
+            endGridTensorMap.at(IvysaurusUtils::TPC_VIEW_V), endMaskMap.at(IvysaurusUtils::TPC_VIEW_V),
+            startGridTensorMap.at(IvysaurusUtils::TPC_VIEW_W), startMaskMap.at(IvysaurusUtils::TPC_VIEW_W),
+            endGridTensorMap.at(IvysaurusUtils::TPC_VIEW_W), endMaskMap.at(IvysaurusUtils::TPC_VIEW_W),
+            trackVarTensor, showerVarTensor}).toTensor();
+        
+    // Remember to softmax!
+    torch::Tensor probs = torch::softmax(output, 1);
+    ivysaurusScores.m_muonScore = probs[0][0].item<float>();
+    ivysaurusScores.m_protonScore = probs[0][1].item<float>();
+    ivysaurusScores.m_pionScore = probs[0][2].item<float>();
+    ivysaurusScores.m_electronScore = probs[0][3].item<float>();
+    ivysaurusScores.m_photonScore = probs[0][4].item<float>();
 
     float highestScore = -std::numeric_limits<float>::max();
     int count = 0;
@@ -129,52 +149,48 @@ ivysaurus::IvysaurusEvaluator::IvysaurusScores ivysaurus::IvysaurusEvaluator::Iv
         ++count;
     }
 
-    std::cout << "--------------------------------" << std::endl;
-    std::cout << "found an ivysaurus score!!!" << std::endl;
-    std::cout << "muonScore: " << ivysaurusScores.m_muonScore << std::endl;
-    std::cout << "protonScore: " << ivysaurusScores.m_protonScore << std::endl;
-    std::cout << "pionScore: " << ivysaurusScores.m_pionScore << std::endl;
-    std::cout << "electronScore: " << ivysaurusScores.m_electronScore << std::endl;
-    std::cout << "photonScore: " << ivysaurusScores.m_photonScore << std::endl;
-    std::cout << "particleType: " << ivysaurusScores.m_particleType << std::endl;
-
-    TF_CHECK_OK(status);
-
     return ivysaurusScores;
 }
 
 /////////////////////////////////////////////////////////////
 
-std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> ivysaurus::IvysaurusEvaluator::ObtainInputGridTensorMap(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle, 
-    const bool isStart)
+bool IvysaurusEvaluator::IsContained(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
 {
-    // The tensor view map to fill and output
-    std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> tensorViewMap;
+    if (!lar_pandora::PandoraPFParticleUtils::HasTrack(pfparticle, evt, m_recoModuleLabel, m_trackModuleLabel))
+        return false;
 
-    // Fill the grids
-    GridManager::GridMap gridMap = m_gridManager.ObtainGridMap(evt, pfparticle, isStart);
+    const art::Ptr<recob::Track> track = lar_pandora::PandoraPFParticleUtils::GetTrack(pfparticle, evt, m_recoModuleLabel, m_trackModuleLabel);
+    const float endX(track->End().X()), endY(track->End().Y()), endZ(track->End().Z());
 
-    if (gridMap.size() != 3)
-        return tensorViewMap;
+    if ((endX < m_fvMinX) || (endX > m_fvMaxX))
+        return false;
 
-    m_gridManager.FillGrids(evt, pfparticle, gridMap);
+    if ((endY < m_fvMinY) || (endY > m_fvMaxY))
+        return false;
 
-    // Convert to tensors
+    if ((endZ < m_fvMinZ) || (endZ > m_fvMaxZ))
+        return false;
+
+    return true;
+}
+
+/////////////////////////////////////////////////////////////
+
+std::map<IvysaurusUtils::PandoraView, torch::Tensor> IvysaurusEvaluator::ObtainInputGridTensorMap(const std::map<IvysaurusUtils::PandoraView, GridManager::Grid> &gridMap)
+{
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> tensorViewMap;
+
     for (IvysaurusUtils::PandoraView pandoraView : {IvysaurusUtils::PandoraView::TPC_VIEW_U,
          IvysaurusUtils::PandoraView::TPC_VIEW_V, IvysaurusUtils::PandoraView::TPC_VIEW_W})
     {
-        GridManager::Grid &grid(gridMap.at(pandoraView));
-
-        // Create the tensors
-        tensorflow::Tensor gridTensor(tensorflow::DT_FLOAT, tensorflow::TensorShape({ 1, grid.GetAxisDimensions(), grid.GetAxisDimensions(), 1 }));
-        auto tensorMap = gridTensor.tensor<float, 4>();
+        const GridManager::Grid &grid(gridMap.at(pandoraView));
+        torch::Tensor gridTensor = torch::zeros({1, grid.GetAxisDimensions(), grid.GetAxisDimensions(), 1});
 
         for (unsigned int driftIndex = 0; driftIndex < grid.GetAxisDimensions(); ++driftIndex)
         {
             for (unsigned int wireIndex = 0; wireIndex < grid.GetAxisDimensions(); ++wireIndex)
             {
-                tensorMap(0, driftIndex, wireIndex, 0) = grid.GetGridValues().at(driftIndex).at(wireIndex);
-                //std::cout << "(" << driftIndex << ", " << wireIndex << "): " << grid.GetGridValues().at(driftIndex).at(wireIndex) << std::endl;
+                gridTensor[0][driftIndex][wireIndex][0] = grid.GetGridValues().at(driftIndex).at(wireIndex).first;
             }
         }
 
@@ -186,75 +202,91 @@ std::map<IvysaurusUtils::PandoraView, tensorflow::Tensor> ivysaurus::IvysaurusEv
 
 /////////////////////////////////////////////////////////////
 
-tensorflow::Tensor ivysaurus::IvysaurusEvaluator::ObtainInputTrackTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
+std::map<IvysaurusUtils::PandoraView, torch::Tensor> IvysaurusEvaluator::ObtainGridMaskMap(const std::map<IvysaurusUtils::PandoraView, GridManager::Grid> &gridMap)
 {
-    tensorflow::Tensor trackVarTensor(tensorflow::DT_FLOAT, tensorflow::TensorShape({1, m_nTrackVars}));
-    auto trackVarsTensorMap = trackVarTensor.tensor<float, 2>();
+    std::map<IvysaurusUtils::PandoraView, torch::Tensor> maskMap;
+
+    for (IvysaurusUtils::PandoraView pandoraView : {IvysaurusUtils::PandoraView::TPC_VIEW_U,
+         IvysaurusUtils::PandoraView::TPC_VIEW_V, IvysaurusUtils::PandoraView::TPC_VIEW_W})
+    {
+        const GridManager::Grid &grid(gridMap.at(pandoraView));
+        torch::Tensor maskTensor = torch::zeros({1, grid.GetAxisDimensions(), grid.GetAxisDimensions(), 1});
+
+        for (unsigned int driftIndex = 0; driftIndex < grid.GetAxisDimensions(); ++driftIndex)
+        {
+            for (unsigned int wireIndex = 0; wireIndex < grid.GetAxisDimensions(); ++wireIndex)
+            {
+                maskTensor[0][driftIndex][wireIndex][0] = float(grid.GetGridValues().at(driftIndex).at(wireIndex).second);
+            }
+        }
+        
+        maskMap[pandoraView] = maskTensor;
+    }
+
+    return maskMap;
+}
+
+/////////////////////////////////////////////////////////////
+
+torch::Tensor IvysaurusEvaluator::ObtainInputTrackTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
+{
+    torch::Tensor trackVarTensor = torch::zeros({1, m_nTrackVars});
+
+    PFPVarManager::PFPVars pfpVars;
+    m_pfpVarManager.EvaluatePFPVars(evt, pfparticle, pfpVars);
+    m_pfpVarManager.NormalisePFPVars(pfpVars);
     
     TrackVarManager::TrackVars trackVars;
     m_trackVarManager.EvaluateTrackVars(evt, pfparticle, trackVars);
     m_trackVarManager.NormaliseTrackVars(trackVars);
 
     // ATTN: Order is important!
-    trackVarsTensorMap(0, 0) = trackVars.GetNTrackChildren();
-    trackVarsTensorMap(0, 1) = trackVars.GetNShowerChildren();
-    trackVarsTensorMap(0, 2) = trackVars.GetNGrandChildren();
-    trackVarsTensorMap(0, 3) = trackVars.GetNChildHits();
-    trackVarsTensorMap(0, 4) = trackVars.GetChildEnergy();
-    trackVarsTensorMap(0, 5) = trackVars.GetChildTrackScore();
-    trackVarsTensorMap(0, 6) = trackVars.GetTrackLength();
-    trackVarsTensorMap(0, 7) = trackVars.GetWobble();
-    trackVarsTensorMap(0, 8) = GetTrackShowerScore(evt, pfparticle);
-    trackVarsTensorMap(0, 9) = trackVars.GetMomentumComparison();
+    trackVarTensor[0][0] = trackVars.GetNTrackChildren().first;
+    trackVarTensor[0][1] = (trackVars.GetNTrackChildren().second ? 1.f : 0.f);
+    trackVarTensor[0][2] = trackVars.GetNShowerChildren().first;
+    trackVarTensor[0][3] = (trackVars.GetNShowerChildren().second ? 1.f : 0.f);
+    trackVarTensor[0][4] = trackVars.GetNGrandChildren().first;
+    trackVarTensor[0][5] = (trackVars.GetNGrandChildren().second ? 1.f : 0.f);
+    trackVarTensor[0][6] = trackVars.GetNChildHits().first;
+    trackVarTensor[0][7] = (trackVars.GetNChildHits().second ? 1.f : 0.f);
+    trackVarTensor[0][8] = trackVars.GetChildEnergy().first;
+    trackVarTensor[0][9] = (trackVars.GetChildEnergy().second ? 1.f : 0.f); 
+    trackVarTensor[0][10] = trackVars.GetChildTrackScore().first;
+    trackVarTensor[0][11] = (trackVars.GetChildTrackScore().second ? 1.f : 0.f);  
+    trackVarTensor[0][12] = trackVars.GetTrackLength().first;
+    trackVarTensor[0][13] = (trackVars.GetTrackLength().second ? 1.f : 0.f);  
+    trackVarTensor[0][14] = trackVars.GetWobble().first;
+    trackVarTensor[0][15] = (trackVars.GetWobble().second ? 1.f : 0.f); 
+    trackVarTensor[0][16] = trackVars.GetMomentumComparison().first;
+    trackVarTensor[0][17] = (trackVars.GetMomentumComparison().second ? 1.f : 0.f);
+    trackVarTensor[0][18] = pfpVars.GetN2DHits();
+    trackVarTensor[0][19] = pfpVars.GetTrackShowerScore();    
     return trackVarTensor;
 }
 
-/////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////
 
-tensorflow::Tensor ivysaurus::IvysaurusEvaluator::ObtainInputShowerTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
+torch::Tensor IvysaurusEvaluator::ObtainInputShowerTensor(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
 {
-    tensorflow::Tensor showerVarTensor(tensorflow::DT_FLOAT, tensorflow::TensorShape({1, m_nShowerVars}));
-    auto showerVarsTensorMap = showerVarTensor.tensor<float, 2>();
+    torch::Tensor showerVarTensor = torch::zeros({1, m_nShowerVars});
 
     ShowerVarManager::ShowerVars showerVars;
-
     m_showerVarManager.EvaluateShowerVars(evt, pfparticle, showerVars);
     m_showerVarManager.NormaliseShowerVars(showerVars);
 
     // ATTN: Order is important!
-    showerVarsTensorMap(0, 0) = showerVars.GetDisplacement();
-    showerVarsTensorMap(0, 1) = showerVars.GetDCA();
-    showerVarsTensorMap(0, 2) = showerVars.GetInitialGapSize();
-    showerVarsTensorMap(0, 3) = showerVars.GetLargestGapSize();
-    showerVarsTensorMap(0, 4) = showerVars.GetPathwayLength();
-    showerVarsTensorMap(0, 5) = showerVars.GetPathwayScatteringAngle2D();
-    showerVarsTensorMap(0, 6) = showerVars.GetNShowerHits();
-    showerVarsTensorMap(0, 7) = showerVars.GetFoundHitRatio();
-    showerVarsTensorMap(0, 8) = showerVars.GetScatterAngle();
-    showerVarsTensorMap(0, 9) = showerVars.GetOpeningAngle();
-    showerVarsTensorMap(0, 10) = showerVars.GetNuVertexEnergyAsymmetry();
-    showerVarsTensorMap(0, 11) = showerVars.GetNuVertexEnergyWeightedMeanRadialDistance();
-    showerVarsTensorMap(0, 12) = showerVars.GetShowerStartEnergyAsymmetry();
-    showerVarsTensorMap(0, 13) = showerVars.GetShowerStartMoliereRadius();
-    showerVarsTensorMap(0, 14) = showerVars.GetNAmbiguousViews();
-    showerVarsTensorMap(0, 15) = showerVars.GetUnaccountedEnergy();
+    showerVarTensor[0][0] = showerVars.GetDisplacement().first;
+    showerVarTensor[0][1] = (showerVars.GetDisplacement().second ? 1.f : 0.f);
+    showerVarTensor[0][2] = showerVars.GetDCA().first;
+    showerVarTensor[0][3] = (showerVars.GetDCA().second ? 1.f : 0.f);
+    showerVarTensor[0][4] = showerVars.GetTrackStubLength().first;
+    showerVarTensor[0][5] = (showerVars.GetTrackStubLength().second ? 1.f : 0.f);
+    showerVarTensor[0][6] = showerVars.GetNuVertexAvSeparation().first;
+    showerVarTensor[0][7] = (showerVars.GetNuVertexAvSeparation().second ? 1.f : 0.f);
+    showerVarTensor[0][8] = showerVars.GetNuVertexChargeAsymmetry().first;
+    showerVarTensor[0][9] = (showerVars.GetNuVertexChargeAsymmetry().second ? 1.f : 0.f);
 
     return showerVarTensor;
 }
 
-/////////////////////////////////////////////////////////////
-
-double ivysaurus::IvysaurusEvaluator::GetTrackShowerScore(const art::Event &evt, const art::Ptr<recob::PFParticle> &pfparticle)
-{
-    const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata = lar_pandora::PandoraPFParticleUtils::GetMetadata(pfparticle, evt, m_recoModuleLabel);
-    const auto metaMap = metadata->GetPropertiesMap();
-
-    if (metaMap.find("TrackScore") == metaMap.end())
-        return -1.0;
-
-    const double trackScore = metaMap.at("TrackScore");
-
-    return trackScore;
 }
-
-/////////////////////////////////////////////////////////////

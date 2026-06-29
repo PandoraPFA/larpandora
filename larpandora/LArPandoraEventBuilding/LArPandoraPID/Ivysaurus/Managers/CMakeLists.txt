@@ -1,6 +1,7 @@
 cet_make_library(
   SOURCE 
     GridManager.cxx
+    PFPVarManager.cxx    
     ShowerVarManager.cxx
     TrackVarManager.cxx
   LIBRARIES

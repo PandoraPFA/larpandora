@@ -1,7 +1,6 @@
 add_subdirectory(LArPandoraPIDData)
 add_subdirectory(Ivysaurus)
 
-find_ups_product(tensorflow)
 find_ups_product(protobuf)
 
 cet_add_compiler_flags(CXX -Wno-pedantic)
@@ -9,9 +8,8 @@ cet_add_compiler_flags(CXX -Wno-pedantic)
 cet_build_plugin(PandoraPID art::EDProducer
   LIBRARIES
     PRIVATE
-      $ENV{TENSORFLOW_LIB}/libtensorflow_cc.so
-      $ENV{TENSORFLOW_LIB}/libtensorflow_framework.so
-      $ENV{PROTOBUF_LIB}/libprotobuf.so
+      torch
+      torch_cpu      
       Eigen3::Eigen    
       larcorealg::Geometry
       larcore::Geometry_Geometry_service
