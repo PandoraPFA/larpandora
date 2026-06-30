@@ -1,0 +1,21 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+grid_manager:
+{
+  HitModuleLabel:     "hitfd"
+  RecoModuleLabel:    "pandora"
+  TrackModuleLabel:   "pandoraTrack"
+  ShowerModuleLabel:  "pandoraShower"
+  GridSize3D:          25.0
+  GridDimensions:      24
+  GridMean:            0.0021
+  GridStd:             0.0027
+  NSigmaConsidered:    2
+  IntegralStep:        0.1
+  RecombFactor:        0.63
+  CalorimetryAlg:      @local::dune10kt_calorimetryalgmc
+}
+
+END_PROLOG

@@ -1,0 +1,40 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+trackvar_manager:
+{
+  RecoModuleLabel:    "pandora"
+  TrackModuleLabel:   "pandoraTrack"
+  RecombFactor:        0.63
+  CalorimetryAlg:      @local::dune10kt_calorimetryalgmc
+  MinTrackLengthMCS:   100.0
+  MaxTrackLengthMCS:   1350.0
+  IntTrkMomRange:      0.0
+  GradTrkMomRange:     1.0
+  IntTrkMomMCS:        0.0
+  GradTrkMomMCS:       1.0                 #uncalibrated? welp.
+
+  NTrackChildrenMean:     0.1309
+  NTrackChildrenStd:      0.3938 
+  NShowerChildrenMean:    0.0466
+  NShowerChildrenStd:     0.2163  
+  NGrandChildrenMean:     0.023
+  NGrandChildrenStd:      0.1787  
+  NChildHitsMean:         205.8004
+  NChildHitsStd:          438.8792 
+  ChildEnergyMean:        0.32
+  ChildEnergyStd:         0.3568
+  ChildTrackScoreMean:    0.7307
+  ChildTrackScoreStd:     0.1003  
+  TrackLengthMean:        258.3441
+  TrackLengthStd:         1426.0234  
+  WobbleMean:             6.7975
+  WobbleStd:              4.4681
+  TrackShowerScoreMean:   0.5998
+  TrackShowerScoreStd:    0.1783
+  MomentumComparisonMean: 3.8436
+  MomentumComparisonStd:  3.1121
+}
+
+END_PROLOG

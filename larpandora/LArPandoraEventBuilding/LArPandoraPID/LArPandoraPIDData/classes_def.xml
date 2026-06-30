@@ -1,0 +1,18 @@
+<lcgdict>
+  <class name="pandorapid::PandoraPIDResult" ClassVersion="11" >
+   <version ClassVersion="11" checksum="2675304912"/>
+   <version ClassVersion="10" checksum="4008748239"/>
+  </class>
+
+  <class name="art::Ptr<pandorapid::PandoraPIDResult>" />
+  <class name="std::vector<pandorapid::PandoraPIDResult>"/>
+  <class name="art::Assns<recob::PFParticle, pandorapid::PandoraPIDResult, void>"/>
+  <class name="art::Assns<pandorapid::PandoraPIDResult, recob::PFParticle, void>"/>
+
+  <class name="art::Wrapper<pandorapid::PandoraPIDResult>" />
+  <class name="art::Wrapper<art::Ptr<pandorapid::PandoraPIDResult>>"/>  
+  <class name="art::Wrapper<std::vector<pandorapid::PandoraPIDResult>>"/>
+  <class name="art::Wrapper<art::Assns<recob::PFParticle, pandorapid::PandoraPIDResult, void>>"/>
+  <class name="art::Wrapper<art::Assns<pandorapid::PandoraPIDResult, recob::PFParticle, void>>"/>
+  
+</lcgdict>

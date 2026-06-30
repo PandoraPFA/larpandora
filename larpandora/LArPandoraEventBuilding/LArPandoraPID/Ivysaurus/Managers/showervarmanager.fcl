@@ -1,0 +1,24 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+showervar_manager:
+{
+  RecoModuleLabel:   "pandora"
+  TrackModuleLabel: "pandoraTrack"  
+  ShowerModuleLabel: "pandoraShower"
+  HitModuleLabel:    "hitfd"
+
+  DisplacementMean:    35.9138
+  DisplacementStd:     78.6049
+  DCAMean:             19.5538
+  DCAStd:              53.3346
+  TrackStubLengthMean: 47.3008
+  TrackStubLengthStd:  63.3723
+  NuVertexAvSeparationMean:    27.9846
+  NuVertexAvSeparationStd:     54.631
+  NuVertexChargeAsymmetryMean: 0.8874
+  NuVertexChargeAsymmetryStd:  0.1908
+}
+
+END_PROLOG

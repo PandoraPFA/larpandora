@@ -1,0 +1,35 @@
+cet_build_plugin(IvysaurusTrainingFiles art::EDAnalyzer
+  LIBRARIES
+    PRIVATE
+      larcorealg::Geometry
+      larcore::Geometry_Geometry_service
+      larsim::Simulation 
+      lardataobj::Simulation
+      lardataobj::RawData
+      lardataobj::RecoBase
+      lardataobj::AnalysisBase
+      lardata::Utilities
+      lardataalg::DetectorInfo
+      nusimdata::SimulationBase
+      larsim::MCCheater_BackTrackerService_service           
+      larsim::MCCheater_ParticleInventoryService_service
+      larsim::Utils
+      ROOT::Core
+      art::Persistency_Common
+      art::Persistency_Provenance
+      art::Utilities
+      canvas::canvas
+      messagefacility::MF_MessageLogger
+      fhiclcpp::fhiclcpp
+      cetlib::cetlib
+      larreco::RecoAlg
+      larpandora::LArPandoraUtils
+      larpandora::LArPandoraEventBuilding_LArPandoraPID_Ivysaurus_Utils
+      larpandora::LArPandoraEventBuilding_LArPandoraPID_Ivysaurus_Managers    
+      larpandora::LArPandoraInterface
+      larreco::Calorimetry      
+)
+
+install_headers()
+install_fhicl()
+install_source()
