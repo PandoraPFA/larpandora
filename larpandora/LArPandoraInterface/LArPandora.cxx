@@ -56,7 +56,7 @@ namespace lar_pandora {
     , m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", ""))
     , m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant"))
     , m_simChannelModuleLabel(pset.get<std::string>("SimChannelModuleLabel", m_geantModuleLabel))
-    , m_eDepSimModuleLabel(pset.get<std::string>("EDepSimModuleLabel", ""))
+    , m_eDepSimModuleLabel(pset.get<std::string>("EDepSimModuleLabel", "IonAndScint"))
     , m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel"))
     , m_backtrackerModuleLabel(pset.get<std::string>("BackTrackerModuleLabel", ""))
     , m_allOutcomesInstanceLabel(pset.get<std::string>("AllOutcomesInstanceLabel", "allOutcomes"))
