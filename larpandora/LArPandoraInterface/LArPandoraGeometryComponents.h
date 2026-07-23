@@ -9,6 +9,10 @@
 
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
+#include "Geometry/LArReadoutChannel.h"
+#include "Geometry/LArReadoutUnit.h"
+#include "Pandora/PandoraEnumeratedTypes.h"
+
 #include <map>
 #include <vector>
 
@@ -85,6 +89,35 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
   //------------------------------------------------------------------------------------------------------------------------------------------
 
+  class LArPandoraReadoutChannel
+  {
+  public:
+    LArPandoraReadoutChannel(unsigned int id, const pandora::LArReadoutChannel::ViewChannelIntervalArray &intervals);
+    unsigned int GetId() const;
+    const pandora::LArReadoutChannel::ViewChannelIntervalArray &GetChannelIntervals() const;
+  private:
+    unsigned int m_id;
+    pandora::LArReadoutChannel::ViewChannelIntervalArray m_channelIntervals;
+  };
+  typedef std::vector<LArPandoraReadoutChannel> LArPandoraReadoutChannelList;
+
+  class LArPandoraReadoutUnit
+  {
+  public:
+    LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, const LArPandoraReadoutChannelList &channels);
+    unsigned int GetId() const;
+    pandora::HitType GetView() const;
+    const LArPandoraReadoutChannelList &GetChannels() const;
+  private:
+    unsigned int m_id;
+    pandora::HitType m_view;
+    LArPandoraReadoutChannelList m_channels;
+  };
+  typedef std::vector<LArPandoraReadoutUnit> LArPandoraReadoutUnitList;
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
   /**
  *  @brief  daughter drift volume class to hold properties of daughter drift volumes
  */
@@ -109,7 +142,8 @@ namespace lar_pandora {
                            const float centerZ,
                            const float widthX,
                            const float widthY,
-                           const float widthZ);
+                           const float widthZ,
+                           const LArPandoraReadoutUnitList &readoutUnitList);
 
     /**
      *  @brief  Return cryostat ID
@@ -151,6 +185,11 @@ namespace lar_pandora {
      */
     float GetWidthZ() const;
 
+    /**
+     *  @brief  Return list of readout units associated with this tpc volume
+     */
+    const LArPandoraReadoutUnitList &GetReadoutUnitList() const;
+
   private:
     unsigned int m_cryostat;
     unsigned int m_tpc;
@@ -160,6 +199,7 @@ namespace lar_pandora {
     float m_widthX;
     float m_widthY;
     float m_widthZ;
+    LArPandoraReadoutUnitList m_readoutUnitList;
   };
 
   typedef std::vector<LArDaughterDriftVolume> LArDaughterDriftVolumeList;
@@ -378,6 +418,60 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
   //------------------------------------------------------------------------------------------------------------------------------------------
 
+  inline LArPandoraReadoutChannel::LArPandoraReadoutChannel(unsigned int id, const pandora::LArReadoutChannel::ViewChannelIntervalArray &intervals) :
+    m_id{id},
+    m_channelIntervals{intervals}
+  {
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline unsigned int LArPandoraReadoutChannel::GetId() const
+  {
+    return m_id;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline const pandora::LArReadoutChannel::ViewChannelIntervalArray &LArPandoraReadoutChannel::GetChannelIntervals() const
+  {
+    return m_channelIntervals;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline LArPandoraReadoutUnit::LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, const LArPandoraReadoutChannelList &channels) :
+    m_id{id},
+    m_view{view},
+    m_channels{channels}
+  {
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline unsigned int LArPandoraReadoutUnit::GetId() const
+  {
+    return m_id;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline pandora::HitType LArPandoraReadoutUnit::GetView() const
+  {
+    return m_view;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline const LArPandoraReadoutChannelList &LArPandoraReadoutUnit::GetChannels() const
+  {
+    return m_channels;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
   inline LArDaughterDriftVolume::LArDaughterDriftVolume(const unsigned int cryostat,
                                                         const unsigned int tpc,
                                                         const float centerX,
@@ -385,7 +479,8 @@ namespace lar_pandora {
                                                         const float centerZ,
                                                         const float widthX,
                                                         const float widthY,
-                                                        const float widthZ)
+                                                        const float widthZ,
+                                                        const LArPandoraReadoutUnitList &readoutUnitList)
     : m_cryostat(cryostat)
     , m_tpc(tpc)
     , m_centerX(centerX)
@@ -394,6 +489,7 @@ namespace lar_pandora {
     , m_widthX(widthX)
     , m_widthY(widthY)
     , m_widthZ(widthZ)
+    , m_readoutUnitList{readoutUnitList}
   {}
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,6 +546,13 @@ namespace lar_pandora {
   inline float LArDaughterDriftVolume::GetWidthZ() const
   {
     return m_widthZ;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline const LArPandoraReadoutUnitList &LArDaughterDriftVolume::GetReadoutUnitList() const
+  {
+    return m_readoutUnitList;
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
@@ -568,3 +671,4 @@ namespace lar_pandora {
 } // namespace lar_pandora
 
 #endif // #ifndef LAR_PANDORA_GEOMETRY_H
+

@@ -150,7 +150,7 @@ namespace lar_pandora {
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
 
     // Pass basic LArTPC information to pandora instances
-    LArPandoraInput::CreatePandoraLArTPCs(m_inputSettings, driftVolumeList);
+    LArPandoraInput::CreatePandoraLArTPCs(m_inputSettings, driftVolumeList, m_driftVolumeMap);
 
     // If using global drift volume approach, pass details of gaps between daughter volumes to the pandora instance
     if (m_enableDetectorGaps) {
