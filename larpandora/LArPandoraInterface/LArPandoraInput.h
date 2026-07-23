@@ -98,9 +98,11 @@ namespace lar_pandora {
      *
      *  @param  settings the settings
      *  @param  driftVolumeList the drift volume list
+     *  @param  driftVolumeMap the mapping from volume id to drift volume
      */
     static void CreatePandoraLArTPCs(const Settings& settings,
-                                     const LArDriftVolumeList& driftVolumeList);
+                                     const LArDriftVolumeList& driftVolumeList,
+                                     const LArDriftVolumeMap& driftVolumeMap);
 
     /**
      *  @brief  Create pandora line gaps to cover dead regions between TPCs in a global drift volume approach

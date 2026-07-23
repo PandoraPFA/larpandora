@@ -15,6 +15,7 @@
 #include <vector>
 
 namespace lar_pandora {
+  class LArPandoraDetectorType;
 
   /**
  *  @brief  LArPandoraGeometry class
@@ -73,6 +74,21 @@ namespace lar_pandora {
                                      const unsigned int tpc,
                                      const geo::View_t hit_View);
 
+    /**
+     *  @brief  Convert to Pandora view
+     *
+     *  @param  view the input LArSoft view
+     *  @param  tpc the input tpc
+     *  @param  cstat the input cryostat
+     *  @param  detType the input detector type
+     *
+     *  @return the corresponding Pandora hit type
+     */
+    static pandora::HitType GetGlobalHitType(const geo::View_t view,
+                                             const geo::TPCID::TPCID_t tpc,
+                                             const geo::CryostatID::CryostatID_t cstat,
+                                             const LArPandoraDetectorType *const detType);
+
   private:
     /**
      *  @brief  Generate a unique identifier for each TPC
@@ -115,6 +131,14 @@ namespace lar_pandora {
      */
     static void LoadGlobalDaughterGeometry(const LArDriftVolumeList& driftVolumeList,
                                            LArDriftVolumeList& daughterVolumeList);
+
+    /**
+     *  @brief  This method will create one or more readout units, which represent a coherent set of readout planes and their channels (e.g. an APA).
+     *
+     *  @param  tpcID the input TPC identifier
+     *  @param  detType the input detector type
+     */
+    static LArPandoraReadoutUnitList BuildReadoutUnits(const geo::TPCID &tpcID, const LArPandoraDetectorType *const detType);
   };
 
 } // namespace lar_pandora
