@@ -1,0 +1,13 @@
+#include "ivysaurusevaluator.fcl"
+
+BEGIN_PROLOG
+
+pandora_pid:
+{
+    module_type:         "PandoraPID"
+    RecoModuleLabel:     "pandora"
+    IvysaurusEvaluator:  @local::ivysaurus_evaluator
+}
+
+END_PROLOG
+

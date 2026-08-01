@@ -1,0 +1,30 @@
+#include "gridmanager.fcl"
+#include "pfpvarmanager.fcl"
+#include "trackvarmanager.fcl"
+#include "showervarmanager.fcl"
+
+BEGIN_PROLOG
+
+ivysaurus_evaluator:
+{
+  GridManager:            @local::grid_manager
+  PFPVarManager:          @local::pfpvar_manager
+  TrackVarManager:        @local::trackvar_manager
+  ShowerVarManager:       @local::showervar_manager
+  ContainedNetName:       "PandoraNet_IvyEvaluator_All_DUNEFD_HD_v1_0_0.pt"
+  ExitingNetName:         "PandoraNet_IvyEvaluator_All_DUNEFD_HD_v1_0_0.pt"  
+  NTrackVars:              20
+  NShowerVars:             10
+  RecoModuleLabel:        "pandora"
+  TrackModuleLabel:       "pandoraTrack"
+  ShowerModuleLabel:      "pandoraShower"  
+  FVMinX:                   -350.0    # FD HD
+  FVMaxX:                    350.0    # FD HD
+  FVMinY:                   -590.0    # FD HD
+  FVMaxY:                    590.0    # FD HD
+  FVMinZ:                    10.0     # FD HD
+  FVMaxZ:                    1384.0   # FD HD
+}
+
+END_PROLOG
+

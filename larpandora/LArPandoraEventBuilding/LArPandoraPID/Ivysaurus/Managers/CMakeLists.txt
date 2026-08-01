@@ -1,0 +1,19 @@
+cet_make_library(
+  SOURCE 
+    GridManager.cxx
+    PFPVarManager.cxx    
+    ShowerVarManager.cxx
+    TrackVarManager.cxx
+  LIBRARIES
+    PRIVATE
+    lardataobj::RecoBase    
+    larpandora::LArPandoraEventBuilding_LArPandoraPID_Ivysaurus_Utils
+    larpandora::LArPandoraInterface
+    larpandora::LArPandoraUtils    
+    larreco::Calorimetry
+    larreco::RecoAlg
+)
+
+install_headers()
+install_fhicl()
+install_source()

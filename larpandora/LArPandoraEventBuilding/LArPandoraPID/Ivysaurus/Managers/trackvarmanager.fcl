@@ -1,0 +1,40 @@
+#include "calorimetry_dune10kt.fcl"
+
+BEGIN_PROLOG
+
+trackvar_manager:
+{
+  RecoModuleLabel:    "pandora"
+  TrackModuleLabel:   "pandoraTrack"
+  PlaneIDForEnergy:    2
+  RecombFactor:        0.63
+  CalorimetryAlg:      @local::dune10kt_calorimetryalgmc
+  MinTrackLengthMCS:   100.0
+  MaxTrackLengthMCS:   1350.0
+  IntTrkMomRange:      0.0  # In recent production, these corrections are removed (do this here for consistency)
+  GradTrkMomRange:     1.0
+  IntTrkMomMCS:        0.0
+  GradTrkMomMCS:       1.0                 
+
+  NTrackChildrenMean:     0.1725  # Calculate offline in training pre-processing script
+  NTrackChildrenStd:      0.4825 
+  NShowerChildrenMean:    0.1007
+  NShowerChildrenStd:     0.3474  
+  NGrandChildrenMean:     0.0283
+  NGrandChildrenStd:      0.2066  
+  NChildHitsMean:         271.294
+  NChildHitsStd:          656.6655 
+  ChildEnergyMean:        0.2317
+  ChildEnergyStd:         0.8004
+  ChildTrackScoreMean:    0.56
+  ChildTrackScoreStd:     0.1305  
+  TrackLengthMean:        189.9965
+  TrackLengthStd:         1135.1893  
+  WobbleMean:             15.5898
+  WobbleStd:              12.2151
+  MomentumComparisonMean: 5.5677
+  MomentumComparisonStd:  4.2623
+}
+
+END_PROLOG
+
