@@ -464,6 +464,21 @@ namespace lar_pandora {
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
+  float LArPandoraGeometry::GetWireAngleForHitType(const pandora::HitType hitType, const geo::TPCID::TPCID_t tpc,
+    const geo::CryostatID::CryostatID_t cstat, const LArPandoraDetectorType *const detType)
+  {
+    if (pandora::TPC_VIEW_U == hitType)
+        return detType->WireAngleU(tpc, cstat);
+    if (pandora::TPC_VIEW_V == hitType)
+        return detType->WireAngleV(tpc, cstat);
+    if (pandora::TPC_VIEW_W == hitType)
+        return detType->WireAngleW(tpc, cstat);
+
+    throw cet::exception("LArPandora") << " GetWireAngleForHitType --- unrecognised hit type ";
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
   LArPandoraReadoutUnitList LArPandoraGeometry::BuildReadoutUnits(const geo::TPCID &tpcID, const LArPandoraDetectorType *const detType)
   {
     auto const &channelReadout{art::ServiceHandle<geo::WireReadout const>()->Get()};
@@ -480,8 +495,19 @@ namespace lar_pandora {
     // Second pass: for each plane, for each wire, compute the valid wire-index range in the other planes.
     for (auto const &[hitType, pPlane] : hitTypeToPlane)
     {
-        LArPandoraReadoutChannelList channelList;
+        const float angle(LArPandoraGeometry::GetWireAngleForHitType(hitType, tpcID.TPC, tpcID.Cryostat, detType));
+        const geo::WireGeo &wire0(pPlane->Wire(0));
+        const geo::WireGeo &wire1(pPlane->Wire(1));
 
+        const auto projectCoordinate = [angle](const geo::Point_t &p)
+        {
+            return p.Z() * std::cos(angle) - p.Y() * std::sin(angle);
+        };
+
+        const float referenceCoordinate(projectCoordinate(wire0.GetCenter()));
+        const float pitch(projectCoordinate(wire1.GetCenter()) - referenceCoordinate);
+
+        LArPandoraReadoutChannelList channelList;
         for (unsigned int iChannel = 0; iChannel < channelReadout.Nwires(pPlane->ID()); ++iChannel)
         {
             const geo::WireGeo &channel(pPlane->Wire(iChannel));
@@ -490,7 +516,8 @@ namespace lar_pandora {
 
             for (auto const &[otherHitType, pOtherPlane] : hitTypeToPlane)
             {
-                if (otherHitType == hitType) continue;
+                if (otherHitType == hitType)
+                    continue;
 
                 // Project both channel endpoints onto the other plane's channel-coordinate axis.
                 const geo::Point_t start{channel.GetStart()};
@@ -514,7 +541,7 @@ namespace lar_pandora {
             channelList.emplace_back(iChannel, intervals);
         }
 
-        readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, channelList);
+        readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, referenceCoordinate, pitch, channelList);
     }
 
     return readoutUnitList;

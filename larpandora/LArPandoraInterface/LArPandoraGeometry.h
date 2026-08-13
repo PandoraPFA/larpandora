@@ -133,6 +133,17 @@ namespace lar_pandora {
                                            LArDriftVolumeList& daughterVolumeList);
 
     /**
+     *  @brief  This method will return the wire angle for a given hit type, TPC and cryostat
+     *
+     *  @param  hitType the input hit type
+     *  @param  tpc the input TPC
+     *  @param  cstat the input cryostat
+     *  @param  detType the input detector type
+     */
+    static float GetWireAngleForHitType(const pandora::HitType hitType, const geo::TPCID::TPCID_t tpc, const geo::CryostatID::CryostatID_t cstat,
+                                        const LArPandoraDetectorType *const detType);
+
+    /**
      *  @brief  This method will create one or more readout units, which represent a coherent set of readout planes and their channels (e.g. an APA).
      *
      *  @param  tpcID the input TPC identifier

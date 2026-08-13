@@ -236,6 +236,8 @@ namespace lar_pandora {
             object_creation::LArReadoutUnitParameters unitParams;
             unitParams.m_id = unit.GetId();
             unitParams.m_view = unit.GetView();
+            unitParams.m_referenceCoordinate = unit.GetReferenceCoordinate();
+            unitParams.m_pitch = unit.GetPitch();
 
             for (const LArPandoraReadoutChannel &channel : unit.GetChannels())
             {
