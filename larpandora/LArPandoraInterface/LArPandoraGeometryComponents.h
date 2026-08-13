@@ -104,14 +104,49 @@ namespace lar_pandora {
   class LArPandoraReadoutUnit
   {
   public:
-    LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, const LArPandoraReadoutChannelList &channels);
+    /**
+     *  @brief  Constructor
+     *
+     *  @param  id                  the readout unit ID
+     *  @param  view                the view of the readout unit (U, V, W)
+     *  @param  referenceCoordinate the reference coordinate for the readout unit
+     *  @param  pitch               the pitch of the readout unit
+     *  @param  channels            the list of channels in the readout unit
+     */
+    LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, float referenceCoordinate, float pitch, const LArPandoraReadoutChannelList &channels);
+
+    /**
+     *  @brief  Return the readout unit ID
+     */
     unsigned int GetId() const;
+
+    /**
+     *  @brief  Return the view of the readout unit (U, V, W)
+     */
     pandora::HitType GetView() const;
+
+    /**
+     *  @brief  Return the reference coordinate for the readout unit
+     */
+    float GetReferenceCoordinate() const;
+
+    /**
+     *  @brief  Return the pitch of the readout unit
+     */
+    float GetPitch() const;
+
+    /**
+     *  @brief  Return the list of channels in the readout unit
+     */
     const LArPandoraReadoutChannelList &GetChannels() const;
+
   private:
-    unsigned int m_id;
-    pandora::HitType m_view;
-    LArPandoraReadoutChannelList m_channels;
+    unsigned int m_id;           ///< plane ID for the readout unit
+    pandora::HitType m_view;     ///< view of the readout unit (U, V, W)
+    float m_referenceCoordinate; ///< z*cosθ - y*sinθ at the midpoint of channel 0's wire
+    float m_pitch;               ///< signed coordinate difference between channel 1 and channel 0
+
+    LArPandoraReadoutChannelList m_channels; ///< list of channels in the readout unit
   };
   typedef std::vector<LArPandoraReadoutUnit> LArPandoraReadoutUnitList;
 
@@ -441,9 +476,12 @@ namespace lar_pandora {
   //------------------------------------------------------------------------------------------------------------------------------------------
   //------------------------------------------------------------------------------------------------------------------------------------------
 
-  inline LArPandoraReadoutUnit::LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, const LArPandoraReadoutChannelList &channels) :
+  inline LArPandoraReadoutUnit::LArPandoraReadoutUnit(unsigned int id, pandora::HitType view, float referenceCoordinate, float pitch,
+    const LArPandoraReadoutChannelList &channels) :
     m_id{id},
     m_view{view},
+    m_referenceCoordinate{referenceCoordinate},
+    m_pitch{pitch},
     m_channels{channels}
   {
   }
@@ -460,6 +498,20 @@ namespace lar_pandora {
   inline pandora::HitType LArPandoraReadoutUnit::GetView() const
   {
     return m_view;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline float LArPandoraReadoutUnit::GetReferenceCoordinate() const
+  {
+    return m_referenceCoordinate;
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
+  inline float LArPandoraReadoutUnit::GetPitch() const
+  {
+    return m_pitch;
   }
 
   //------------------------------------------------------------------------------------------------------------------------------------------
