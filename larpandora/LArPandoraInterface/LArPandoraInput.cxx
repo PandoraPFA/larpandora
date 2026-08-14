@@ -238,6 +238,8 @@ namespace lar_pandora {
             unitParams.m_view = unit.GetView();
             unitParams.m_referenceCoordinate = unit.GetReferenceCoordinate();
             unitParams.m_pitch = unit.GetPitch();
+            unitParams.m_unitCenter = unit.GetUnitCenter();
+            unitParams.m_unitSize = unit.GetUnitSize();
 
             for (const LArPandoraReadoutChannel &channel : unit.GetChannels())
             {
