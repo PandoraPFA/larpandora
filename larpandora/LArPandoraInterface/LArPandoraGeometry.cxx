@@ -479,6 +479,20 @@ namespace lar_pandora {
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 
+  float LArPandoraGeometry::GetWirePitchForHitType(const pandora::HitType hitType, const LArPandoraDetectorType *const detType)
+  {
+    if (pandora::TPC_VIEW_U == hitType)
+      return detType->WirePitchU();
+    if (pandora::TPC_VIEW_V == hitType)
+      return detType->WirePitchV();
+    if (pandora::TPC_VIEW_W == hitType)
+      return detType->WirePitchW();
+
+    throw cet::exception("LArPandora") << " GetWirePitchForHitType --- unrecognised hit type ";
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------------------
+
   LArPandoraReadoutUnitList LArPandoraGeometry::BuildReadoutUnits(const geo::TPCID &tpcID, const LArPandoraDetectorType *const detType)
   {
     auto const &channelReadout{art::ServiceHandle<geo::WireReadout const>()->Get()};
@@ -505,7 +519,12 @@ namespace lar_pandora {
         };
 
         const float referenceCoordinate(projectCoordinate(wire0.GetCenter()));
-        const float pitch(projectCoordinate(wire1.GetCenter()) - referenceCoordinate);
+        const float rawPitch(projectCoordinate(wire1.GetCenter()) - referenceCoordinate);
+        const float nominalPitch(LArPandoraGeometry::GetWirePitchForHitType(hitType, detType));
+        const float pitch(std::copysign(nominalPitch, rawPitch));
+        const geo::BoxBoundedGeo box(pPlane->BoundingBox());
+        const pandora::CartesianVector unitCenter(0.f, 0.5f * (box.MinY() + box.MaxY()), 0.5f * (box.MinZ() + box.MaxZ()));
+        const pandora::CartesianVector unitSize(0.f, box.MaxY() - box.MinY(), box.MaxZ() - box.MinZ());
 
         LArPandoraReadoutChannelList channelList;
         for (unsigned int iChannel = 0; iChannel < channelReadout.Nwires(pPlane->ID()); ++iChannel)
@@ -541,7 +560,7 @@ namespace lar_pandora {
             channelList.emplace_back(iChannel, intervals);
         }
 
-        readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, referenceCoordinate, pitch, channelList);
+        readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, referenceCoordinate, pitch, unitCenter, unitSize, channelList);
     }
 
     return readoutUnitList;

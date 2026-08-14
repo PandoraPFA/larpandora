@@ -144,6 +144,14 @@ namespace lar_pandora {
                                         const LArPandoraDetectorType *const detType);
 
     /**
+     *  @brief  This method will return the wire pitch for a given hit type and detector type
+     *
+     *  @param  hitType the input hit type
+     *  @param  detType the input detector type
+     */
+    static float GetWirePitchForHitType(const pandora::HitType hitType, const LArPandoraDetectorType *const detType);
+
+    /**
      *  @brief  This method will create one or more readout units, which represent a coherent set of readout planes and their channels (e.g. an APA).
      *
      *  @param  tpcID the input TPC identifier
