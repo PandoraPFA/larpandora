@@ -18,6 +18,8 @@
 #include "larpandora/LArPandoraInterface/Detectors/GetDetectorType.h"
 #include "larpandora/LArPandoraInterface/Detectors/LArPandoraDetectorType.h"
 
+#include "larpandoracontent/LArPersistency/LArTPCFactory.h"
+
 #include <iomanip>
 #include <set>
 
@@ -506,61 +508,72 @@ namespace lar_pandora {
       hitTypeToPlane[globalHitType] = &plane;
     }
 
-    // Second pass: for each plane, for each wire, compute the valid wire-index range in the other planes.
+    // Second pass: compute the generative parameters used to compute intervals.
+    struct PlaneInfo
+    {
+      float m_angle;
+      float m_referenceCoordinate;
+      float m_pitch;
+      pandora::CartesianVector m_unitCenter{0.f, 0.f, 0.f};
+      pandora::CartesianVector m_unitSize{0.f, 0.f, 0.f};
+      unsigned int m_nChannels;
+    };
+
+    std::map<pandora::HitType, PlaneInfo> hitTypeToPlaneInfo;
     for (auto const &[hitType, pPlane] : hitTypeToPlane)
     {
-        const float angle(LArPandoraGeometry::GetWireAngleForHitType(hitType, tpcID.TPC, tpcID.Cryostat, detType));
-        const geo::WireGeo &wire0(pPlane->Wire(0));
-        const geo::WireGeo &wire1(pPlane->Wire(1));
+      PlaneInfo info;
+      info.m_angle = LArPandoraGeometry::GetWireAngleForHitType(hitType, tpcID.TPC, tpcID.Cryostat, detType);
 
-        const auto projectCoordinate = [angle](const geo::Point_t &p)
+      const geo::WireGeo &wire0(pPlane->Wire(0));
+      const geo::WireGeo &wire1(pPlane->Wire(1));
+      const auto projectCoordinate = [&info](const geo::Point_t &p)
+      {
+        return p.Z() * std::cos(info.m_angle) - p.Y() * std::sin(info.m_angle);
+      };
+
+      info.m_referenceCoordinate = projectCoordinate(wire0.GetCenter());
+      const float rawPitch(projectCoordinate(wire1.GetCenter()) - info.m_referenceCoordinate);
+      const float nominalPitch(LArPandoraGeometry::GetWirePitchForHitType(hitType, detType));
+      info.m_pitch = std::copysign(nominalPitch, rawPitch);
+
+      const geo::BoxBoundedGeo box(pPlane->BoundingBox());
+      info.m_unitCenter = pandora::CartesianVector(0.f, 0.5f * (box.MinY() + box.MaxY()), 0.5f * (box.MinZ() + box.MaxZ()));
+      info.m_unitSize = pandora::CartesianVector(0.f, box.MaxY() - box.MinY(), box.MaxZ() - box.MinZ());
+      info.m_nChannels = channelReadout.Nwires(pPlane->ID());
+
+      hitTypeToPlaneInfo[hitType] = info;
+    }
+
+    // Third pass: compute the channel overlap intervals, via the same ComputeChannelInterval logic used to regenerate this data from a
+    // persisted geometry file when running standalone.
+    for (auto const &[hitType, pPlane] : hitTypeToPlane)
+    {
+      const PlaneInfo &selfInfo(hitTypeToPlaneInfo.at(hitType));
+
+      LArPandoraReadoutChannelList channelList;
+      for (unsigned int iChannel = 0; iChannel < selfInfo.m_nChannels; ++iChannel)
+      {
+        const float selfCoordinate(selfInfo.m_referenceCoordinate + static_cast<float>(iChannel) * selfInfo.m_pitch);
+
+        pandora::LArReadoutChannel::ViewChannelIntervalArray intervals;
+        std::size_t slot(0);
+
+        for (auto const &[otherHitType, otherInfo] : hitTypeToPlaneInfo)
         {
-            return p.Z() * std::cos(angle) - p.Y() * std::sin(angle);
-        };
+          if (otherHitType == hitType)
+            continue;
 
-        const float referenceCoordinate(projectCoordinate(wire0.GetCenter()));
-        const float rawPitch(projectCoordinate(wire1.GetCenter()) - referenceCoordinate);
-        const float nominalPitch(LArPandoraGeometry::GetWirePitchForHitType(hitType, detType));
-        const float pitch(std::copysign(nominalPitch, rawPitch));
-        const geo::BoxBoundedGeo box(pPlane->BoundingBox());
-        const pandora::CartesianVector unitCenter(0.f, 0.5f * (box.MinY() + box.MaxY()), 0.5f * (box.MinZ() + box.MaxZ()));
-        const pandora::CartesianVector unitSize(0.f, box.MaxY() - box.MinY(), box.MaxZ() - box.MinZ());
-
-        LArPandoraReadoutChannelList channelList;
-        for (unsigned int iChannel = 0; iChannel < channelReadout.Nwires(pPlane->ID()); ++iChannel)
-        {
-            const geo::WireGeo &channel(pPlane->Wire(iChannel));
-            pandora::LArReadoutChannel::ViewChannelIntervalArray intervals;
-            std::size_t slot(0);
-
-            for (auto const &[otherHitType, pOtherPlane] : hitTypeToPlane)
-            {
-                if (otherHitType == hitType)
-                    continue;
-
-                // Project both channel endpoints onto the other plane's channel-coordinate axis.
-                const geo::Point_t start{channel.GetStart()};
-                const geo::Point_t end{channel.GetEnd()};
-                double startInterp{channelReadout.WireCoordinate(start.Y(), start.Z(), pOtherPlane->ID())};
-                double endInterp{channelReadout.WireCoordinate(end.Y(), end.Z(), pOtherPlane->ID())};
-                if (startInterp > endInterp)
-                    std::swap(startInterp, endInterp);
-                int minChannel{static_cast<int>(std::ceil(startInterp))};
-                int maxChannel{static_cast<int>(std::floor(endInterp))};
-                // Just in case the start and end interpolations point to the same channel
-                if (minChannel > maxChannel)
-                    std::swap(minChannel, maxChannel);
-                minChannel = std::clamp(minChannel, 0, static_cast<int>(channelReadout.Nwires(pOtherPlane->ID())));
-                maxChannel = std::clamp(maxChannel, 0, static_cast<int>(channelReadout.Nwires(pOtherPlane->ID())));
-
-                intervals[slot++] = {otherHitType, pandora::LArReadoutChannel::ChannelInterval{static_cast<unsigned int>(minChannel),
-                    static_cast<unsigned int>(maxChannel)}};
-            }
-
-            channelList.emplace_back(iChannel, intervals);
+          intervals[slot++] = {otherHitType, lar_content::LArTPCFactory::ComputeChannelInterval(selfCoordinate, selfInfo.m_angle,
+            selfInfo.m_unitCenter, selfInfo.m_unitSize, otherInfo.m_angle, otherInfo.m_referenceCoordinate, otherInfo.m_pitch,
+            otherInfo.m_nChannels)};
         }
 
-        readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, referenceCoordinate, pitch, unitCenter, unitSize, channelList);
+        channelList.emplace_back(iChannel, intervals);
+      }
+
+      readoutUnitList.emplace_back(pPlane->ID().Plane, hitType, selfInfo.m_referenceCoordinate, selfInfo.m_pitch,
+        selfInfo.m_unitCenter, selfInfo.m_unitSize, channelList);
     }
 
     return readoutUnitList;
