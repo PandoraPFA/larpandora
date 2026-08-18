@@ -65,10 +65,12 @@ namespace lar_pandora {
     std::string m_simChannelModuleLabel;  ///< The SimChannel producer module label
     std::string m_eDepSimModuleLabel;     ///< The SimEnergyDeposit producer module label
     std::string m_hitfinderModuleLabel;   ///< The hit finder module label
+    std::string m_opHitFinderModuleLabel; ///< The optical hit finder module label
     std::string m_backtrackerModuleLabel; ///< The back tracker module label
 
     std::string m_allOutcomesInstanceLabel; ///< The instance label for all outcomes
 
+    bool m_enableOpHits;       ///< Whether to pass optical hit information to Pandora instances
     bool m_enableProduction;   ///< Whether to persist output products
     bool m_enableDetectorGaps; ///< Whether to pass detector gap information to Pandora instances
     bool

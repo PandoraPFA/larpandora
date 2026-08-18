@@ -21,6 +21,7 @@
 #include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/OpHit.h"
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Shower.h"
@@ -58,6 +59,7 @@ namespace lar_pandora {
     , m_simChannelModuleLabel(pset.get<std::string>("SimChannelModuleLabel", m_geantModuleLabel))
     , m_eDepSimModuleLabel(pset.get<std::string>("EDepSimModuleLabel", "IonAndScint"))
     , m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel"))
+    , m_opHitFinderModuleLabel(pset.get<std::string>("OpHitFinderModuleLabel", "ophitspe"))
     , m_backtrackerModuleLabel(pset.get<std::string>("BackTrackerModuleLabel", ""))
     , m_allOutcomesInstanceLabel(pset.get<std::string>("AllOutcomesInstanceLabel", "allOutcomes"))
     , m_enableProduction(pset.get<bool>("EnableProduction", true))
@@ -81,6 +83,12 @@ namespace lar_pandora {
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
     m_inputSettings.m_useHitPredictions = pset.get<bool>("UseHitPredictions", false);
+    m_inputSettings.m_opHitCounterOffset = m_inputSettings.m_uidOffset / 2;
+
+    m_enableOpHits = pset.get<bool>("EnableOpHits", false);
+    if (m_enableOpHits)
+      consumes<std::vector<recob::OpHit>>(art::InputTag(m_opHitFinderModuleLabel));
+
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
     m_outputSettings.m_shouldProduceSlices = pset.get<bool>("ShouldProduceSlices", true);
     m_outputSettings.m_shouldProduceTestBeamInteractionVertices =
@@ -248,6 +256,15 @@ namespace lar_pandora {
 
     LArPandoraInput::CreatePandoraHits2D(
       evt, m_inputSettings, m_driftVolumeMap, artHits, hitToScores, hitToScoreLabels, idToHitMap);
+
+    if (m_enableOpHits) {
+      OpHitVector artOpHits;
+      auto const opHitHandle = evt.getValidHandle<std::vector<recob::OpHit>>(m_opHitFinderModuleLabel);
+      art::fill_ptr_vector(artOpHits, opHitHandle);
+
+      IdToOpHitMap idToOpHitMap;
+      LArPandoraInput::CreatePandoraOpHits(m_inputSettings, artOpHits, idToOpHitMap);
+    }
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {
       LArPandoraInput::CreatePandoraMCParticles(m_inputSettings,

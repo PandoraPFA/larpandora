@@ -12,6 +12,7 @@
 
 namespace recob {
   class Hit;
+  class OpHit;
 }
 namespace pandora {
   class Pandora;
@@ -22,6 +23,7 @@ namespace pandora {
 namespace lar_pandora {
 
   typedef std::map<int, art::Ptr<recob::Hit>> IdToHitMap;
+  typedef std::map<int, art::Ptr<recob::OpHit>> IdToOpHitMap;
 
   /**
  *  @brief  ILArPandora class

@@ -11,11 +11,17 @@ namespace detinfo {
   class DetectorPropertiesData;
 }
 
+namespace recob {
+  class OpHit;
+}
+
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include "larpandoracontent/LArObjects/LArMCParticle.h"
+
+#include "larcorealg/Geometry/OpDetGeo.h"
 
 #include <tuple>
 
@@ -64,6 +70,7 @@ namespace lar_pandora {
       bool m_useHitPredictions;                  ///<
       int m_uidOffset;                           ///<
       int m_hitCounterOffset;                    ///<
+      int m_opHitCounterOffset;                  ///<
       double m_dx_cm;                            ///<
       double m_int_cm;                           ///<
       double m_rad_cm;                           ///<
@@ -92,6 +99,18 @@ namespace lar_pandora {
                                     const HitToScores& hitToScores,
                                     const HitToScoreLabels& hitToScoreLabels,
                                     IdToHitMap& idToHitMap);
+
+    /**
+     *  @brief  Create Pandora optical hits from ART OpHits. Optical hits are assigned HitType OPTICAL_SIPM, OPTICAL_TRAP, or OPTICAL_TPC
+     *          based on the optical detector type name from the geometry service.
+     *
+     *  @param  settings the settings
+     *  @param  opHitVector the input vector of ART optical hits
+     *  @param  idToOpHitMap to receive the mapping from Pandora hit ID to ART OpHit
+     */
+    static void CreatePandoraOpHits(const Settings& settings,
+                                    const OpHitVector& opHitVector,
+                                    IdToOpHitMap& idToOpHitMap);
 
     /**
      *  @brief  Create pandora LArTPCs to represent the different drift volumes in use
@@ -219,6 +238,14 @@ namespace lar_pandora {
                           const Settings& settings,
                           const double hit_Charge,
                           const geo::View_t hit_View);
+
+    /**
+     *  @brief  Map a LArSoft optical detector geometry name to the appropriate Pandora HitType.
+     *          ARAPUCA variants -> OPTICAL_TRAP; TPC-mounted -> OPTICAL_TPC; default -> OPTICAL_SIPM.
+     *
+     *  @param  opDet the optical detector geometry
+     */
+    static pandora::HitType GetOpHitType(const geo::OpDetGeo& opDet);
 
     /**
      *  @brief  Populate a map from MC process string to enumeration
