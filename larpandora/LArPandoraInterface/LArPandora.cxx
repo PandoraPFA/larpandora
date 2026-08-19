@@ -83,7 +83,6 @@ namespace lar_pandora {
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
     m_inputSettings.m_useHitPredictions = pset.get<bool>("UseHitPredictions", false);
-    m_inputSettings.m_opHitCounterOffset = m_inputSettings.m_uidOffset / 2;
 
     m_enableOpHits = pset.get<bool>("EnableOpHits", false);
     if (m_enableOpHits)
@@ -254,7 +253,7 @@ namespace lar_pandora {
     if (m_eDepSimModuleLabel != "")
       LArPandoraHelper::CollectEDepSims(evt, m_eDepSimModuleLabel, artTrackIDToEDepSims);
 
-    LArPandoraInput::CreatePandoraHits2D(
+    const int opHitCounterOffset = LArPandoraInput::CreatePandoraHits2D(
       evt, m_inputSettings, m_driftVolumeMap, artHits, hitToScores, hitToScoreLabels, idToHitMap);
 
     if (m_enableOpHits) {
@@ -263,7 +262,7 @@ namespace lar_pandora {
       art::fill_ptr_vector(artOpHits, opHitHandle);
 
       IdToOpHitMap idToOpHitMap;
-      LArPandoraInput::CreatePandoraOpHits(m_inputSettings, artOpHits, idToOpHitMap);
+      LArPandoraInput::CreatePandoraOpHits(m_inputSettings, artOpHits, opHitCounterOffset, idToOpHitMap);
     }
 
     if (m_enableMCParticles && (m_disableRealDataCheck || !evt.isRealData())) {

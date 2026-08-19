@@ -70,7 +70,6 @@ namespace lar_pandora {
       bool m_useHitPredictions;                  ///<
       int m_uidOffset;                           ///<
       int m_hitCounterOffset;                    ///<
-      int m_opHitCounterOffset;                  ///<
       double m_dx_cm;                            ///<
       double m_int_cm;                           ///<
       double m_rad_cm;                           ///<
@@ -91,8 +90,10 @@ namespace lar_pandora {
      *  @param  hitToScores to receive the mapping between a hit and its predicted scores, if available
      *  @param  hitToScoreLabels to receive the mapping between a hit and its predicted score labels, if available
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
+     *
+     *  @return The number of hits created.
      */
-    static void CreatePandoraHits2D(const art::Event& evt,
+    static int CreatePandoraHits2D(const art::Event& evt,
                                     const Settings& settings,
                                     const LArDriftVolumeMap& driftVolumeMap,
                                     const HitVector& hitVector,
@@ -106,10 +107,12 @@ namespace lar_pandora {
      *
      *  @param  settings the settings
      *  @param  opHitVector the input vector of ART optical hits
+     *  @param  hitCounterOffset the number of charge hits created prior to the optical hits
      *  @param  idToOpHitMap to receive the mapping from Pandora hit ID to ART OpHit
      */
     static void CreatePandoraOpHits(const Settings& settings,
                                     const OpHitVector& opHitVector,
+                                    int hitCounterOffset,
                                     IdToOpHitMap& idToOpHitMap);
 
     /**

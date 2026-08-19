@@ -45,13 +45,13 @@
 
 namespace lar_pandora {
 
-  void LArPandoraInput::CreatePandoraHits2D(const art::Event& e,
-                                            const Settings& settings,
-                                            const LArDriftVolumeMap& driftVolumeMap,
-                                            const HitVector& hitVector,
-                                            const HitToScores& hitToScores,
-                                            const HitToScoreLabels& hitToScoreLabels,
-                                            IdToHitMap& idToHitMap)
+  int LArPandoraInput::CreatePandoraHits2D(const art::Event& e,
+                                           const Settings& settings,
+                                           const LArDriftVolumeMap& driftVolumeMap,
+                                           const HitVector& hitVector,
+                                           const HitToScores& hitToScores,
+                                           const HitToScoreLabels& hitToScoreLabels,
+                                           IdToHitMap& idToHitMap)
   {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraHits2D(...) *** "
                                << std::endl;
@@ -185,11 +185,14 @@ namespace lar_pandora {
         continue;
       }
     }
+
+    return hitCounter;
   }
 
   //
   void LArPandoraInput::CreatePandoraOpHits(const Settings& settings,
                                             const OpHitVector& opHitVector,
+                                            int hitCounterOffset,
                                             IdToOpHitMap& idToOpHitMap)
   {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraOpHits(...) *** "
@@ -203,7 +206,7 @@ namespace lar_pandora {
     art::ServiceHandle<geo::Geometry const> theGeometry;
 
     lar_content::LArHitFactory hitFactory;
-    int hitCounter(settings.m_opHitCounterOffset);
+    int hitCounter(hitCounterOffset);
 
     for (auto const& opHit : opHitVector) {
       const unsigned int channel(static_cast<unsigned int>(opHit->OpChannel()));
@@ -1090,7 +1093,6 @@ namespace lar_pandora {
     , m_useActiveBoundingBox(false)
     , m_uidOffset(100000000)
     , m_hitCounterOffset(0)
-    , m_opHitCounterOffset(50000000)
     , m_dx_cm(0.5)
     , m_int_cm(84.)
     , m_rad_cm(14.)
