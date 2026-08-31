@@ -125,6 +125,10 @@ showerunidirectiondedx:{
     ShowerDirectionInputLabel: "ShowerDirection"
     ShowerdEdxOutputLabel: "ShowerdEdx"
     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
+    # PFParticleLabel: "pandora"
+
+    ApplyCorrectionsInNorm: false # do not expect INormalizeCharge tools
+    NormTools: []                 # empty list of INormalizeCharge tools
 }
 
 showertrackhitdirection:{
@@ -302,6 +306,9 @@ showertrajpointdedx:{
     ShowerdEdxOutputLabel: "ShowerdEdx"
     ShowerBestPlaneOutputLabel: "ShowerBestPlane"
     ShowerdEdxVecOutputLabel: "ShowerdEdxVec"
+
+    ApplyCorrectionsInNorm: false # do not expect INormalizeCharge tools
+    NormTools: []                 # empty list of INormalizeCharge tools
 }
 
 showerincrementaltrackhitfinder:{
