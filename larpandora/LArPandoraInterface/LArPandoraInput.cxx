@@ -247,6 +247,7 @@ namespace lar_pandora {
         hitParameters.m_pParentAddress = (void*)((intptr_t)(++hitCounter));
 
         // ATTN: confirm the units
+        hitParameters.m_startTime = static_cast<float>(opHit->StartTime());
         hitParameters.m_width = static_cast<float>(opHit->Width());
         hitParameters.m_channel = channel;
       }
