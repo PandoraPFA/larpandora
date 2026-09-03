@@ -30,6 +30,7 @@ namespace pandora {
 namespace recob {
   class Cluster;
   class Hit;
+  class OpHit;
   class PFParticle;
   class Seed;
   class Shower;
@@ -59,6 +60,7 @@ namespace lar_pandora {
 
   typedef std::vector<art::Ptr<recob::Wire>> WireVector;
   typedef std::vector<art::Ptr<recob::Hit>> HitVector;
+  typedef std::vector<art::Ptr<recob::OpHit>> OpHitVector;
   typedef std::vector<art::Ptr<sim::SimEnergyDeposit>> EDepSimVector;
   typedef std::vector<art::Ptr<recob::SpacePoint>> SpacePointVector;
   typedef std::vector<art::Ptr<recob::Cluster>> ClusterVector;
