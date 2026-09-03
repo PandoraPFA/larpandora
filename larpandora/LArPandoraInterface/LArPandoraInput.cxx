@@ -225,8 +225,6 @@ namespace lar_pandora {
         for (const LArDaughterDriftVolume &childVolume : driftVolume.GetTpcVolumeList())
         {
           object_creation::LArReadoutVolumeParameters readoutVolumeParams;
-          // I think I'd like to add a variant of this function in PandoraGeometry that just takes a driftVolumeList, so we don't need the
-          // extra map parameter in this function
           readoutVolumeParams.m_id = LArPandoraGeometry::GetDaughterVolumeID(driftVolumeMap, childVolume.GetCryostat(), childVolume.GetTpc());
           readoutVolumeParams.m_center = pandora::CartesianVector(childVolume.GetCenterX(), childVolume.GetCenterY(), childVolume.GetCenterZ());
           readoutVolumeParams.m_size   = pandora::CartesianVector(childVolume.GetWidthX(), childVolume.GetWidthY(), childVolume.GetWidthZ());

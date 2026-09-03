@@ -552,6 +552,7 @@ namespace lar_pandora {
       const PlaneInfo &selfInfo(hitTypeToPlaneInfo.at(hitType));
 
       LArPandoraReadoutChannelList channelList;
+      channelList.reserve(selfInfo.m_nChannels);
       for (unsigned int iChannel = 0; iChannel < selfInfo.m_nChannels; ++iChannel)
       {
         const float selfCoordinate(selfInfo.m_referenceCoordinate + static_cast<float>(iChannel) * selfInfo.m_pitch);
