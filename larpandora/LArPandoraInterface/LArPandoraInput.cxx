@@ -222,15 +222,16 @@ namespace lar_pandora {
         parameters.m_sigmaUVW = driftVolume.GetSigmaUVZ();
         parameters.m_isDriftInPositiveX = driftVolume.IsPositiveDrift();
 
-        for (const LArDaughterDriftVolume &childVolume : driftVolume.GetTpcVolumeList())
-        {
+        for (const LArDaughterDriftVolume& childVolume : driftVolume.GetTpcVolumeList()) {
           object_creation::LArReadoutVolumeParameters readoutVolumeParams;
-          readoutVolumeParams.m_id = LArPandoraGeometry::GetDaughterVolumeID(driftVolumeMap, childVolume.GetCryostat(), childVolume.GetTpc());
-          readoutVolumeParams.m_center = pandora::CartesianVector(childVolume.GetCenterX(), childVolume.GetCenterY(), childVolume.GetCenterZ());
-          readoutVolumeParams.m_size   = pandora::CartesianVector(childVolume.GetWidthX(), childVolume.GetWidthY(), childVolume.GetWidthZ());
+          readoutVolumeParams.m_id = LArPandoraGeometry::GetDaughterVolumeID(
+            driftVolumeMap, childVolume.GetCryostat(), childVolume.GetTpc());
+          readoutVolumeParams.m_center = pandora::CartesianVector(
+            childVolume.GetCenterX(), childVolume.GetCenterY(), childVolume.GetCenterZ());
+          readoutVolumeParams.m_size = pandora::CartesianVector(
+            childVolume.GetWidthX(), childVolume.GetWidthY(), childVolume.GetWidthZ());
 
-          for (const LArPandoraReadoutUnit &unit : childVolume.GetReadoutUnitList())
-          {
+          for (const LArPandoraReadoutUnit& unit : childVolume.GetReadoutUnitList()) {
             object_creation::LArReadoutUnitParameters unitParams;
             unitParams.m_id = unit.GetId();
             unitParams.m_view = unit.GetView();
@@ -239,8 +240,7 @@ namespace lar_pandora {
             unitParams.m_unitCenter = unit.GetUnitCenter();
             unitParams.m_unitSize = unit.GetUnitSize();
 
-            for (const LArPandoraReadoutChannel &channel : unit.GetChannels())
-            {
+            for (const LArPandoraReadoutChannel& channel : unit.GetChannels()) {
               object_creation::LArReadoutChannelParameters channelParams;
               channelParams.m_id = channel.GetId();
               channelParams.m_channelIntervalArray = channel.GetChannelIntervals();

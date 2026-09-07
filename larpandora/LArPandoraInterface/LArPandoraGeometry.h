@@ -87,7 +87,7 @@ namespace lar_pandora {
     static pandora::HitType GetGlobalHitType(const geo::View_t view,
                                              const geo::TPCID::TPCID_t tpc,
                                              const geo::CryostatID::CryostatID_t cstat,
-                                             const LArPandoraDetectorType *const detType);
+                                             const LArPandoraDetectorType* const detType);
 
   private:
     /**
@@ -140,8 +140,10 @@ namespace lar_pandora {
      *  @param  cstat the input cryostat
      *  @param  detType the input detector type
      */
-    static float GetWireAngleForHitType(const pandora::HitType hitType, const geo::TPCID::TPCID_t tpc, const geo::CryostatID::CryostatID_t cstat,
-                                        const LArPandoraDetectorType *const detType);
+    static float GetWireAngleForHitType(const pandora::HitType hitType,
+                                        const geo::TPCID::TPCID_t tpc,
+                                        const geo::CryostatID::CryostatID_t cstat,
+                                        const LArPandoraDetectorType* const detType);
 
     /**
      *  @brief  This method will return the wire pitch for a given hit type and detector type
@@ -149,7 +151,8 @@ namespace lar_pandora {
      *  @param  hitType the input hit type
      *  @param  detType the input detector type
      */
-    static float GetWirePitchForHitType(const pandora::HitType hitType, const LArPandoraDetectorType *const detType);
+    static float GetWirePitchForHitType(const pandora::HitType hitType,
+                                        const LArPandoraDetectorType* const detType);
 
     /**
      *  @brief  This method will create one or more readout units, which represent a coherent set of readout planes and their channels (e.g. an APA).
@@ -157,7 +160,8 @@ namespace lar_pandora {
      *  @param  tpcID the input TPC identifier
      *  @param  detType the input detector type
      */
-    static LArPandoraReadoutUnitList BuildReadoutUnits(const geo::TPCID &tpcID, const LArPandoraDetectorType *const detType);
+    static LArPandoraReadoutUnitList BuildReadoutUnits(const geo::TPCID& tpcID,
+                                                       const LArPandoraDetectorType* const detType);
   };
 
 } // namespace lar_pandora
